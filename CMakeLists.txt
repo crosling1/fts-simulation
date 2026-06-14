@@ -12,12 +12,16 @@ set(PROJECT_SOURCES
     map.cpp
     Robot.cpp
     RobotController.cpp
+    ObstacleManager.cpp
+    LidarSensor.cpp
 )
 
 set(PROJECT_HEADERS
     map.h
     Robot.h
     RobotController.h
+    ObstacleManager.h
+    LidarSensor.h
 )
 
 add_executable(robot_sim ${PROJECT_SOURCES} ${PROJECT_HEADERS})
