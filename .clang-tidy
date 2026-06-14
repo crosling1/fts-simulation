@@ -1,0 +1,11 @@
+Checks: >
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  portability-*,
+  readability-braces-around-statements,
+  readability-const-return-type,
+  readability-redundant-member-init
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
