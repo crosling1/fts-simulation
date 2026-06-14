@@ -10,10 +10,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_SOURCES
     main.cpp
     map.cpp
+    Robot.cpp
+    RobotController.cpp
 )
 
 set(PROJECT_HEADERS
     map.h
+    Robot.h
+    RobotController.h
 )
 
 add_executable(robot_sim ${PROJECT_SOURCES} ${PROJECT_HEADERS})
