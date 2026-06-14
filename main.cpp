@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "RobotController.h"
 #include "map.h"
 
 int main(void) {
@@ -9,15 +10,20 @@ int main(void) {
     SetTargetFPS(60);
 
     InitMap();
+    InitRobotController();
 
     while (!WindowShouldClose()) {
+        UpdateRobotController();
+
         BeginDrawing();
 
         DrawMap();
+        DrawRobotController();
 
         EndDrawing();
     }
 
+    UnloadRobotController();
     UnloadMap();
     CloseWindow();
 

@@ -26,6 +26,8 @@ Vector2 GetMapPointB(void);
 Vector2 GetRobotStartPosition(void);
 Vector2 GetLagerPosition(LagerId lagerId);
 Vector2 GetLagerDockPosition(LagerId lagerId);
+bool IsMapRoadPosition(Vector2 position);
+Vector2 ClampPositionToMapRoad(Vector2 position);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,7 @@
 #include "map.h"
 
+#include <algorithm>
+
 class LogisticsMap {
   public:
     void Init(void) {
@@ -59,6 +61,40 @@ class LogisticsMap {
         }
 
         return dockPoints[lagerId];
+    }
+
+    bool IsRoadPosition(Vector2 position) const {
+        for (Rectangle road : roads) {
+            if (CheckCollisionPointRec(position, road)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    Vector2 ClampPositionToRoad(Vector2 position) const {
+        Vector2 closestPosition = position;
+        float closestDistanceSquared = 0.0f;
+        bool hasClosestPosition = false;
+
+        for (Rectangle road : roads) {
+            const Vector2 clampedPosition = {
+                std::clamp(position.x, road.x, road.x + road.width),
+                std::clamp(position.y, road.y, road.y + road.height),
+            };
+            const float deltaX = position.x - clampedPosition.x;
+            const float deltaY = position.y - clampedPosition.y;
+            const float distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
+
+            if (!hasClosestPosition || distanceSquared < closestDistanceSquared) {
+                closestPosition = clampedPosition;
+                closestDistanceSquared = distanceSquared;
+                hasClosestPosition = true;
+            }
+        }
+
+        return closestPosition;
     }
 
   private:
@@ -191,4 +227,12 @@ Vector2 GetLagerPosition(LagerId lagerId) {
 
 Vector2 GetLagerDockPosition(LagerId lagerId) {
     return map.GetLagerDockPosition(lagerId);
+}
+
+bool IsMapRoadPosition(Vector2 position) {
+    return map.IsRoadPosition(position);
+}
+
+Vector2 ClampPositionToMapRoad(Vector2 position) {
+    return map.ClampPositionToRoad(position);
 }
