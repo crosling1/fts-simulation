@@ -8,7 +8,7 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 
 - The map renders warehouses, lager dock points, the robot start position, and the road network.
 - The robot controller owns the robot lifecycle and task flow.
-- The navigation module calculates road-network waypoint routes with A*.
+- The navigation module calculates road-network waypoint routes with A* and validates candidate edges against the map road area.
 - The robot follows calculated waypoint routes instead of moving directly through non-road areas.
 - Road constraints clamp the robot back to the nearest road if its center leaves the road network.
 - The robot state includes idle, moving, picking up, carrying an item, dropping off, and arrived.
@@ -16,7 +16,7 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 - A lidar sensor draws a circular scan area around the main robot.
 - Blocking robots move on road-network paths and choose randomized next targets at path nodes.
 - If the main robot detects a blocking robot inside its lidar range, it pauses until the scan area is clear.
-- If a blocking robot collides with the main robot, it bounces back and receives a randomized speed.
+- Blocking robots keep moving through blocked narrow sections instead of bouncing off the main robot.
 
 ## Requirements
 
@@ -92,7 +92,7 @@ The Makefile wraps CMake, so the equivalent `cmake --build build --target ...` c
 - `map.h`: Public map module functions
 - `map.cpp`: Map class, lager positions, road rendering logic, and road constraint helpers
 - `navigation.h`: Public navigation pathfinding interface
-- `navigation.cpp`: Road graph definition and A* waypoint pathfinding
+- `navigation.cpp`: Road graph definition, A* waypoint pathfinding, and map-road edge validation
 - `Robot.h`: Robot class interface, movement state, and drawing API
 - `Robot.cpp`: Robot movement, state handling, and robot/item rendering
 - `RobotController.h`: Public robot controller module functions
@@ -100,6 +100,6 @@ The Makefile wraps CMake, so the equivalent `cmake --build build --target ...` c
 - `LidarSensor.h`: Public lidar sensor interface
 - `LidarSensor.cpp`: Lidar scan checks and scan area rendering
 - `ObstacleManager.h`: Blocking robot data and manager interface
-- `ObstacleManager.cpp`: Blocking robot movement, randomized target selection, collision bounce behavior, and drawing
+- `ObstacleManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
 
 `main.cpp` does not define map or robot task details directly. It initializes the map and robot controller, updates the controller each frame, and draws the map before drawing the robot controller.

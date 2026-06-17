@@ -12,6 +12,8 @@
 
 namespace {
 constexpr float unreachableDistance = std::numeric_limits<float>::max();
+constexpr float roadSampleSpacing = 8.0f;
+constexpr float roadSampleTolerance = 1.0f;
 constexpr int invalidPathNode = -1;
 constexpr int pathEdgeCount = 30;
 
@@ -45,6 +47,37 @@ float DistanceSquared(Vector2 from, Vector2 to) {
 
 float Distance(Vector2 from, Vector2 to) {
     return std::sqrt(DistanceSquared(from, to));
+}
+
+bool IsRoadSample(Vector2 position) {
+    if (IsMapRoadPosition(position)) {
+        return true;
+    }
+
+    return DistanceSquared(position, ClampPositionToMapRoad(position)) <=
+           (roadSampleTolerance * roadSampleTolerance);
+}
+
+bool IsRoadSegment(Vector2 from, Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
+    const float segmentLength = Distance(from, to);
+    if (segmentLength <= roadSampleTolerance) {
+        return IsRoadSample(from) && IsRoadSample(to);
+    }
+
+    const int sampleCount = static_cast<int>(std::ceil(segmentLength / roadSampleSpacing));
+    for (int i = 0; i <= sampleCount; i++) {
+        const float t = static_cast<float>(i) / static_cast<float>(sampleCount);
+        const Vector2 sample = {
+            from.x + ((to.x - from.x) * t),
+            from.y + ((to.y - from.y) * t),
+        };
+
+        if (!IsRoadSample(sample)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 std::vector<Vector2> BuildPathNodes(void) {
@@ -181,6 +214,10 @@ FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swap
         for (PathEdge edge : pathEdges) {
             const int neighborNodeIndex = GetNeighborNodeIndex(edge, currentNodeIndex);
             if (neighborNodeIndex == invalidPathNode || closed[neighborNodeIndex]) {
+                continue;
+            }
+
+            if (!IsRoadSegment(pathNodes[currentNodeIndex], pathNodes[neighborNodeIndex])) {
                 continue;
             }
 

@@ -200,7 +200,7 @@ void UpdateRobotController(void) {
     const float deltaTime = GetFrameTime();
     Vector2 robotPosition = {0.0f, 0.0f};
     robot->getPosition(robotPosition);
-    obstacleManager.update(deltaTime, robotPosition, robotSize);
+    obstacleManager.update(deltaTime);
 
     if (taskPhase == TaskPhase::PickingUp) {
         UpdatePickup(deltaTime);
