@@ -1,6 +1,7 @@
 #include "RobotController.h"
 
 #include "LidarSensor.h"
+#include "navigation.h"
 #include "ObstacleManager.h"
 #include "Robot.h"
 
@@ -42,6 +43,12 @@ TaskPhase taskPhase = TaskPhase::ToPickup;
 float stateTimer = 0.0f;
 
 std::vector<Vector2> BuildPathToPointA(void) {
+    std::vector<Vector2> path =
+        FindNavigationPath(GetRobotStartPosition(), GetLagerDockPosition(LAGER_2));
+    if (!path.empty()) {
+        return path;
+    }
+
     return {
         {200.0f, 620.0f}, {200.0f, 450.0f}, {800.0f, 450.0f},
         {800.0f, 270.0f}, {450.0f, 270.0f}, GetLagerDockPosition(LAGER_2),
@@ -49,6 +56,12 @@ std::vector<Vector2> BuildPathToPointA(void) {
 }
 
 std::vector<Vector2> BuildPathFromPointAToPointB(void) {
+    std::vector<Vector2> path =
+        FindNavigationPath(GetLagerDockPosition(LAGER_2), GetLagerDockPosition(LAGER_5));
+    if (!path.empty()) {
+        return path;
+    }
+
     return {
         {450.0f, 270.0f}, {800.0f, 270.0f}, {800.0f, 450.0f},
         {960.0f, 450.0f}, {960.0f, 556.0f}, GetLagerDockPosition(LAGER_5),
