@@ -3,8 +3,6 @@
 #include <cmath>
 
 namespace {
-constexpr float minBlockingRobotSpeed = 45.0f;
-constexpr float maxBlockingRobotSpeed = 95.0f;
 constexpr float reachedDistance = 2.0f;
 
 float Distance(Vector2 from, Vector2 to) {
@@ -31,17 +29,13 @@ void ObstacleManager::addObstacle(const Obstacle& obstacle) {
     obstacles.push_back(obstacle);
 }
 
-void ObstacleManager::update(float deltaTime, Vector2 robotPosition, float robotRadius) {
+void ObstacleManager::update(float deltaTime) {
     for (Obstacle& obstacle : obstacles) {
         if (!obstacle.active) {
             continue;
         }
 
         moveObstacle(obstacle, deltaTime);
-
-        if (CheckCollisionCircles(robotPosition, robotRadius, obstacle.position, obstacle.radius)) {
-            bounceObstacle(obstacle);
-        }
     }
 }
 
@@ -127,16 +121,4 @@ void ObstacleManager::chooseNextTarget(Obstacle& obstacle, bool allowBacktrackin
 
     std::uniform_int_distribution<std::size_t> targetDistribution(0, candidates.size() - 1);
     obstacle.targetNodeIndex = candidates[targetDistribution(randomEngine)];
-}
-
-void ObstacleManager::bounceObstacle(Obstacle& obstacle) {
-    obstacle.targetNodeIndex = obstacle.previousNodeIndex;
-
-    std::uniform_real_distribution<float> speedDistribution(minBlockingRobotSpeed,
-                                                            maxBlockingRobotSpeed);
-    obstacle.speed = speedDistribution(randomEngine);
-
-    if (obstacle.targetNodeIndex == obstacle.currentNodeIndex) {
-        chooseNextTarget(obstacle, true);
-    }
 }

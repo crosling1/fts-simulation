@@ -98,14 +98,14 @@ class LogisticsMap {
     }
 
   private:
-    static const int screenWidth = 1280;
-    static const int screenHeight = 720;
-    static const int gridSize = 80;
-    static const int pointAIndex = 1;
-    static const int pointBIndex = 4;
+    static constexpr int screenWidth = 1280;
+    static constexpr int screenHeight = 720;
+    static constexpr int gridSize = 80;
+    static constexpr int pointAIndex = 1;
+    static constexpr int pointBIndex = 4;
 
-    static const int roadCount = 14;
-    static const int warehouseCount = LAGER_COUNT;
+    static constexpr int roadCount = 14;
+    static constexpr int warehouseCount = LAGER_COUNT;
 
     Vector2 robotStart = {140.0f, 620.0f};
 

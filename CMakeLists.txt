@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_SOURCES
     main.cpp
     map.cpp
+    navigation.cpp
     Robot.cpp
     RobotController.cpp
     ObstacleManager.cpp
@@ -18,6 +19,7 @@ set(PROJECT_SOURCES
 
 set(PROJECT_HEADERS
     map.h
+    navigation.h
     Robot.h
     RobotController.h
     ObstacleManager.h

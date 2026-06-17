@@ -24,7 +24,7 @@ class ObstacleManager {
 
     void clear(void);
     void addObstacle(const Obstacle& obstacle);
-    void update(float deltaTime, Vector2 robotPosition, float robotRadius);
+    void update(float deltaTime);
     void draw(void) const;
     bool hasActiveObstacleNear(Vector2 position, float detectionRadius) const;
     const std::vector<Obstacle>& getObstacles(void) const;
@@ -35,7 +35,6 @@ class ObstacleManager {
 
     void moveObstacle(Obstacle& obstacle, float deltaTime);
     void chooseNextTarget(Obstacle& obstacle, bool allowBacktracking);
-    void bounceObstacle(Obstacle& obstacle);
 };
 
 #endif // OBSTACLE_MANAGER_H
