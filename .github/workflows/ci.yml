@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build-test-lint:
+    name: Build, test, and lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            git \
+            libasound2-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxrandr-dev \
+            pkg-config \
+            clang-format \
+            clang-tidy
+
+      - name: Install raylib
+        run: |
+          git clone --depth 1 --branch 5.0 https://github.com/raysan5/raylib.git /tmp/raylib
+          cmake -S /tmp/raylib -B /tmp/raylib/build \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_GAMES=OFF \
+            -DPLATFORM=Desktop
+          cmake --build /tmp/raylib/build --parallel
+          sudo cmake --install /tmp/raylib/build
+          sudo ldconfig
+
+      - name: Configure
+        run: make configure
+
+      - name: Build
+        run: make build
+
+      - name: Unit tests
+        run: make test
+
+      - name: Format check
+        run: make format-check
+
+      - name: Lint
+        run: make lint

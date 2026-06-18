@@ -1,6 +1,6 @@
 BUILD_DIR := build
 
-.PHONY: configure build run check fix format-check format lint lint-fix clean
+.PHONY: configure build run test check fix format-check format lint lint-fix clean
 
 configure:
 	cmake -S . -B $(BUILD_DIR)
@@ -11,8 +11,13 @@ build: configure
 run: build
 	./$(BUILD_DIR)/robot_sim
 
+test: configure
+	cmake --build $(BUILD_DIR) --target unit_tests
+	ctest --test-dir $(BUILD_DIR) --output-on-failure
+
 check: configure
 	cmake --build $(BUILD_DIR)
+	ctest --test-dir $(BUILD_DIR) --output-on-failure
 	cmake --build $(BUILD_DIR) --target format-check
 	cmake --build $(BUILD_DIR) --target lint
 

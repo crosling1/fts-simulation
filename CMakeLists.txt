@@ -7,14 +7,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(PROJECT_SOURCES
-    main.cpp
+set(COMMON_SOURCES
     map.cpp
     navigation.cpp
     Robot.cpp
     RobotController.cpp
     ObstacleManager.cpp
     LidarSensor.cpp
+)
+
+set(PROJECT_SOURCES
+    main.cpp
+    ${COMMON_SOURCES}
+)
+
+set(TEST_SOURCES
+    tests/unit_tests.cpp
 )
 
 set(PROJECT_HEADERS
@@ -27,26 +35,45 @@ set(PROJECT_HEADERS
 )
 
 add_executable(robot_sim ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+add_executable(unit_tests
+    ${TEST_SOURCES}
+    map.cpp
+    navigation.cpp
+    Robot.cpp
+    ObstacleManager.cpp
+    LidarSensor.cpp
+    ${PROJECT_HEADERS}
+)
+target_include_directories(unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+enable_testing()
+add_test(NAME unit_tests COMMAND unit_tests)
 
 find_package(raylib QUIET)
 
 if(raylib_FOUND)
     target_link_libraries(robot_sim PRIVATE raylib)
+    target_link_libraries(unit_tests PRIVATE raylib)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(RAYLIB REQUIRED raylib)
 
     target_include_directories(robot_sim PRIVATE ${RAYLIB_INCLUDE_DIRS})
+    target_include_directories(unit_tests PRIVATE ${RAYLIB_INCLUDE_DIRS})
     target_link_directories(robot_sim PRIVATE ${RAYLIB_LIBRARY_DIRS})
+    target_link_directories(unit_tests PRIVATE ${RAYLIB_LIBRARY_DIRS})
     target_compile_options(robot_sim PRIVATE ${RAYLIB_CFLAGS_OTHER})
+    target_compile_options(unit_tests PRIVATE ${RAYLIB_CFLAGS_OTHER})
     target_link_libraries(robot_sim PRIVATE ${RAYLIB_LIBRARIES})
+    target_link_libraries(unit_tests PRIVATE ${RAYLIB_LIBRARIES})
 endif()
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(robot_sim PRIVATE m dl pthread GL rt X11)
+    target_link_libraries(unit_tests PRIVATE m dl pthread GL rt X11)
 endif()
 
-set(FORMAT_FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+set(FORMAT_FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${TEST_SOURCES})
 
 find_program(CLANG_FORMAT_EXE clang-format)
 if(CLANG_FORMAT_EXE)
