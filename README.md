@@ -25,6 +25,7 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 - raylib
 - clang-format
 - clang-tidy
+- GitHub Actions is used for CI on pushes and pull requests
 
 On Ubuntu-based systems, the following packages are usually required.
 
@@ -52,6 +53,12 @@ Run the full validation pipeline:
 
 ```bash
 make check
+```
+
+Run unit tests only:
+
+```bash
+make test
 ```
 
 Apply automatic fixes:
@@ -84,7 +91,17 @@ Run lint checks with automatic fixes:
 make lint-fix
 ```
 
-The Makefile wraps CMake, so the equivalent `cmake --build build --target ...` commands still work when needed.
+The Makefile wraps CMake, so the equivalent `cmake --build build --target ...` commands still work when needed. Unit tests are registered with CTest and can also be run directly with:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+## Continuous Integration
+
+GitHub Actions runs the project validation pipeline for pull requests and pushes to `main` or `master`.
+
+The CI workflow installs the required build tools, builds raylib, configures the project, builds the simulation, runs unit tests, checks formatting, and runs clang-tidy.
 
 ## Project Structure
 
@@ -101,5 +118,6 @@ The Makefile wraps CMake, so the equivalent `cmake --build build --target ...` c
 - `LidarSensor.cpp`: Lidar scan checks and scan area rendering
 - `ObstacleManager.h`: Blocking robot data and manager interface
 - `ObstacleManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
+- `tests/unit_tests.cpp`: Unit tests for robot movement, obstacle detection, lidar checks, map road helpers, and navigation routes
 
 `main.cpp` does not define map or robot task details directly. It initializes the map and robot controller, updates the controller each frame, and draws the map before drawing the robot controller.

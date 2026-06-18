@@ -6,6 +6,7 @@
 #include "Robot.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -25,7 +26,7 @@ constexpr Robot::Config robotConfig = {
     robotSize,
 };
 
-enum class TaskPhase {
+enum class TaskPhase : std::uint8_t {
     ToPickup,
     PickingUp,
     ToDropoff,

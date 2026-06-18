@@ -20,7 +20,7 @@ class LogisticsMap {
         }
 
         DrawCircleV(robotStart, 20, ORANGE);
-        DrawCircleLines((int)robotStart.x, (int)robotStart.y, 24, BROWN);
+        DrawCircleLines((int)robotStart.x, (int)robotStart.y, 24.0f, BROWN);
         DrawText("Robot Start", (int)robotStart.x - 47, (int)robotStart.y + 34, 18, DARKGRAY);
 
         DrawText("Robot Logistics Map", 20, 20, 28, DARKGRAY);
