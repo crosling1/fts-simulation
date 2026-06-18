@@ -3,13 +3,15 @@
 
 #include "raylib.h"
 
+#include <cstdint>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 class Robot {
   public:
-    enum class State {
+    enum class State : std::uint8_t {
         Idle,
         Moving,
         PickingUp,

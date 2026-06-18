@@ -3,6 +3,8 @@
 
 #include "raylib.h"
 
+#include <cstdint>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,7 +13,7 @@ void InitMap(void);
 void DrawMap(void);
 void UnloadMap(void);
 
-typedef enum LagerId {
+typedef enum LagerId : std::uint8_t {
     LAGER_1 = 0,
     LAGER_2,
     LAGER_3,
