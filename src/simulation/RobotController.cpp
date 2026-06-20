@@ -42,29 +42,12 @@ TaskPhase taskPhase = TaskPhase::ToPickup;
 float stateTimer = 0.0f;
 
 std::vector<Vector2> BuildPathToPointA(void) {
-    std::vector<Vector2> path =
-        FindNavigationPath(GetRobotStartPosition(), GetLagerDockPosition(LAGER_2));
-    if (!path.empty()) {
-        return path;
-    }
-
-    return {
-        {200.0f, 620.0f}, {200.0f, 450.0f}, {800.0f, 450.0f},
-        {800.0f, 270.0f}, {450.0f, 270.0f}, GetLagerDockPosition(LAGER_2),
-    };
+    return FindNavigationPath(GetRobotStartPosition(), GetLagerDockPosition(GetMapPickupLagerId()));
 }
 
 std::vector<Vector2> BuildPathFromPointAToPointB(void) {
-    std::vector<Vector2> path =
-        FindNavigationPath(GetLagerDockPosition(LAGER_2), GetLagerDockPosition(LAGER_5));
-    if (!path.empty()) {
-        return path;
-    }
-
-    return {
-        {450.0f, 270.0f}, {800.0f, 270.0f}, {800.0f, 450.0f},
-        {960.0f, 450.0f}, {960.0f, 556.0f}, GetLagerDockPosition(LAGER_5),
-    };
+    return FindNavigationPath(GetLagerDockPosition(GetMapPickupLagerId()),
+                              GetLagerDockPosition(GetMapDeliveryLagerId()));
 }
 
 bool SetNextWaypoint(void) {
@@ -100,7 +83,7 @@ void UpdatePickup(float deltaTime) {
 
     taskPhase = TaskPhase::ToDropoff;
     robot->setState(Robot::State::CarryingItem);
-    SetActivePath(BuildPathFromPointAToPointB(), GetLagerDockPosition(LAGER_2));
+    SetActivePath(BuildPathFromPointAToPointB(), GetLagerDockPosition(GetMapPickupLagerId()));
 }
 
 void UpdateDropoff(float deltaTime) {

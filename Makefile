@@ -12,10 +12,12 @@ run: build
 	./$(BUILD_DIR)/robot_sim
 
 test: configure
-	cmake --build $(BUILD_DIR) --target robot_sim
+	cmake --build $(BUILD_DIR) --target unit_tests
+	ctest --test-dir $(BUILD_DIR) --output-on-failure
 
 check: configure
 	cmake --build $(BUILD_DIR)
+	ctest --test-dir $(BUILD_DIR) --output-on-failure
 
 fix: configure
 	cmake --build $(BUILD_DIR)

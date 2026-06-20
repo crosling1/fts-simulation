@@ -1,5 +1,7 @@
 #include "simulation/ObstacleManager.h"
 
+#include "simulation/map.h"
+
 #include <cmath>
 
 namespace {
@@ -34,31 +36,9 @@ void ObstacleManager::addObstacle(const Obstacle& obstacle) {
 void ObstacleManager::initBlockingRobots(void) {
     clear();
 
-    const std::vector<Vector2> mainRoadNetwork = {
-        {140.0f, 620.0f}, {200.0f, 620.0f},  {200.0f, 450.0f}, {540.0f, 450.0f}, {800.0f, 450.0f},
-        {960.0f, 450.0f}, {1040.0f, 450.0f}, {960.0f, 450.0f}, {960.0f, 350.0f}, {800.0f, 350.0f},
-        {800.0f, 270.0f}, {540.0f, 270.0f},  {450.0f, 270.0f}, {340.0f, 270.0f},
-    };
-    const std::vector<Vector2> upperRoadNetwork = {
-        {540.0f, 150.0f}, {540.0f, 270.0f}, {675.0f, 270.0f}, {800.0f, 270.0f}, {800.0f, 150.0f},
-        {800.0f, 270.0f}, {800.0f, 450.0f}, {960.0f, 450.0f}, {960.0f, 556.0f}, {930.0f, 556.0f},
-    };
-    const std::vector<Vector2> warehouseRoadNetwork = {
-        {340.0f, 325.0f}, {340.0f, 270.0f}, {450.0f, 270.0f}, {450.0f, 224.0f}, {450.0f, 270.0f},
-        {675.0f, 270.0f}, {675.0f, 224.0f}, {675.0f, 270.0f}, {800.0f, 270.0f}, {850.0f, 257.0f},
-    };
-
-    addBlockingRobot(mainRoadNetwork, blockingRobotSpeed);
-    addBlockingRobot(upperRoadNetwork, blockingRobotSpeed * 0.85f);
-    addBlockingRobot(warehouseRoadNetwork, blockingRobotSpeed * 1.15f);
-    addBlockingRobot(
-        {
-            {800.0f, 150.0f},
-            {800.0f, 270.0f},
-            {800.0f, 350.0f},
-            {800.0f, 470.0f},
-        },
-        blockingRobotSpeed * 1.2f);
+    for (const BlockingRobotPath& blockingPath : GetMapBlockingRobotPaths()) {
+        addBlockingRobot(blockingPath.points, blockingRobotSpeed * blockingPath.speedMultiplier);
+    }
 }
 
 void ObstacleManager::update(float deltaTime) {
