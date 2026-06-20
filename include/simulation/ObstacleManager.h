@@ -24,6 +24,7 @@ class ObstacleManager {
 
     void clear(void);
     void addObstacle(const Obstacle& obstacle);
+    void initBlockingRobots(void);
     void update(float deltaTime);
     void draw(void) const;
     bool hasActiveObstacleNear(Vector2 position, float detectionRadius) const;
@@ -33,6 +34,7 @@ class ObstacleManager {
     std::vector<Obstacle> obstacles;
     std::mt19937 randomEngine;
 
+    void addBlockingRobot(const std::vector<Vector2>& path, float speed);
     void moveObstacle(Obstacle& obstacle, float deltaTime);
     void chooseNextTarget(Obstacle& obstacle, bool allowBacktracking);
 };

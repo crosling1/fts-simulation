@@ -1,6 +1,6 @@
-#include "navigation.h"
+#include "simulation/navigation.h"
 
-#include "map.h"
+#include "simulation/map.h"
 
 #include <algorithm>
 #include <array>

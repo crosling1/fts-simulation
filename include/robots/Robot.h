@@ -1,13 +1,12 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
+#include "sensors/Sensor.h"
 #include "raylib.h"
 
 #include <cstdint>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <memory>
+#include <vector>
 
 class Robot {
   public:
@@ -26,7 +25,12 @@ class Robot {
         float size;
     };
 
+    Robot(double x, double y, double angle = 0.0);
     Robot(const Vector2& startPosition, Config config);
+    virtual ~Robot() = default;
+
+    virtual void update() = 0;
+    virtual void printType() const = 0;
 
     void update(float deltaTime);
     void draw(void);
@@ -40,18 +44,27 @@ class Robot {
     State getState(void) const;
     bool hasReachedTarget(void) const;
 
-  private:
-    float speed;
-    Vector2 position;
-    Vector2 targetPosition;
-    float rotation;
-    float rotationSpeed;
-    float size;
-    State state;
-};
+    void addSensor(std::unique_ptr<Sensor> sensor);
+    void updateSensors();
 
-#ifdef __cplusplus
-}
-#endif
+    double x() const;
+    double y() const;
+    double angle() const;
+
+  protected:
+    void moveForward(double distance);
+    void rotate(double degree);
+
+  private:
+    double x_;
+    double y_;
+    double angle_;
+    float speed_;
+    Vector2 targetPosition_;
+    float rotationSpeed_;
+    float size_;
+    State state_;
+    std::vector<std::unique_ptr<Sensor>> sensors_;
+};
 
 #endif // ROBOT_H

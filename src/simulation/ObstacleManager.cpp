@@ -1,9 +1,11 @@
-#include "ObstacleManager.h"
+#include "simulation/ObstacleManager.h"
 
 #include <cmath>
 
 namespace {
 constexpr float reachedDistance = 2.0f;
+constexpr float blockingRobotRadius = 14.0f;
+constexpr float blockingRobotSpeed = 65.0f;
 
 float Distance(Vector2 from, Vector2 to) {
     const float deltaX = to.x - from.x;
@@ -27,6 +29,36 @@ void ObstacleManager::clear(void) {
 
 void ObstacleManager::addObstacle(const Obstacle& obstacle) {
     obstacles.push_back(obstacle);
+}
+
+void ObstacleManager::initBlockingRobots(void) {
+    clear();
+
+    const std::vector<Vector2> mainRoadNetwork = {
+        {140.0f, 620.0f}, {200.0f, 620.0f},  {200.0f, 450.0f}, {540.0f, 450.0f}, {800.0f, 450.0f},
+        {960.0f, 450.0f}, {1040.0f, 450.0f}, {960.0f, 450.0f}, {960.0f, 350.0f}, {800.0f, 350.0f},
+        {800.0f, 270.0f}, {540.0f, 270.0f},  {450.0f, 270.0f}, {340.0f, 270.0f},
+    };
+    const std::vector<Vector2> upperRoadNetwork = {
+        {540.0f, 150.0f}, {540.0f, 270.0f}, {675.0f, 270.0f}, {800.0f, 270.0f}, {800.0f, 150.0f},
+        {800.0f, 270.0f}, {800.0f, 450.0f}, {960.0f, 450.0f}, {960.0f, 556.0f}, {930.0f, 556.0f},
+    };
+    const std::vector<Vector2> warehouseRoadNetwork = {
+        {340.0f, 325.0f}, {340.0f, 270.0f}, {450.0f, 270.0f}, {450.0f, 224.0f}, {450.0f, 270.0f},
+        {675.0f, 270.0f}, {675.0f, 224.0f}, {675.0f, 270.0f}, {800.0f, 270.0f}, {850.0f, 257.0f},
+    };
+
+    addBlockingRobot(mainRoadNetwork, blockingRobotSpeed);
+    addBlockingRobot(upperRoadNetwork, blockingRobotSpeed * 0.85f);
+    addBlockingRobot(warehouseRoadNetwork, blockingRobotSpeed * 1.15f);
+    addBlockingRobot(
+        {
+            {800.0f, 150.0f},
+            {800.0f, 270.0f},
+            {800.0f, 350.0f},
+            {800.0f, 470.0f},
+        },
+        blockingRobotSpeed * 1.2f);
 }
 
 void ObstacleManager::update(float deltaTime) {
@@ -64,6 +96,23 @@ bool ObstacleManager::hasActiveObstacleNear(Vector2 position, float detectionRad
 
 const std::vector<Obstacle>& ObstacleManager::getObstacles(void) const {
     return obstacles;
+}
+
+void ObstacleManager::addBlockingRobot(const std::vector<Vector2>& path, float speed) {
+    if (path.size() < 2) {
+        return;
+    }
+
+    addObstacle({
+        path[0],
+        blockingRobotRadius,
+        speed,
+        path,
+        0,
+        1,
+        0,
+        true,
+    });
 }
 
 void ObstacleManager::moveObstacle(Obstacle& obstacle, float deltaTime) {

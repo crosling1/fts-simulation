@@ -1,8 +1,8 @@
-#include "LidarSensor.h"
-#include "ObstacleManager.h"
-#include "Robot.h"
-#include "map.h"
-#include "navigation.h"
+#include "robots/Robot.h"
+#include "sensors/LidarSensor.h"
+#include "simulation/ObstacleManager.h"
+#include "simulation/map.h"
+#include "simulation/navigation.h"
 
 #include <cmath>
 #include <iostream>
