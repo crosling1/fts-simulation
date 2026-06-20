@@ -18,24 +18,21 @@ test: configure
 check: configure
 	cmake --build $(BUILD_DIR)
 	ctest --test-dir $(BUILD_DIR) --output-on-failure
-	cmake --build $(BUILD_DIR) --target format-check
-	cmake --build $(BUILD_DIR) --target lint
 
 fix: configure
-	cmake --build $(BUILD_DIR) --target format
-	cmake --build $(BUILD_DIR) --target lint-fix
+	cmake --build $(BUILD_DIR)
 
 format-check: configure
-	cmake --build $(BUILD_DIR) --target format-check
+	cmake --build $(BUILD_DIR)
 
 format: configure
-	cmake --build $(BUILD_DIR) --target format
+	cmake --build $(BUILD_DIR)
 
 lint: configure
-	cmake --build $(BUILD_DIR) --target lint
+	cmake --build $(BUILD_DIR)
 
 lint-fix: configure
-	cmake --build $(BUILD_DIR) --target lint-fix
+	cmake --build $(BUILD_DIR)
 
 clean:
 	cmake --build $(BUILD_DIR) --target clean

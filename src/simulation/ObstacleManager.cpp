@@ -1,9 +1,13 @@
-#include "ObstacleManager.h"
+#include "simulation/ObstacleManager.h"
+
+#include "simulation/map.h"
 
 #include <cmath>
 
 namespace {
 constexpr float reachedDistance = 2.0f;
+constexpr float blockingRobotRadius = 14.0f;
+constexpr float blockingRobotSpeed = 65.0f;
 
 float Distance(Vector2 from, Vector2 to) {
     const float deltaX = to.x - from.x;
@@ -27,6 +31,14 @@ void ObstacleManager::clear(void) {
 
 void ObstacleManager::addObstacle(const Obstacle& obstacle) {
     obstacles.push_back(obstacle);
+}
+
+void ObstacleManager::initBlockingRobots(void) {
+    clear();
+
+    for (const BlockingRobotPath& blockingPath : GetMapBlockingRobotPaths()) {
+        addBlockingRobot(blockingPath.points, blockingRobotSpeed * blockingPath.speedMultiplier);
+    }
 }
 
 void ObstacleManager::update(float deltaTime) {
@@ -64,6 +76,23 @@ bool ObstacleManager::hasActiveObstacleNear(Vector2 position, float detectionRad
 
 const std::vector<Obstacle>& ObstacleManager::getObstacles(void) const {
     return obstacles;
+}
+
+void ObstacleManager::addBlockingRobot(const std::vector<Vector2>& path, float speed) {
+    if (path.size() < 2) {
+        return;
+    }
+
+    addObstacle({
+        path[0],
+        blockingRobotRadius,
+        speed,
+        path,
+        0,
+        1,
+        0,
+        true,
+    });
 }
 
 void ObstacleManager::moveObstacle(Obstacle& obstacle, float deltaTime) {

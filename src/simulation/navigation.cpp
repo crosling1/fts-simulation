@@ -1,9 +1,8 @@
-#include "navigation.h"
+#include "simulation/navigation.h"
 
-#include "map.h"
+#include "simulation/map.h"
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -15,12 +14,6 @@ constexpr float unreachableDistance = std::numeric_limits<float>::max();
 constexpr float roadSampleSpacing = 8.0f;
 constexpr float roadSampleTolerance = 1.0f;
 constexpr int invalidPathNode = -1;
-constexpr int pathEdgeCount = 30;
-
-struct PathEdge {
-    int from;
-    int to;
-};
 
 struct PathQueueEntry {
     int nodeIndex;
@@ -80,48 +73,6 @@ bool IsRoadSegment(Vector2 from, Vector2 to) { // NOLINT(bugprone-easily-swappab
     return true;
 }
 
-std::vector<Vector2> BuildPathNodes(void) {
-    return {
-        GetRobotStartPosition(),
-        {200.0f, 620.0f},
-        {200.0f, 450.0f},
-        {200.0f, 150.0f},
-        {540.0f, 450.0f},
-        {800.0f, 450.0f},
-        {960.0f, 450.0f},
-        {1040.0f, 450.0f},
-        {800.0f, 470.0f},
-        {800.0f, 350.0f},
-        {800.0f, 270.0f},
-        {800.0f, 150.0f},
-        {540.0f, 150.0f},
-        {540.0f, 270.0f},
-        {540.0f, 350.0f},
-        {960.0f, 350.0f},
-        {960.0f, 556.0f},
-        GetLagerDockPosition(LAGER_5),
-        {340.0f, 270.0f},
-        GetLagerDockPosition(LAGER_1),
-        {450.0f, 270.0f},
-        GetLagerDockPosition(LAGER_2),
-        {675.0f, 270.0f},
-        GetLagerDockPosition(LAGER_3),
-        GetLagerDockPosition(LAGER_4),
-        {545.0f, 450.0f},
-        GetLagerDockPosition(LAGER_6),
-        {800.0f, 257.0f},
-    };
-}
-
-std::array<PathEdge, pathEdgeCount> BuildPathEdges(void) {
-    return {{
-        {0, 1},   {1, 2},   {2, 3},   {2, 4},   {4, 25},  {25, 5},  {5, 6},   {6, 7},
-        {5, 8},   {5, 9},   {9, 10},  {10, 11}, {12, 13}, {13, 14}, {14, 9},  {9, 15},
-        {15, 6},  {15, 16}, {16, 17}, {18, 19}, {18, 20}, {20, 13}, {13, 22}, {22, 10},
-        {20, 21}, {22, 23}, {10, 27}, {27, 24}, {25, 26}, {14, 15},
-    }};
-}
-
 int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position) {
     int nearestNodeIndex = invalidPathNode;
     float nearestDistanceSquared = unreachableDistance;
@@ -137,13 +88,13 @@ int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position)
     return nearestNodeIndex;
 }
 
-int GetNeighborNodeIndex(PathEdge edge, int nodeIndex) {
-    if (edge.from == nodeIndex) {
-        return edge.to;
+int GetNeighborNodeIndex(NavigationEdge edge, int nodeIndex) {
+    if (edge.from == static_cast<std::size_t>(nodeIndex)) {
+        return static_cast<int>(edge.to);
     }
 
-    if (edge.to == nodeIndex) {
-        return edge.from;
+    if (edge.to == static_cast<std::size_t>(nodeIndex)) {
+        return static_cast<int>(edge.from);
     }
 
     return invalidPathNode;
@@ -171,8 +122,8 @@ std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
 
 std::vector<Vector2>
 FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swappable-parameters)
-    const std::vector<Vector2> pathNodes = BuildPathNodes();
-    const std::array<PathEdge, pathEdgeCount> pathEdges = BuildPathEdges();
+    const std::vector<Vector2>& pathNodes = GetMapNavigationNodes();
+    const std::vector<NavigationEdge>& pathEdges = GetMapNavigationEdges();
     const PathEndpointIndices endpoints = {
         FindNearestPathNode(pathNodes, start),
         FindNearestPathNode(pathNodes, goal),
@@ -211,7 +162,7 @@ FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swap
         }
 
         closed[currentNodeIndex] = true;
-        for (PathEdge edge : pathEdges) {
+        for (NavigationEdge edge : pathEdges) {
             const int neighborNodeIndex = GetNeighborNodeIndex(edge, currentNodeIndex);
             if (neighborNodeIndex == invalidPathNode || closed[neighborNodeIndex]) {
                 continue;

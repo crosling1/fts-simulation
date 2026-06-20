@@ -1,7 +1,7 @@
 #ifndef ROBOT_CONTROLLER_H
 #define ROBOT_CONTROLLER_H
 
-#include "map.h"
+#include "simulation/map.h"
 
 #ifdef __cplusplus
 extern "C" {

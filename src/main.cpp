@@ -1,6 +1,7 @@
+#include "simulation/BlockingRobotController.h"
+#include "simulation/RobotController.h"
+#include "simulation/map.h"
 #include "raylib.h"
-#include "RobotController.h"
-#include "map.h"
 
 int main(void) {
     const int screenWidth = 1280;
@@ -10,20 +11,24 @@ int main(void) {
     SetTargetFPS(60);
 
     InitMap();
+    InitBlockingRobotController();
     InitRobotController();
 
     while (!WindowShouldClose()) {
+        UpdateBlockingRobotController();
         UpdateRobotController();
 
         BeginDrawing();
 
         DrawMap();
+        DrawBlockingRobotController();
         DrawRobotController();
 
         EndDrawing();
     }
 
     UnloadRobotController();
+    UnloadBlockingRobotController();
     UnloadMap();
     CloseWindow();
 

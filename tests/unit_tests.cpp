@@ -1,8 +1,8 @@
-#include "LidarSensor.h"
-#include "ObstacleManager.h"
-#include "Robot.h"
-#include "map.h"
-#include "navigation.h"
+#include "robots/WorkerRobot.h"
+#include "sensors/LidarSensor.h"
+#include "simulation/ObstacleManager.h"
+#include "simulation/map.h"
+#include "simulation/navigation.h"
 
 #include <cmath>
 #include <iostream>
@@ -32,7 +32,7 @@ void ExpectVectorNear(Vector2 actual, Vector2 expected, const std::string& messa
 }
 
 void TestRobotMovesToTarget(void) {
-    Robot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
+    WorkerRobot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
 
     robot.setTargetPosition({10.0f, 0.0f});
     Expect(robot.getState() == Robot::State::Moving, "robot should start moving to a new target");
@@ -51,7 +51,7 @@ void TestRobotMovesToTarget(void) {
 }
 
 void TestRobotKeepsCarryingStateWhenArriving(void) {
-    Robot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
+    WorkerRobot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
 
     robot.setState(Robot::State::CarryingItem);
     robot.setTargetPosition({10.0f, 0.0f});
@@ -65,7 +65,7 @@ void TestRobotKeepsCarryingStateWhenArriving(void) {
 }
 
 void TestRobotRotatesTowardTarget(void) {
-    Robot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
+    WorkerRobot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
 
     robot.setTargetPosition({0.0f, -10.0f});
     robot.update(0.5f);
@@ -151,6 +151,8 @@ void TestLidarUsesObstacleManager(void) {
 }
 
 void TestMapRoadQueries(void) {
+    InitMap();
+
     const Vector2 start = GetRobotStartPosition();
     const Vector2 offRoad = {20.0f, 20.0f};
     const Vector2 clamped = ClampPositionToMapRoad(offRoad);
@@ -163,16 +165,19 @@ void TestMapRoadQueries(void) {
 }
 
 void TestNavigationFindsWarehouseRoutes(void) {
+    InitMap();
+
     const std::vector<Vector2> pickupPath =
-        FindNavigationPath(GetRobotStartPosition(), GetLagerDockPosition(LAGER_2));
+        FindNavigationPath(GetRobotStartPosition(), GetLagerDockPosition(GetMapPickupLagerId()));
     const std::vector<Vector2> dropoffPath =
-        FindNavigationPath(GetLagerDockPosition(LAGER_2), GetLagerDockPosition(LAGER_5));
+        FindNavigationPath(GetLagerDockPosition(GetMapPickupLagerId()),
+                           GetLagerDockPosition(GetMapDeliveryLagerId()));
 
     Expect(!pickupPath.empty(), "navigation should find a path to pickup lager");
     Expect(!dropoffPath.empty(), "navigation should find a path from pickup to dropoff lager");
-    ExpectVectorNear(pickupPath.back(), GetLagerDockPosition(LAGER_2),
+    ExpectVectorNear(pickupPath.back(), GetLagerDockPosition(GetMapPickupLagerId()),
                      "pickup path should end at pickup dock");
-    ExpectVectorNear(dropoffPath.back(), GetLagerDockPosition(LAGER_5),
+    ExpectVectorNear(dropoffPath.back(), GetLagerDockPosition(GetMapDeliveryLagerId()),
                      "dropoff path should end at dropoff dock");
 
     for (Vector2 waypoint : pickupPath) {
