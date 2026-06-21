@@ -1,6 +1,7 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
+#include "robots/Battery.h"
 #include "sensors/Sensor.h"
 #include "raylib.h"
 
@@ -17,6 +18,8 @@ class Robot {
         CarryingItem,
         DroppingOff,
         Arrived,
+        BatteryDepleted,
+        Charging,
     };
 
     struct Config {
@@ -43,6 +46,8 @@ class Robot {
     void getRotation(float& outRotation) const;
     State getState(void) const;
     bool hasReachedTarget(void) const;
+    Battery& getBattery(void);
+    const Battery& getBattery(void) const;
 
     void addSensor(std::unique_ptr<Sensor> sensor);
     void updateSensors();
@@ -64,6 +69,7 @@ class Robot {
     float rotationSpeed_;
     float size_;
     State state_;
+    Battery battery_;
     std::vector<std::unique_ptr<Sensor>> sensors_;
 };
 

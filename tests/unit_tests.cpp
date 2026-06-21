@@ -79,6 +79,62 @@ void TestRobotRotatesTowardTarget(void) {
     Expect(AlmostEqual(rotation, -90.0f), "robot should finish rotating toward the target");
 }
 
+void TestRobotOwnsBattery(void) {
+    WorkerRobot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
+
+    Expect(AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
+           "robot battery should start full");
+
+    robot.getBattery().drain(91.0f);
+    Expect(AlmostEqual(robot.getBattery().getChargePercentage(), 9.0f),
+           "robot battery should drain by percentage");
+    Expect(robot.getBattery().isLow(10.0f), "robot battery should report low charge");
+
+    robot.getBattery().charge(200.0f);
+    Expect(AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
+           "robot battery should clamp charge to full");
+    Expect(robot.getBattery().isFull(), "robot battery should report full charge");
+
+    robot.getBattery().drain(100.0f);
+    Expect(robot.getBattery().isEmpty(), "robot battery should report empty charge");
+}
+
+void TestRobotDrainsBatteryByDistanceMoved(void) {
+    WorkerRobot robot({0.0f, 0.0f}, {100.0f, 90.0f, 8.0f});
+
+    robot.setTargetPosition({100.0f, 0.0f});
+    robot.update(1.0f);
+
+    Expect(AlmostEqual(robot.getBattery().getChargePercentage(), 99.0f),
+           "robot battery should drain 1 percent per 100 pixels moved");
+
+    robot.getBattery().charge(1.0f);
+    Expect(AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
+           "robot battery should recharge by percentage");
+}
+
+void TestRobotStopsWhenBatteryIsEmpty(void) {
+    WorkerRobot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
+
+    robot.getBattery().setChargePercentage(0.0f);
+    robot.setTargetPosition({10.0f, 0.0f});
+
+    Expect(robot.getState() == Robot::State::BatteryDepleted,
+           "empty battery robot should enter battery depleted state");
+
+    robot.update(1.0f);
+
+    Vector2 position = {0.0f, 0.0f};
+    robot.getPosition(position);
+    ExpectVectorNear(position, {0.0f, 0.0f}, "empty battery robot should not move");
+
+    robot.getBattery().charge(50.0f);
+    robot.setTargetPosition({10.0f, 0.0f});
+    robot.update(1.0f);
+    robot.getPosition(position);
+    ExpectVectorNear(position, {10.0f, 0.0f}, "charged robot should move again");
+}
+
 void TestObstacleDetectionIgnoresInactiveObstacles(void) {
     ObstacleManager manager;
 
@@ -158,6 +214,8 @@ void TestMapRoadQueries(void) {
     const Vector2 clamped = ClampPositionToMapRoad(offRoad);
 
     Expect(IsMapRoadPosition(start), "robot start should be on a road");
+    Expect(IsMapRoadPosition(GetChargingStationDockPosition()),
+           "charging station dock should be on a road");
     Expect(!IsMapRoadPosition(offRoad), "off-road point should not be on a road");
     Expect(IsMapRoadPosition(clamped), "clamped off-road point should land on a road");
     ExpectVectorNear(GetLagerDockPosition(static_cast<LagerId>(LAGER_COUNT)), {0.0f, 0.0f},
@@ -172,13 +230,27 @@ void TestNavigationFindsWarehouseRoutes(void) {
     const std::vector<Vector2> dropoffPath =
         FindNavigationPath(GetLagerDockPosition(GetMapPickupLagerId()),
                            GetLagerDockPosition(GetMapDeliveryLagerId()));
+    const std::vector<Vector2> chargingPath =
+        FindNavigationPath(GetRobotStartPosition(), GetChargingStationDockPosition());
+    const std::vector<Vector2> dropoffToChargingPath =
+        FindNavigationPath(GetLagerDockPosition(GetMapDeliveryLagerId()),
+                           GetChargingStationDockPosition());
 
     Expect(!pickupPath.empty(), "navigation should find a path to pickup lager");
     Expect(!dropoffPath.empty(), "navigation should find a path from pickup to dropoff lager");
+    Expect(!chargingPath.empty(), "navigation should find a path to charging station");
+    Expect(!dropoffToChargingPath.empty(),
+           "navigation should find a path from dropoff to charging station");
     ExpectVectorNear(pickupPath.back(), GetLagerDockPosition(GetMapPickupLagerId()),
                      "pickup path should end at pickup dock");
     ExpectVectorNear(dropoffPath.back(), GetLagerDockPosition(GetMapDeliveryLagerId()),
                      "dropoff path should end at dropoff dock");
+    ExpectVectorNear(chargingPath.back(), GetChargingStationDockPosition(),
+                     "charging path should end at charging station dock");
+    ExpectVectorNear(dropoffToChargingPath.back(), GetChargingStationDockPosition(),
+                     "dropoff to charging path should end at charging station dock");
+    Expect(dropoffToChargingPath.size() <= 3,
+           "dropoff to charging path should use the direct right-side road");
 
     for (Vector2 waypoint : pickupPath) {
         Expect(IsMapRoadPosition(waypoint), "pickup path waypoint should be on a road");
@@ -186,6 +258,15 @@ void TestNavigationFindsWarehouseRoutes(void) {
 
     for (Vector2 waypoint : dropoffPath) {
         Expect(IsMapRoadPosition(waypoint), "dropoff path waypoint should be on a road");
+    }
+
+    for (Vector2 waypoint : chargingPath) {
+        Expect(IsMapRoadPosition(waypoint), "charging path waypoint should be on a road");
+    }
+
+    for (Vector2 waypoint : dropoffToChargingPath) {
+        Expect(IsMapRoadPosition(waypoint),
+               "dropoff to charging path waypoint should be on a road");
     }
 }
 
@@ -201,6 +282,9 @@ int main(void) {
         RunTest("Robot keeps carrying state when arriving",
                 TestRobotKeepsCarryingStateWhenArriving);
         RunTest("Robot rotates toward target", TestRobotRotatesTowardTarget);
+        RunTest("Robot owns battery", TestRobotOwnsBattery);
+        RunTest("Robot drains battery by distance moved", TestRobotDrainsBatteryByDistanceMoved);
+        RunTest("Robot stops when battery is empty", TestRobotStopsWhenBatteryIsEmpty);
         RunTest("Obstacle detection ignores inactive obstacles",
                 TestObstacleDetectionIgnoresInactiveObstacles);
         RunTest("Obstacle moves along path", TestObstacleMovesAlongPath);

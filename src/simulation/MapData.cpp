@@ -238,6 +238,9 @@ Vector2 ReadNavigationNode(const JsonValue& value, const MapData& data) {
         if (ref.type == JsonValue::Type::String && ref.text == "robot_start") {
             return data.robotStart;
         }
+        if (ref.type == JsonValue::Type::String && ref.text == "charging_station_dock") {
+            return data.chargingStation.dockPoint;
+        }
         throw std::runtime_error("Unsupported navigation node ref");
     }
 
@@ -292,6 +295,11 @@ MapData LoadMapData(const std::string& path) {
     data.pickupLagerIndex = IntegerField(root, "pickupLager");
     data.deliveryLagerIndex = IntegerField(root, "deliveryLager");
     data.robotStart = ReadVector(RequireField(root, "robotStart"));
+    const JsonValue& chargingStation = RequireField(root, "chargingStation");
+    data.chargingStation = {
+        ReadRectangle(RequireField(chargingStation, "body")),
+        ReadVector(RequireField(chargingStation, "dockPoint")),
+    };
 
     for (const JsonValue& road : RequireArray(RequireField(root, "roads"), "roads")) {
         data.roads.push_back(ReadRectangle(road));

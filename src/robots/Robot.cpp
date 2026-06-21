@@ -8,6 +8,7 @@ constexpr float reachedDistance = 2.0f;
 constexpr float radToDeg = 57.29577951308232f;
 constexpr float fullTurn = 360.0f;
 constexpr float halfTurn = 180.0f;
+constexpr float batteryDrainPercentagePerPixel = 0.01f;
 
 double DegreesToRadians(double degree) {
     return degree * pi / 180.0;
@@ -50,6 +51,10 @@ Color GetRobotColor(Robot::State state) {
         return SKYBLUE;
     case Robot::State::Arrived:
         return LIME;
+    case Robot::State::BatteryDepleted:
+        return RED;
+    case Robot::State::Charging:
+        return BLUE;
     }
 
     return ORANGE;
@@ -68,20 +73,34 @@ bool ShouldDrawItem(Robot::State state) {
 Robot::Robot(double x, double y, double angle)
     : x_(x), y_(y), angle_(angle), speed_(0.0f),
       targetPosition_({static_cast<float>(x), static_cast<float>(y)}), rotationSpeed_(0.0f),
-      size_(16.0f), state_(State::Idle) {}
+      size_(16.0f), state_(State::Idle), battery_() {}
 
 Robot::Robot(const Vector2& startPosition, Config config)
     : x_(startPosition.x), y_(startPosition.y), angle_(0.0), speed_(config.speed),
       targetPosition_(startPosition), rotationSpeed_(config.rotationSpeed), size_(config.size),
-      state_(State::Idle) {}
+      state_(State::Idle), battery_() {}
 
 void Robot::update(float deltaTime) {
+    if (battery_.isEmpty()) {
+        state_ = State::BatteryDepleted;
+        return;
+    }
+
     if (!ShouldMove(state_)) {
         return;
     }
 
+    const Vector2 previousPosition = {static_cast<float>(x_), static_cast<float>(y_)};
+
     rotateTowardsTarget(deltaTime);
     moveTowardsTarget(deltaTime);
+
+    const Vector2 currentPosition = {static_cast<float>(x_), static_cast<float>(y_)};
+    battery_.drain(Distance(previousPosition, currentPosition) * batteryDrainPercentagePerPixel);
+    if (battery_.isEmpty()) {
+        state_ = State::BatteryDepleted;
+    }
+
     updateSensors();
 }
 
@@ -123,6 +142,11 @@ void Robot::setTargetPosition(const Vector2& target) {
     targetPosition_ = target;
     if (hasReachedTarget()) {
         state_ = State::Arrived;
+        return;
+    }
+
+    if (battery_.isEmpty()) {
+        state_ = State::BatteryDepleted;
         return;
     }
 
@@ -195,6 +219,14 @@ bool Robot::hasReachedTarget(void) const {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
 
     return Distance(position, targetPosition_) <= reachedDistance;
+}
+
+Battery& Robot::getBattery(void) {
+    return battery_;
+}
+
+const Battery& Robot::getBattery(void) const {
+    return battery_;
 }
 
 void Robot::addSensor(std::unique_ptr<Sensor> sensor) {
