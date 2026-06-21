@@ -1,6 +1,7 @@
 #include "simulation/MapData.h"
 
 #include <cctype>
+#include <cstdint>
 #include <fstream>
 #include <map>
 #include <stdexcept>
@@ -10,7 +11,7 @@
 
 namespace {
 struct JsonValue {
-    enum class Type {
+    enum class Type : std::uint8_t {
         Number,
         String,
         Array,
