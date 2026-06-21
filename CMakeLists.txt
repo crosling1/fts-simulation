@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.16)
 
 project(fts_simulation LANGUAGES CXX)
 
+if(POLICY CMP0110)
+    cmake_policy(SET CMP0110 NEW)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -35,6 +39,15 @@ set(COMMON_SOURCES
     src/sensors/LidarSensor.cpp
 )
 
+set(TEST_SOURCES
+    tests/unit_tests.cpp
+    tests/robots/robot_tests.cpp
+    tests/sensors/lidar_tests.cpp
+    tests/simulation/obstacle_tests.cpp
+    tests/simulation/map_tests.cpp
+    tests/simulation/navigation_tests.cpp
+)
+
 set(PROJECT_HEADERS
     include/robots/Robot.h
     include/robots/Battery.h
@@ -55,11 +68,32 @@ set(PROJECT_HEADERS
 add_executable(robot_sim ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 target_include_directories(robot_sim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(unit_tests tests/unit_tests.cpp ${COMMON_SOURCES} ${PROJECT_HEADERS})
-target_include_directories(unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_executable(unit_tests ${TEST_SOURCES} ${COMMON_SOURCES} ${PROJECT_HEADERS})
+target_include_directories(unit_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests
+)
 
 enable_testing()
-add_test(NAME unit_tests COMMAND unit_tests)
+
+set(UNIT_TEST_CASES
+    "Robot moves to target"
+    "Robot PI controller limits speed near target"
+    "Robot keeps carrying state when arriving"
+    "Robot rotates toward target"
+    "Robot owns battery"
+    "Robot drains battery by distance moved"
+    "Robot stops when battery is empty"
+    "Obstacle detection ignores inactive obstacles"
+    "Obstacle moves along path"
+    "Lidar uses obstacle manager"
+    "Map road queries"
+    "Navigation finds warehouse routes"
+)
+
+foreach(test_case IN LISTS UNIT_TEST_CASES)
+    add_test(NAME "${test_case}" COMMAND unit_tests --test "${test_case}")
+endforeach()
 
 find_package(raylib QUIET)
 

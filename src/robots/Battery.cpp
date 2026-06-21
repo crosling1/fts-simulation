@@ -11,7 +11,8 @@ float ClampChargePercentage(float percentage) {
 }
 } // namespace
 
-Battery::Battery(float chargePercentage) : chargePercentage_(ClampChargePercentage(chargePercentage)) {}
+Battery::Battery(float chargePercentage)
+    : chargePercentage_(ClampChargePercentage(chargePercentage)) {}
 
 float Battery::getChargePercentage(void) const {
     return chargePercentage_;

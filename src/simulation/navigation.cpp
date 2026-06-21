@@ -118,6 +118,26 @@ std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
     std::reverse(path.begin(), path.end());
     return path;
 }
+
+std::vector<Vector2> SimplifyPath(const std::vector<Vector2>& path) {
+    if (path.size() < 3) {
+        return path;
+    }
+
+    std::vector<Vector2> simplifiedPath;
+    simplifiedPath.push_back(path.front());
+
+    for (std::size_t i = 1; i + 1 < path.size(); i++) {
+        if (IsRoadSegment(simplifiedPath.back(), path[i + 1])) {
+            continue;
+        }
+
+        simplifiedPath.push_back(path[i]);
+    }
+
+    simplifiedPath.push_back(path.back());
+    return simplifiedPath;
+}
 } // namespace
 
 std::vector<Vector2>
@@ -158,7 +178,7 @@ FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swap
         }
 
         if (currentNodeIndex == endpoints.goalNodeIndex) {
-            return BuildPathFromParents(pathNodes, cameFrom, endpoints);
+            return SimplifyPath(BuildPathFromParents(pathNodes, cameFrom, endpoints));
         }
 
         closed[currentNodeIndex] = true;
