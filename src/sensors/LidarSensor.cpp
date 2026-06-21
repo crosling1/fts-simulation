@@ -16,18 +16,17 @@ LidarSensor::LidarSensor(float detectionRadius)
     : offsetX_(0.0), offsetY_(0.0), offsetAngle_(0.0), distance_(0.0),
       detectionRadius_(detectionRadius) {}
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 LidarSensor::LidarSensor(double offsetX, double offsetY, double offsetAngle)
     : offsetX_(offsetX), offsetY_(offsetY), offsetAngle_(offsetAngle), distance_(0.0),
       detectionRadius_(0.0f) {}
 
 void LidarSensor::update(const Robot& robot) {
     const double robotAngleRadians = DegreesToRadians(robot.angle());
-    const double sensorX =
-        robot.x() + (std::cos(robotAngleRadians) * offsetX_) -
-        (std::sin(robotAngleRadians) * offsetY_);
-    const double sensorY =
-        robot.y() + (std::sin(robotAngleRadians) * offsetX_) +
-        (std::cos(robotAngleRadians) * offsetY_);
+    const double sensorX = robot.x() + (std::cos(robotAngleRadians) * offsetX_) -
+                           (std::sin(robotAngleRadians) * offsetY_);
+    const double sensorY = robot.y() + (std::sin(robotAngleRadians) * offsetX_) +
+                           (std::cos(robotAngleRadians) * offsetY_);
     const double sensorAngle = robot.angle() + offsetAngle_;
 
     (void)sensorX;

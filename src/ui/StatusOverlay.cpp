@@ -63,11 +63,44 @@ float GetCurrentMemoryMegabytes(void) {
 
     return cachedMemoryMegabytes;
 }
+
+void DrawControlHint(void) {
+    constexpr int fontSize = 20;
+    constexpr int horizontalPadding = 18;
+    constexpr int hintHeight = 36;
+    constexpr int bottomMargin = 18;
+
+    const char* emergencyKey = "E";
+    const char* emergencyText = ": Emergency Stop    ";
+    const char* resetKey = "R";
+    const char* resetText = ": Reset Stop";
+
+    const int textWidth = MeasureText(emergencyKey, fontSize) +
+                          MeasureText(emergencyText, fontSize) + MeasureText(resetKey, fontSize) +
+                          MeasureText(resetText, fontSize);
+    const int hintWidth = textWidth + (horizontalPadding * 2);
+    const int hintX = (GetScreenWidth() - hintWidth) / 2;
+    const int hintY = GetScreenHeight() - hintHeight - bottomMargin;
+    int textX = hintX + horizontalPadding;
+    const int textY = hintY + 8;
+
+    DrawRectangle(hintX, hintY, hintWidth, hintHeight, Fade(RAYWHITE, 0.9f));
+    DrawRectangleLinesEx({(float)hintX, (float)hintY, (float)hintWidth, (float)hintHeight}, 2.0f,
+                         DARKGRAY);
+
+    DrawText(emergencyKey, textX, textY, fontSize, MAROON);
+    textX += MeasureText(emergencyKey, fontSize);
+    DrawText(emergencyText, textX, textY, fontSize, DARKGRAY);
+    textX += MeasureText(emergencyText, fontSize);
+    DrawText(resetKey, textX, textY, fontSize, DARKBLUE);
+    textX += MeasureText(resetKey, fontSize);
+    DrawText(resetText, textX, textY, fontSize, DARKGRAY);
+}
 } // namespace
 
 void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus) {
     constexpr int panelWidth = 270;
-    constexpr int panelHeight = 112;
+    constexpr int panelHeight = 138;
     constexpr int panelPadding = 14;
     constexpr int lineHeight = 25;
 
@@ -85,17 +118,32 @@ void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus) {
         DrawText("Battery: --", panelX + panelPadding, panelY + 38 + lineHeight, 18, DARKGRAY);
         DrawText(TextFormat("Used Memory: %.1f MB", GetCurrentMemoryMegabytes()),
                  panelX + panelPadding, panelY + 38 + (lineHeight * 2), 18, DARKGRAY);
+        DrawText("E-Stop: Unavailable", panelX + panelPadding, panelY + 38 + (lineHeight * 3), 18,
+                 RED);
+        DrawControlHint();
         return;
     }
 
     const float batteryPercentage = robotStatus->batteryPercentage;
-    const Color batteryColor =
-        batteryPercentage <= 10.0f ? RED : batteryPercentage <= 30.0f ? ORANGE : DARKGREEN;
+    const Color batteryColor = batteryPercentage <= 10.0f   ? RED
+                               : batteryPercentage <= 30.0f ? ORANGE
+                                                            : DARKGREEN;
+    const Color emergencyStopColor = robotStatus->emergencyStopActive ? RED : DARKGREEN;
+    const char* emergencyStopText = robotStatus->emergencyStopActive ? "ACTIVE" : "Ready";
 
     DrawText(TextFormat("State: %s", RobotStateText(robotStatus->state)), panelX + panelPadding,
              panelY + 38, 18, DARKGRAY);
     DrawText(TextFormat("Battery: %.1f%%", batteryPercentage), panelX + panelPadding,
              panelY + 38 + lineHeight, 18, batteryColor);
-    DrawText(TextFormat("Used Memory: %.1f MB", GetCurrentMemoryMegabytes()),
-             panelX + panelPadding, panelY + 38 + (lineHeight * 2), 18, DARKGRAY);
+    DrawText(TextFormat("Used Memory: %.1f MB", GetCurrentMemoryMegabytes()), panelX + panelPadding,
+             panelY + 38 + (lineHeight * 2), 18, DARKGRAY);
+    DrawText(TextFormat("E-Stop: %s", emergencyStopText), panelX + panelPadding,
+             panelY + 38 + (lineHeight * 3), 18, emergencyStopColor);
+    DrawControlHint();
+
+    if (robotStatus->emergencyStopActive) {
+        DrawRectangle(20, 20, 316, 42, Fade(RED, 0.88f));
+        DrawRectangleLinesEx({20.0f, 20.0f, 316.0f, 42.0f}, 2.0f, MAROON);
+        DrawText("EMERGENCY STOP ACTIVE", 34, 31, 20, RAYWHITE);
+    }
 }

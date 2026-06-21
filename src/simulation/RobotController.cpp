@@ -16,6 +16,9 @@ namespace {
 constexpr float robotSpeed = 120.0f;
 constexpr float robotRotationSpeed = 180.0f;
 constexpr float robotSize = 16.0f;
+constexpr float robotProportionalGain = 2.0f;
+constexpr float robotIntegralGain = 0.25f;
+constexpr float robotMaxIntegralError = 200.0f;
 constexpr float pickupDuration = 1.0f;
 constexpr float dropoffDuration = 1.0f;
 constexpr float lidarDetectionRadius = robotSize * 2.0f;
@@ -25,9 +28,8 @@ constexpr float minimumBatteryAfterJob = 10.0f;
 constexpr float batteryDrainPercentagePerPixel = 0.01f;
 
 constexpr Robot::Config robotConfig = {
-    robotSpeed,
-    robotRotationSpeed,
-    robotSize,
+    robotSpeed,        robotRotationSpeed,    robotSize, robotProportionalGain,
+    robotIntegralGain, robotMaxIntegralError,
 };
 
 enum class TaskPhase : std::uint8_t {
@@ -46,6 +48,8 @@ Vector2 activePathStart = {0.0f, 0.0f};
 std::size_t currentWaypointIndex = 0;
 TaskPhase taskPhase = TaskPhase::ToPickup;
 float stateTimer = 0.0f;
+bool emergencyStopActive = false;
+Robot::State stateBeforeEmergencyStop = Robot::State::Idle;
 
 float Distance(Vector2 from, Vector2 to) {
     const float deltaX = to.x - from.x;
@@ -146,9 +150,8 @@ bool CanCompleteNextDeliveryBeforeMinimumBattery(void) {
     const float estimatedDistance =
         PathDistance(robotPosition, pickupPath) + PathDistance(pickupDock, dropoffPath);
 
-    const float estimatedBatteryAfterJob =
-        robot->getBattery().getChargePercentage() -
-        (estimatedDistance * batteryDrainPercentagePerPixel);
+    const float estimatedBatteryAfterJob = robot->getBattery().getChargePercentage() -
+                                           (estimatedDistance * batteryDrainPercentagePerPixel);
 
     return estimatedBatteryAfterJob > minimumBatteryAfterJob;
 }
@@ -225,17 +228,37 @@ void UpdateWaypointTravel(void) {
         robot->setState(Robot::State::Charging);
     }
 }
+
+void UpdateEmergencyStopInput(void) {
+    if (IsKeyPressed(KEY_E) && !emergencyStopActive) {
+        emergencyStopActive = true;
+        stateBeforeEmergencyStop = robot->getState();
+        robot->setState(Robot::State::Idle);
+    }
+
+    if (IsKeyPressed(KEY_R) && emergencyStopActive) {
+        emergencyStopActive = false;
+        robot->setState(stateBeforeEmergencyStop);
+    }
+}
 } // namespace
 
 void InitRobotController(void) {
     robot = std::make_unique<WorkerRobot>(GetRobotStartPosition(), robotConfig);
     taskPhase = TaskPhase::ToPickup;
     stateTimer = 0.0f;
+    emergencyStopActive = false;
+    stateBeforeEmergencyStop = Robot::State::Idle;
     SetActivePath(BuildPathToPickup(GetRobotStartPosition()), GetRobotStartPosition());
 }
 
 void UpdateRobotController(void) {
     if (robot == nullptr) {
+        return;
+    }
+
+    UpdateEmergencyStopInput();
+    if (emergencyStopActive) {
         return;
     }
 
@@ -298,5 +321,6 @@ std::optional<RobotStatusSnapshot> GetRobotStatusSnapshot(void) {
     return RobotStatusSnapshot{
         robot->getState(),
         robot->getBattery().getChargePercentage(),
+        emergencyStopActive,
     };
 }
