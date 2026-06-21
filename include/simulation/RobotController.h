@@ -2,6 +2,9 @@
 #define ROBOT_CONTROLLER_H
 
 #include "simulation/map.h"
+#include "simulation/RobotStatusSnapshot.h"
+
+#include <optional>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,5 +18,7 @@ void UnloadRobotController(void);
 #ifdef __cplusplus
 }
 #endif
+
+std::optional<RobotStatusSnapshot> GetRobotStatusSnapshot(void);
 
 #endif // ROBOT_CONTROLLER_H

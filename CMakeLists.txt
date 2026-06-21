@@ -15,6 +15,8 @@ set(PROJECT_SOURCES
     src/simulation/BlockingRobotController.cpp
     src/simulation/RobotController.cpp
     src/simulation/ObstacleManager.cpp
+    src/ui/StatusOverlay.cpp
+    src/robots/Battery.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
     src/robots/ObstacleRobot.cpp
@@ -26,6 +28,7 @@ set(COMMON_SOURCES
     src/simulation/map.cpp
     src/simulation/navigation.cpp
     src/simulation/ObstacleManager.cpp
+    src/robots/Battery.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
     src/robots/ObstacleRobot.cpp
@@ -34,6 +37,7 @@ set(COMMON_SOURCES
 
 set(PROJECT_HEADERS
     include/robots/Robot.h
+    include/robots/Battery.h
     include/robots/WorkerRobot.h
     include/robots/ObstacleRobot.h
     include/sensors/Sensor.h
@@ -43,7 +47,9 @@ set(PROJECT_HEADERS
     include/simulation/navigation.h
     include/simulation/BlockingRobotController.h
     include/simulation/RobotController.h
+    include/simulation/RobotStatusSnapshot.h
     include/simulation/ObstacleManager.h
+    include/ui/StatusOverlay.h
 )
 
 add_executable(robot_sim ${PROJECT_SOURCES} ${PROJECT_HEADERS})

@@ -25,6 +25,8 @@ Vector2 GetMapPointB(void);
 LagerId GetMapPickupLagerId(void);
 LagerId GetMapDeliveryLagerId(void);
 Vector2 GetRobotStartPosition(void);
+Vector2 GetChargingStationPosition(void);
+Vector2 GetChargingStationDockPosition(void);
 Vector2 GetLagerPosition(LagerId lagerId);
 Vector2 GetLagerDockPosition(LagerId lagerId);
 bool IsMapRoadPosition(Vector2 position);

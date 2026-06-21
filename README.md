@@ -2,17 +2,22 @@
 
 FTS Simulation is a raylib-based robot logistics simulation project.
 
-The current implementation shows a logistics map with L1-L6 lager positions, pickup lager A, delivery lager B, the robot start position, and the road network between lager dock points. A robot starts at the map start position, requests an A* route through the road network, follows the returned waypoints to pickup lager A, picks up an item, carries it to delivery lager B, drops it off, and stays constrained to the road network during movement. Moving blocking robots share the road network, and the main robot uses a circular lidar scan to wait when another robot blocks its path.
+The current implementation shows a logistics map with L1-L6 lager positions, pickup lager A, delivery lager B, a charging station, the robot start position, and the road network between dock points. A robot starts at the map start position, requests A* routes through the road network, repeats pickup and delivery tasks, tracks battery usage while moving, charges when the next delivery would leave too little battery, and stays constrained to the road network during movement. Moving blocking robots share the road network, and the main robot uses a circular lidar scan to wait when another robot blocks its path.
 
 ## Simulation Behavior
 
-- The map renders warehouses, lager dock points, the robot start position, and the road network.
+- The map renders warehouses, lager dock points, the charging station, the robot start position, and the road network.
 - The robot controller owns the robot lifecycle and task flow.
 - The navigation module calculates road-network waypoint routes with A* and validates candidate edges against the map road area.
 - The robot follows calculated waypoint routes instead of moving directly through non-road areas.
 - Road constraints clamp the robot back to the nearest road if its center leaves the road network.
-- The robot state includes idle, moving, picking up, carrying an item, dropping off, and arrived.
+- The robot state includes idle, moving, picking up, carrying an item, dropping off, arrived, battery depleted, and charging.
 - The carried item is drawn on top of the robot and moves with it while pickup, carry, and dropoff states are active.
+- The robot drains battery based on distance traveled.
+- After each dropoff, the controller estimates whether the robot can complete the next pickup and delivery while staying above 10% battery.
+- If the next delivery would leave too little battery, or if the battery is 10% or lower after dropoff, the robot goes to the charging station.
+- Charging restores battery at 10% per second and then the robot resumes the pickup/delivery loop.
+- A status overlay shows the robot state, battery percentage, and currently used process memory.
 - A lidar sensor draws a circular scan area around the main robot.
 - Blocking robots move on road-network paths and choose randomized next targets at path nodes.
 - If the main robot detects a blocking robot inside its lidar range, it pauses until the scan area is clear.
@@ -111,13 +116,18 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `navigation.h`: Public navigation pathfinding interface
 - `navigation.cpp`: Road graph definition, A* waypoint pathfinding, and map-road edge validation
 - `Robot.h`: Robot class interface, movement state, and drawing API
-- `Robot.cpp`: Robot movement, state handling, and robot/item rendering
+- `Robot.cpp`: Robot movement, battery drain, state handling, and robot/item rendering
+- `Battery.h`: Public battery interface
+- `Battery.cpp`: Battery charge, drain, and percentage clamping logic
 - `RobotController.h`: Public robot controller module functions
-- `RobotController.cpp`: Robot task flow, navigation requests, pickup/dropoff handling, lidar checks, blocking robot setup, and road enforcement
+- `RobotController.cpp`: Robot task flow, navigation requests, pickup/dropoff handling, charging decisions, lidar checks, and road enforcement
+- `RobotStatusSnapshot.h`: Display-safe robot status data for UI overlays
+- `StatusOverlay.h`: Public status overlay drawing interface
+- `StatusOverlay.cpp`: Robot status, battery, and used-memory overlay rendering
 - `LidarSensor.h`: Public lidar sensor interface
 - `LidarSensor.cpp`: Lidar scan checks and scan area rendering
 - `ObstacleManager.h`: Blocking robot data and manager interface
 - `ObstacleManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
 - `tests/unit_tests.cpp`: Unit tests for robot movement, obstacle detection, lidar checks, map road helpers, and navigation routes
 
-`main.cpp` does not define map or robot task details directly. It initializes the map and robot controller, updates the controller each frame, and draws the map before drawing the robot controller.
+`main.cpp` does not define map, robot task, or UI details directly. It initializes the map and controllers, updates them each frame, and draws the map, blocking robots, main robot, and status overlay in order.

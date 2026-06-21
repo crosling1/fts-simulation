@@ -32,6 +32,8 @@ class LogisticsMap {
             DrawWarehouse(data.warehouses[i], static_cast<int>(i));
         }
 
+        DrawChargingStation();
+
         DrawCircleV(data.robotStart, 20, ORANGE);
         DrawCircleLines((int)data.robotStart.x, (int)data.robotStart.y, 24.0f, BROWN);
         DrawText("Robot Start", (int)data.robotStart.x - 47, (int)data.robotStart.y + 34, 18,
@@ -43,6 +45,7 @@ class LogisticsMap {
         DrawText("L1~L6: Lager / warehouses", 20, 108, 18, BLUE);
         DrawText("Orange circle: Robot start", 20, 132, 18, ORANGE);
         DrawText("Gray rectangles: road network to each lager", 20, 156, 18, DARKGRAY);
+        DrawText("C: Charging station", 20, 180, 18, DARKPURPLE);
     }
 
     void Unload(void) {
@@ -67,6 +70,17 @@ class LogisticsMap {
 
     Vector2 GetRobotStart(void) const {
         return data.robotStart;
+    }
+
+    Vector2 GetChargingStationPosition(void) const {
+        return {
+            data.chargingStation.body.x + data.chargingStation.body.width * 0.5f,
+            data.chargingStation.body.y + data.chargingStation.body.height * 0.5f,
+        };
+    }
+
+    Vector2 GetChargingStationDockPosition(void) const {
+        return data.chargingStation.dockPoint;
     }
 
     Vector2 GetLagerPosition(LagerId lagerId) const {
@@ -183,6 +197,27 @@ class LogisticsMap {
         }
     }
 
+    void DrawChargingStation(void) const {
+        const Rectangle body = data.chargingStation.body;
+        const Vector2 dock = data.chargingStation.dockPoint;
+        const Vector2 connectorEnd = {body.x, body.y + body.height * 0.5f};
+
+        DrawLineEx(dock, connectorEnd, 5.0f, DARKPURPLE);
+        DrawCircleV(dock, 6.0f, DARKPURPLE);
+
+        DrawRectangleRec(body, Fade(PURPLE, 0.25f));
+        DrawRectangleLinesEx(body, 3.0f, DARKPURPLE);
+        DrawText("C", (int)body.x + 12, (int)body.y + 10, 28, DARKPURPLE);
+        DrawText("CHARGE", (int)body.x + 14, (int)body.y + 52, 14, DARKPURPLE);
+
+        const Rectangle batteryBody = {body.x + 38.0f, body.y + 18.0f, 30.0f, 18.0f};
+        const Rectangle batteryTip = {body.x + 68.0f, body.y + 23.0f, 5.0f, 8.0f};
+        DrawRectangleRec(batteryBody, RAYWHITE);
+        DrawRectangleLinesEx(batteryBody, 2.0f, DARKPURPLE);
+        DrawRectangleRec(batteryTip, DARKPURPLE);
+        DrawRectangle((int)batteryBody.x + 4, (int)batteryBody.y + 4, 18, 10, GREEN);
+    }
+
     bool IsValidLagerId(LagerId lagerId) const {
         return lagerId >= LAGER_1 && static_cast<std::size_t>(lagerId) < data.warehouses.size();
     }
@@ -220,6 +255,14 @@ LagerId GetMapDeliveryLagerId(void) {
 
 Vector2 GetRobotStartPosition(void) {
     return map.GetRobotStart();
+}
+
+Vector2 GetChargingStationPosition(void) {
+    return map.GetChargingStationPosition();
+}
+
+Vector2 GetChargingStationDockPosition(void) {
+    return map.GetChargingStationDockPosition();
 }
 
 Vector2 GetLagerPosition(LagerId lagerId) {

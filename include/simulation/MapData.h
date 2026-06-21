@@ -23,6 +23,11 @@ struct BlockingRobotPath {
     std::vector<Vector2> points;
 };
 
+struct ChargingStationData {
+    Rectangle body;
+    Vector2 dockPoint;
+};
+
 struct MapData {
     int screenWidth;
     int screenHeight;
@@ -30,6 +35,7 @@ struct MapData {
     int pickupLagerIndex;
     int deliveryLagerIndex;
     Vector2 robotStart;
+    ChargingStationData chargingStation;
     std::vector<Rectangle> roads;
     std::vector<Rectangle> warehouses;
     std::vector<Vector2> dockPoints;

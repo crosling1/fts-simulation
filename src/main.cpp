@@ -1,6 +1,7 @@
 #include "simulation/BlockingRobotController.h"
 #include "simulation/RobotController.h"
 #include "simulation/map.h"
+#include "ui/StatusOverlay.h"
 #include "raylib.h"
 
 int main(void) {
@@ -23,6 +24,7 @@ int main(void) {
         DrawMap();
         DrawBlockingRobotController();
         DrawRobotController();
+        DrawStatusOverlay(GetRobotStatusSnapshot());
 
         EndDrawing();
     }
