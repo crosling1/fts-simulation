@@ -1,27 +1,27 @@
 #include "simulation/BlockingRobotController.h"
 
-#include "simulation/ObstacleManager.h"
+#include "simulation/BlockingRobotManager.h"
 
 namespace {
-ObstacleManager obstacleManager;
+BlockingRobotManager blockingRobotManager;
 } // namespace
 
 void InitBlockingRobotController(void) {
-    obstacleManager.initBlockingRobots();
+    blockingRobotManager.initBlockingRobots();
 }
 
 void UpdateBlockingRobotController(void) {
-    obstacleManager.update(GetFrameTime());
+    blockingRobotManager.update(GetFrameTime());
 }
 
 void DrawBlockingRobotController(void) {
-    obstacleManager.draw();
+    blockingRobotManager.draw();
 }
 
 void UnloadBlockingRobotController(void) {
-    obstacleManager.clear();
+    blockingRobotManager.clear();
 }
 
 bool HasBlockingRobotNear(Vector2 position, float detectionRadius) {
-    return obstacleManager.hasActiveObstacleNear(position, detectionRadius);
+    return blockingRobotManager.hasActiveBlockingRobotNear(position, detectionRadius);
 }
