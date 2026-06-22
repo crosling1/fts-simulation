@@ -13,7 +13,7 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 - Navigation removes unnecessary pass-through waypoints while keeping turn points needed for dock entry.
 - Road constraints clamp the robot back to the nearest road if its center leaves the road network.
 - The robot state includes idle, moving, picking up, carrying an item, dropping off, arrived, battery depleted, and charging.
-- The main robot movement speed is adjusted by a simple PI controller while still respecting the configured maximum speed.
+- The main robot movement speed is adjusted by a reusable PI controller while still respecting the configured maximum speed.
 - The carried item is drawn on top of the robot and moves with it while pickup, carry, and dropoff states are active.
 - The robot drains battery based on distance traveled.
 - After each dropoff, the controller estimates whether the robot can complete the next pickup and delivery while staying above 10% battery.
@@ -123,8 +123,10 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `map.cpp`: Map class, lager positions, road rendering logic, and road constraint helpers
 - `navigation.h`: Public navigation pathfinding interface
 - `navigation.cpp`: Road graph definition, A* waypoint pathfinding, and map-road edge validation
-- `Robot.h`: Robot class interface, movement state, and drawing API
-- `Robot.cpp`: Robot movement, battery drain, state handling, and robot/item rendering
+- `PIController.h`: Public reusable PI controller interface for bounded control output
+- `PIController.cpp`: PI controller integral accumulation, reset, and output clamping logic
+- `Robot.h`: Robot class interface, start pose/config types, movement state, and drawing API
+- `Robot.cpp`: Robot movement, battery drain, PI-controlled speed requests, state handling, and robot/item rendering
 - `Battery.h`: Public battery interface
 - `Battery.cpp`: Battery charge, drain, and percentage clamping logic
 - `RobotController.h`: `RobotController` class plus temporary public wrapper functions used by `main.cpp`
@@ -140,7 +142,7 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `BlockingRobotManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
 - `tests/unit_tests.cpp`: Unit test executable entry point
 - `tests/support/`: Shared unit test helpers, test case runner, and suite declarations
-- `tests/robots/`: Robot and battery behavior tests
+- `tests/robots/`: Robot, PI controller, and battery behavior tests
 - `tests/sensors/`: Proximity sensor tests
 - `tests/simulation/`: Map, blocking robot, and navigation tests
 

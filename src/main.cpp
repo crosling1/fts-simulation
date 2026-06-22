@@ -5,11 +5,12 @@
 #include "raylib.h"
 
 int main(void) {
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    constexpr int screenWidth = 1280;
+    constexpr int screenHeight = 720;
+    constexpr int targetFps = 60;
 
     InitWindow(screenWidth, screenHeight, "Robot Logistics Map Simulation");
-    SetTargetFPS(60);
+    SetTargetFPS(targetFps);
 
     InitMap();
     InitBlockingRobotController();

@@ -17,7 +17,7 @@ Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
 }
 
 void TestRobotMovesToTarget(void) {
-    WorkerRobot robot({0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({10.0f, 0.0f});
     test::Expect(robot.getState() == Robot::State::Moving,
@@ -38,8 +38,7 @@ void TestRobotMovesToTarget(void) {
 }
 
 void TestRobotPiControllerLimitsSpeedNearTarget(void) {
-    WorkerRobot robot({0.0f, 0.0f},
-                      RobotConfig(100.0f, 90.0f, 8.0f, 0.5f, 0.1f, 100.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f, 0.5f, 0.1f, 100.0f));
 
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
@@ -53,7 +52,7 @@ void TestRobotPiControllerLimitsSpeedNearTarget(void) {
 }
 
 void TestRobotKeepsCarryingStateWhenArriving(void) {
-    WorkerRobot robot({0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setState(Robot::State::CarryingItem);
     robot.setTargetPosition({10.0f, 0.0f});
@@ -67,7 +66,7 @@ void TestRobotKeepsCarryingStateWhenArriving(void) {
 }
 
 void TestRobotRotatesTowardTarget(void) {
-    WorkerRobot robot({0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({0.0f, -10.0f});
     robot.updateMovement(0.5f);
@@ -84,7 +83,7 @@ void TestRobotRotatesTowardTarget(void) {
 }
 
 void TestRobotOwnsBattery(void) {
-    WorkerRobot robot({0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
                  "robot battery should start full");
@@ -104,7 +103,7 @@ void TestRobotOwnsBattery(void) {
 }
 
 void TestRobotDrainsBatteryByDistanceMoved(void) {
-    WorkerRobot robot({0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({100.0f, 0.0f});
     robot.updateMovement(1.0f);
@@ -118,7 +117,7 @@ void TestRobotDrainsBatteryByDistanceMoved(void) {
 }
 
 void TestRobotStopsWhenBatteryIsEmpty(void) {
-    WorkerRobot robot({0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.getBattery().setChargePercentage(0.0f);
     robot.setTargetPosition({10.0f, 0.0f});

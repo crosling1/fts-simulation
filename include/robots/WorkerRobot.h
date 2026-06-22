@@ -5,7 +5,7 @@
 
 class WorkerRobot : public Robot {
   public:
-    WorkerRobot(double x, double y, double angle = 0.0);
+    WorkerRobot(Pose startPose, Config config);
     WorkerRobot(const Vector2& startPosition, Config config);
 
     void printType() const override;

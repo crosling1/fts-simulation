@@ -2,20 +2,21 @@
 
 #include <algorithm>
 
+PIController::PIController() : PIController(Config{}) {}
+
 PIController::PIController(Config config) : config_(config) {}
 
-float PIController::update(float error, float deltaTime, float maxOutput) {
-    errorIntegral_ += error * deltaTime;
-    errorIntegral_ =
-        std::clamp(errorIntegral_, 0.0f, std::max(0.0f, config_.maxIntegralError));
+float PIController::update(UpdateInput input) {
+    errorIntegral_ += input.error * input.deltaTime;
+    errorIntegral_ = std::clamp(errorIntegral_, 0.0f, std::max(0.0f, config_.maxIntegralError));
 
     if (config_.proportionalGain <= 0.0f && config_.integralGain <= 0.0f) {
-        return maxOutput;
+        return input.maxOutput;
     }
 
     const float output =
-        (config_.proportionalGain * error) + (config_.integralGain * errorIntegral_);
-    return std::clamp(output, 0.0f, maxOutput);
+        (config_.proportionalGain * input.error) + (config_.integralGain * errorIntegral_);
+    return std::clamp(output, 0.0f, input.maxOutput);
 }
 
 void PIController::reset() {

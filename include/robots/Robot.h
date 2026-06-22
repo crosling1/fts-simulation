@@ -36,7 +36,12 @@ class Robot {
         ControllerConfig controller;
     };
 
-    Robot(double x, double y, double angle = 0.0);
+    struct Pose {
+        Vector2 position;
+        float angleDegrees = 0.0f;
+    };
+
+    Robot(Pose startPose, Config config);
     Robot(const Vector2& startPosition, Config config);
     virtual ~Robot() = default;
 

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-WorkerRobot::WorkerRobot(double x, double y, double angle) : Robot(x, y, angle) {}
+WorkerRobot::WorkerRobot(Pose startPose, Config config) : Robot(startPose, config) {}
 
 WorkerRobot::WorkerRobot(const Vector2& startPosition, Config config)
     : Robot(startPosition, config) {}

@@ -9,9 +9,16 @@ class PIController {
         float maxIntegralError = 1000.0f;
     };
 
-    explicit PIController(Config config = {});
+    struct UpdateInput {
+        float error;
+        float deltaTime;
+        float maxOutput;
+    };
 
-    float update(float error, float deltaTime, float maxOutput);
+    PIController();
+    explicit PIController(Config config);
+
+    float update(UpdateInput input);
     void reset();
 
   private:
