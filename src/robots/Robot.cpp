@@ -1,6 +1,5 @@
 #include "robots/Robot.h"
 
-#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -74,16 +73,12 @@ bool ShouldDrawItem(Robot::State state) {
 Robot::Robot(double x, double y, double angle) // NOLINT(bugprone-easily-swappable-parameters)
     : x_(x), y_(y), angle_(angle), speed_(0.0f),
       targetPosition_({static_cast<float>(x), static_cast<float>(y)}), rotationSpeed_(0.0f),
-      size_(16.0f), proportionalGain_(0.0f), integralGain_(0.0f), maxIntegralError_(1000.0f),
-      distanceErrorIntegral_(0.0f), state_(State::Idle) {}
+      size_(16.0f), speedController_(), state_(State::Idle) {}
 
 Robot::Robot(const Vector2& startPosition, Config config)
     : x_(startPosition.x), y_(startPosition.y), angle_(0.0), speed_(config.motion.speed),
       targetPosition_(startPosition), rotationSpeed_(config.motion.rotationSpeed),
-      size_(config.motion.size), proportionalGain_(config.controller.proportionalGain),
-      integralGain_(config.controller.integralGain),
-      maxIntegralError_(config.controller.maxIntegralError), distanceErrorIntegral_(0.0f),
-      state_(State::Idle) {}
+      size_(config.motion.size), speedController_(config.controller), state_(State::Idle) {}
 
 void Robot::updateMovement(float deltaTime) {
     if (battery_.isEmpty()) {
@@ -137,7 +132,7 @@ void Robot::draw(void) {
 void Robot::setPosition(const Vector2& newPosition) {
     x_ = newPosition.x;
     y_ = newPosition.y;
-    distanceErrorIntegral_ = 0.0f;
+    speedController_.reset();
 }
 
 void Robot::setState(State newState) {
@@ -146,7 +141,7 @@ void Robot::setState(State newState) {
 
 void Robot::setTargetPosition(const Vector2& target) {
     targetPosition_ = target;
-    distanceErrorIntegral_ = 0.0f;
+    speedController_.reset();
     if (hasReachedTarget()) {
         state_ = State::Arrived;
         return;
@@ -168,28 +163,19 @@ void Robot::moveTowardsTarget(float deltaTime) {
     if (distance <= reachedDistance) {
         x_ = targetPosition_.x;
         y_ = targetPosition_.y;
-        distanceErrorIntegral_ = 0.0f;
+        speedController_.reset();
         if (state_ != State::CarryingItem) {
             state_ = State::Arrived;
         }
         return;
     }
 
-    distanceErrorIntegral_ += distance * deltaTime;
-    distanceErrorIntegral_ =
-        std::clamp(distanceErrorIntegral_, 0.0f, std::max(0.0f, maxIntegralError_));
-
-    float controlledSpeed = speed_;
-    if (proportionalGain_ > 0.0f || integralGain_ > 0.0f) {
-        controlledSpeed = (proportionalGain_ * distance) + (integralGain_ * distanceErrorIntegral_);
-        controlledSpeed = std::clamp(controlledSpeed, 0.0f, speed_);
-    }
-
+    const float controlledSpeed = speedController_.update(distance, deltaTime, speed_);
     const float step = controlledSpeed * deltaTime;
     if (step >= distance) {
         x_ = targetPosition_.x;
         y_ = targetPosition_.y;
-        distanceErrorIntegral_ = 0.0f;
+        speedController_.reset();
         if (state_ != State::CarryingItem) {
             state_ = State::Arrived;
         }

@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
     src/simulation/BlockingRobotManager.cpp
     src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
+    src/control/PIController.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
     src/sensors/ProximitySensor.cpp
@@ -32,6 +33,7 @@ set(COMMON_SOURCES
     src/simulation/navigation.cpp
     src/simulation/BlockingRobotManager.cpp
     src/robots/Battery.cpp
+    src/control/PIController.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
     src/sensors/ProximitySensor.cpp
@@ -40,6 +42,7 @@ set(COMMON_SOURCES
 set(TEST_SOURCES
     tests/unit_tests.cpp
     tests/robots/robot_tests.cpp
+    tests/robots/pi_controller_tests.cpp
     tests/sensors/proximity_sensor_tests.cpp
     tests/simulation/blocking_robot_manager_tests.cpp
     tests/simulation/map_tests.cpp
@@ -49,6 +52,7 @@ set(TEST_SOURCES
 set(PROJECT_HEADERS
     include/robots/Robot.h
     include/robots/Battery.h
+    include/control/PIController.h
     include/robots/WorkerRobot.h
     include/sensors/Sensor.h
     include/sensors/ProximitySensor.h
@@ -81,6 +85,9 @@ set(UNIT_TEST_CASES
     "Robot owns battery"
     "Robot drains battery by distance moved"
     "Robot stops when battery is empty"
+    "PI controller uses max output without gains"
+    "PI controller clamps output"
+    "PI controller reset clears integral"
     "Blocking robot detection ignores inactive robots"
     "Blocking robot outside radius is not detected"
     "Blocking robot inside radius is detected"

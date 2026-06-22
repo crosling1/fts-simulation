@@ -5,9 +5,9 @@
 #include <string>
 
 bool RunTestByName(const std::string& name) {
-    return RunRobotTestByName(name) || RunBlockingRobotManagerTestByName(name) ||
-           RunProximitySensorTestByName(name) || RunMapTestByName(name) ||
-           RunNavigationTestByName(name);
+    return RunRobotTestByName(name) || RunPiControllerTestByName(name) ||
+           RunBlockingRobotManagerTestByName(name) || RunProximitySensorTestByName(name) ||
+           RunMapTestByName(name) || RunNavigationTestByName(name);
 }
 
 int main(int argc, char** argv) {
@@ -21,6 +21,7 @@ int main(int argc, char** argv) {
         }
 
         RunRobotTests();
+        RunPiControllerTests();
         RunBlockingRobotManagerTests();
         RunProximitySensorTests();
         RunMapTests();

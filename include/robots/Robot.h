@@ -2,6 +2,7 @@
 #define ROBOT_H
 
 #include "robots/Battery.h"
+#include "control/PIController.h"
 #include "sensors/Sensor.h"
 #include "raylib.h"
 
@@ -28,11 +29,7 @@ class Robot {
         float size;
     };
 
-    struct ControllerConfig {
-        float proportionalGain = 0.0f;
-        float integralGain = 0.0f;
-        float maxIntegralError = 1000.0f;
-    };
+    using ControllerConfig = PIController::Config;
 
     struct Config {
         MotionConfig motion;
@@ -78,10 +75,7 @@ class Robot {
     Vector2 targetPosition_;
     float rotationSpeed_;
     float size_;
-    float proportionalGain_;
-    float integralGain_;
-    float maxIntegralError_;
-    float distanceErrorIntegral_;
+    PIController speedController_;
     State state_;
     Battery battery_;
     std::vector<std::unique_ptr<Sensor>> sensors_;
