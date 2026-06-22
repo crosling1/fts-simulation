@@ -84,7 +84,7 @@ Robot::Robot(const Vector2& startPosition, Config config)
       maxIntegralError_(config.maxIntegralError), distanceErrorIntegral_(0.0f),
       state_(State::Idle) {}
 
-void Robot::update(float deltaTime) {
+void Robot::updateMovement(float deltaTime) {
     if (battery_.isEmpty()) {
         state_ = State::BatteryDepleted;
         return;

@@ -16,11 +16,6 @@ WorkerRobot::WorkerRobot(const Vector2& startPosition, Config config)
     addSensor(std::make_unique<LidarSensor>(-0.3, 0.0, 180.0));
 }
 
-void WorkerRobot::update() {
-    moveForward(0.1);
-    updateSensors();
-}
-
 void WorkerRobot::printType() const {
     std::cout << "WorkerRobot\n";
 }

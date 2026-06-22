@@ -23,7 +23,6 @@ set(PROJECT_SOURCES
     src/robots/Battery.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
-    src/robots/ObstacleRobot.cpp
     src/sensors/LidarSensor.cpp
 )
 
@@ -35,7 +34,6 @@ set(COMMON_SOURCES
     src/robots/Battery.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
-    src/robots/ObstacleRobot.cpp
     src/sensors/LidarSensor.cpp
 )
 
@@ -52,7 +50,6 @@ set(PROJECT_HEADERS
     include/robots/Robot.h
     include/robots/Battery.h
     include/robots/WorkerRobot.h
-    include/robots/ObstacleRobot.h
     include/sensors/Sensor.h
     include/sensors/LidarSensor.h
     include/simulation/MapData.h

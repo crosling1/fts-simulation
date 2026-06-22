@@ -35,10 +35,9 @@ class Robot {
     Robot(const Vector2& startPosition, Config config);
     virtual ~Robot() = default;
 
-    virtual void update() = 0;
     virtual void printType() const = 0;
 
-    void update(float deltaTime);
+    void updateMovement(float deltaTime);
     void draw(void);
     void setPosition(const Vector2& newPosition);
     void setState(State newState);

@@ -14,7 +14,7 @@ void TestRobotMovesToTarget(void) {
     test::Expect(robot.getState() == Robot::State::Moving,
                  "robot should start moving to a new target");
 
-    robot.update(0.5f);
+    robot.updateMovement(0.5f);
 
     Vector2 position = {0.0f, 0.0f};
     robot.getPosition(position);
@@ -22,7 +22,7 @@ void TestRobotMovesToTarget(void) {
     test::Expect(robot.getState() == Robot::State::Moving,
                  "robot should still be moving before target");
 
-    robot.update(0.5f);
+    robot.updateMovement(0.5f);
     robot.getPosition(position);
     test::ExpectVectorNear(position, {10.0f, 0.0f}, "robot should stop exactly at the target");
     test::Expect(robot.getState() == Robot::State::Arrived, "robot should arrive at target");
@@ -32,7 +32,7 @@ void TestRobotPiControllerLimitsSpeedNearTarget(void) {
     WorkerRobot robot({0.0f, 0.0f}, {100.0f, 90.0f, 8.0f, 0.5f, 0.1f, 100.0f});
 
     robot.setTargetPosition({10.0f, 0.0f});
-    robot.update(1.0f);
+    robot.updateMovement(1.0f);
 
     Vector2 position = {0.0f, 0.0f};
     robot.getPosition(position);
@@ -47,7 +47,7 @@ void TestRobotKeepsCarryingStateWhenArriving(void) {
 
     robot.setState(Robot::State::CarryingItem);
     robot.setTargetPosition({10.0f, 0.0f});
-    robot.update(1.0f);
+    robot.updateMovement(1.0f);
 
     Vector2 position = {0.0f, 0.0f};
     robot.getPosition(position);
@@ -60,14 +60,14 @@ void TestRobotRotatesTowardTarget(void) {
     WorkerRobot robot({0.0f, 0.0f}, {10.0f, 90.0f, 8.0f});
 
     robot.setTargetPosition({0.0f, -10.0f});
-    robot.update(0.5f);
+    robot.updateMovement(0.5f);
 
     float rotation = 0.0f;
     robot.getRotation(rotation);
     test::Expect(test::AlmostEqual(rotation, -45.0f),
                  "robot rotation should be limited by rotation speed");
 
-    robot.update(0.5f);
+    robot.updateMovement(0.5f);
     robot.getRotation(rotation);
     test::Expect(test::AlmostEqual(rotation, -90.0f),
                  "robot should finish rotating toward the target");
@@ -97,7 +97,7 @@ void TestRobotDrainsBatteryByDistanceMoved(void) {
     WorkerRobot robot({0.0f, 0.0f}, {100.0f, 90.0f, 8.0f});
 
     robot.setTargetPosition({100.0f, 0.0f});
-    robot.update(1.0f);
+    robot.updateMovement(1.0f);
 
     test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 99.0f),
                  "robot battery should drain 1 percent per 100 pixels moved");
@@ -116,7 +116,7 @@ void TestRobotStopsWhenBatteryIsEmpty(void) {
     test::Expect(robot.getState() == Robot::State::BatteryDepleted,
                  "empty battery robot should enter battery depleted state");
 
-    robot.update(1.0f);
+    robot.updateMovement(1.0f);
 
     Vector2 position = {0.0f, 0.0f};
     robot.getPosition(position);
@@ -124,7 +124,7 @@ void TestRobotStopsWhenBatteryIsEmpty(void) {
 
     robot.getBattery().charge(50.0f);
     robot.setTargetPosition({10.0f, 0.0f});
-    robot.update(1.0f);
+    robot.updateMovement(1.0f);
     robot.getPosition(position);
     test::ExpectVectorNear(position, {10.0f, 0.0f}, "charged robot should move again");
 }

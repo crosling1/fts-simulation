@@ -285,7 +285,7 @@ void UpdateRobotController(void) {
         return;
     }
 
-    robot->update(deltaTime);
+    robot->updateMovement(deltaTime);
     KeepRobotOnRoad();
     UpdateWaypointTravel();
 }
