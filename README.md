@@ -7,7 +7,7 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 ## Simulation Behavior
 
 - The map renders warehouses, lager dock points, the charging station, the robot start position, and the road network.
-- The robot controller owns the robot lifecycle and task flow.
+- The `RobotController` class owns the main robot lifecycle, route state, task flow, emergency stop state, and charging decisions.
 - The navigation module calculates road-network waypoint routes with A* and validates candidate edges against the map road area.
 - The robot follows calculated waypoint routes instead of moving directly through non-road areas.
 - Navigation removes unnecessary pass-through waypoints while keeping turn points needed for dock entry.
@@ -21,9 +21,10 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 - Charging restores battery at 10% per second and then the robot resumes the pickup/delivery loop.
 - A status overlay shows the robot state, battery percentage, and currently used process memory.
 - The status overlay shows emergency stop state, and the bottom-center control hint shows `E` for emergency stop and `R` for reset.
-- A proximity sensor draws a circular scan area around the main robot.
+- A radius-based proximity sensor draws a circular scan area around the main robot.
+- The `BlockingRobotManager` owns moving blocking robot data, path movement, and proximity queries.
 - Blocking robots move on road-network paths and choose randomized next targets at path nodes.
-- If the main robot detects a blocking robot inside its proximity range, it pauses until the scan area is clear.
+- If the main robot detects a blocking robot inside its proximity range, the robot controller pauses movement until the scan area is clear.
 - Blocking robots keep moving through blocked narrow sections instead of bouncing off the main robot.
 
 ## Requirements
@@ -126,13 +127,15 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `Robot.cpp`: Robot movement, battery drain, state handling, and robot/item rendering
 - `Battery.h`: Public battery interface
 - `Battery.cpp`: Battery charge, drain, and percentage clamping logic
-- `RobotController.h`: Public robot controller module functions
-- `RobotController.cpp`: Robot task flow, navigation requests, pickup/dropoff handling, charging decisions, proximity checks, and road enforcement
+- `RobotController.h`: `RobotController` class plus temporary public wrapper functions used by `main.cpp`
+- `RobotController.cpp`: Main robot lifecycle, route state, pickup/dropoff handling, charging decisions, emergency stop handling, proximity checks, and road enforcement
+- `BlockingRobotController.h`: Public blocking robot controller wrapper functions
+- `BlockingRobotController.cpp`: Thin wrapper around the blocking robot manager used by the main loop
 - `RobotStatusSnapshot.h`: Display-safe robot status data for UI overlays
 - `StatusOverlay.h`: Public status overlay drawing interface
 - `StatusOverlay.cpp`: Robot status, emergency stop state, control hints, battery, and used-memory overlay rendering
-- `ProximitySensor.h`: Public radius-based proximity sensor interface
-- `ProximitySensor.cpp`: Proximity checks and scan area rendering
+- `ProximitySensor.h`: Public radius-based proximity detection interface
+- `ProximitySensor.cpp`: Blocking robot proximity checks and scan area rendering
 - `BlockingRobotManager.h`: Blocking robot data and manager interface
 - `BlockingRobotManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
 - `tests/unit_tests.cpp`: Unit test executable entry point
@@ -141,4 +144,4 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `tests/sensors/`: Proximity sensor tests
 - `tests/simulation/`: Map, blocking robot, and navigation tests
 
-`main.cpp` does not define map, robot task, or UI details directly. It initializes the map and controllers, updates them each frame, and draws the map, blocking robots, main robot, and status overlay in order.
+`main.cpp` does not define map, robot task, blocking robot movement, or UI details directly. It initializes the map and controller wrappers, updates them each frame, and draws the map, blocking robots, main robot, and status overlay in order.
