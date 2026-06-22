@@ -22,13 +22,21 @@ class Robot {
         Charging,
     };
 
-    struct Config {
+    struct MotionConfig {
         float speed;
         float rotationSpeed;
         float size;
+    };
+
+    struct ControllerConfig {
         float proportionalGain = 0.0f;
         float integralGain = 0.0f;
         float maxIntegralError = 1000.0f;
+    };
+
+    struct Config {
+        MotionConfig motion;
+        ControllerConfig controller;
     };
 
     Robot(double x, double y, double angle = 0.0);

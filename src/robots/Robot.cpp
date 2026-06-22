@@ -78,10 +78,11 @@ Robot::Robot(double x, double y, double angle) // NOLINT(bugprone-easily-swappab
       distanceErrorIntegral_(0.0f), state_(State::Idle) {}
 
 Robot::Robot(const Vector2& startPosition, Config config)
-    : x_(startPosition.x), y_(startPosition.y), angle_(0.0), speed_(config.speed),
-      targetPosition_(startPosition), rotationSpeed_(config.rotationSpeed), size_(config.size),
-      proportionalGain_(config.proportionalGain), integralGain_(config.integralGain),
-      maxIntegralError_(config.maxIntegralError), distanceErrorIntegral_(0.0f),
+    : x_(startPosition.x), y_(startPosition.y), angle_(0.0), speed_(config.motion.speed),
+      targetPosition_(startPosition), rotationSpeed_(config.motion.rotationSpeed),
+      size_(config.motion.size), proportionalGain_(config.controller.proportionalGain),
+      integralGain_(config.controller.integralGain),
+      maxIntegralError_(config.controller.maxIntegralError), distanceErrorIntegral_(0.0f),
       state_(State::Idle) {}
 
 void Robot::updateMovement(float deltaTime) {

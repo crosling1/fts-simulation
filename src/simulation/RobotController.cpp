@@ -29,8 +29,8 @@ constexpr float minimumBatteryAfterJob = 10.0f;
 constexpr float batteryDrainPercentagePerPixel = 0.01f;
 
 constexpr Robot::Config robotConfig = {
-    robotSpeed,        robotRotationSpeed,    robotSize, robotProportionalGain,
-    robotIntegralGain, robotMaxIntegralError,
+    {robotSpeed, robotRotationSpeed, robotSize},
+    {robotProportionalGain, robotIntegralGain, robotMaxIntegralError},
 };
 
 float Distance(Vector2 from, Vector2 to) {
