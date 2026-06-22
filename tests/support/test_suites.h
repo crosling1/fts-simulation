@@ -4,14 +4,14 @@
 #include <string>
 
 void RunRobotTests(void);
-void RunObstacleTests(void);
-void RunLidarTests(void);
+void RunBlockingRobotManagerTests(void);
+void RunProximitySensorTests(void);
 void RunMapTests(void);
 void RunNavigationTests(void);
 
 bool RunRobotTestByName(const std::string& name);
-bool RunObstacleTestByName(const std::string& name);
-bool RunLidarTestByName(const std::string& name);
+bool RunBlockingRobotManagerTestByName(const std::string& name);
+bool RunProximitySensorTestByName(const std::string& name);
 bool RunMapTestByName(const std::string& name);
 bool RunNavigationTestByName(const std::string& name);
 bool RunTestByName(const std::string& name);

@@ -2,7 +2,7 @@
 #define ROBOT_CONTROLLER_H
 
 #include "robots/Robot.h"
-#include "sensors/LidarSensor.h"
+#include "sensors/ProximitySensor.h"
 #include "simulation/RobotStatusSnapshot.h"
 
 #include "raylib.h"
@@ -53,7 +53,7 @@ class RobotController {
     void updateEmergencyStopInput();
 
     std::unique_ptr<Robot> robot_;
-    LidarSensor lidarSensor_;
+    ProximitySensor proximitySensor_;
     std::vector<Vector2> activePath_;
     Vector2 activePathStart_ = {0.0f, 0.0f};
     std::size_t currentWaypointIndex_ = 0;

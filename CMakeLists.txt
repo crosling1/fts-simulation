@@ -18,30 +18,30 @@ set(PROJECT_SOURCES
     src/simulation/navigation.cpp
     src/simulation/BlockingRobotController.cpp
     src/simulation/RobotController.cpp
-    src/simulation/ObstacleManager.cpp
+    src/simulation/BlockingRobotManager.cpp
     src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
-    src/sensors/LidarSensor.cpp
+    src/sensors/ProximitySensor.cpp
 )
 
 set(COMMON_SOURCES
     src/simulation/MapData.cpp
     src/simulation/map.cpp
     src/simulation/navigation.cpp
-    src/simulation/ObstacleManager.cpp
+    src/simulation/BlockingRobotManager.cpp
     src/robots/Battery.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
-    src/sensors/LidarSensor.cpp
+    src/sensors/ProximitySensor.cpp
 )
 
 set(TEST_SOURCES
     tests/unit_tests.cpp
     tests/robots/robot_tests.cpp
-    tests/sensors/lidar_tests.cpp
-    tests/simulation/obstacle_tests.cpp
+    tests/sensors/proximity_sensor_tests.cpp
+    tests/simulation/blocking_robot_manager_tests.cpp
     tests/simulation/map_tests.cpp
     tests/simulation/navigation_tests.cpp
 )
@@ -51,14 +51,14 @@ set(PROJECT_HEADERS
     include/robots/Battery.h
     include/robots/WorkerRobot.h
     include/sensors/Sensor.h
-    include/sensors/LidarSensor.h
+    include/sensors/ProximitySensor.h
     include/simulation/MapData.h
     include/simulation/map.h
     include/simulation/navigation.h
     include/simulation/BlockingRobotController.h
     include/simulation/RobotController.h
     include/simulation/RobotStatusSnapshot.h
-    include/simulation/ObstacleManager.h
+    include/simulation/BlockingRobotManager.h
     include/ui/StatusOverlay.h
 )
 
@@ -81,9 +81,11 @@ set(UNIT_TEST_CASES
     "Robot owns battery"
     "Robot drains battery by distance moved"
     "Robot stops when battery is empty"
-    "Obstacle detection ignores inactive obstacles"
-    "Obstacle moves along path"
-    "Lidar uses obstacle manager"
+    "Blocking robot detection ignores inactive robots"
+    "Blocking robot outside radius is not detected"
+    "Blocking robot inside radius is detected"
+    "Blocking robot moves along path"
+    "Proximity sensor uses blocking robot manager"
     "Map road queries"
     "Navigation finds warehouse routes"
 )
