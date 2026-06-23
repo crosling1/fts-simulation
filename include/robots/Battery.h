@@ -1,5 +1,4 @@
-#ifndef BATTERY_H
-#define BATTERY_H
+#pragma once
 
 class Battery {
   public:
@@ -17,5 +16,3 @@ class Battery {
   private:
     float chargePercentage_;
 };
-
-#endif // BATTERY_H

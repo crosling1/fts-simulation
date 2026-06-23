@@ -10,10 +10,6 @@ void RobotTaskFlow::reset(void) {
     stateTimer_ = 0.0f;
 }
 
-RobotTaskPhase RobotTaskFlow::phase(void) const {
-    return phase_;
-}
-
 bool RobotTaskFlow::isPickingUp(void) const {
     return phase_ == RobotTaskPhase::PickingUp;
 }

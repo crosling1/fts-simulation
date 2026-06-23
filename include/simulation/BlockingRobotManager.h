@@ -1,5 +1,4 @@
-#ifndef BLOCKING_ROBOT_MANAGER_H
-#define BLOCKING_ROBOT_MANAGER_H
+#pragma once
 
 #include "raylib.h"
 
@@ -40,5 +39,3 @@ class BlockingRobotManager {
     void moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime);
     void chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking);
 };
-
-#endif // BLOCKING_ROBOT_MANAGER_H

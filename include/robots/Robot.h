@@ -1,5 +1,4 @@
-#ifndef ROBOT_H
-#define ROBOT_H
+#pragma once
 
 #include "robots/Battery.h"
 #include "control/PIController.h"
@@ -89,5 +88,3 @@ class Robot {
     ProximitySensor proximitySensor_;
     std::vector<std::unique_ptr<Sensor>> sensors_;
 };
-
-#endif // ROBOT_H

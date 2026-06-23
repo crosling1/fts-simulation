@@ -5,7 +5,6 @@
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/map.h"
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 

@@ -1,5 +1,4 @@
-#ifndef ROBOT_STATUS_SNAPSHOT_H
-#define ROBOT_STATUS_SNAPSHOT_H
+#pragma once
 
 #include "robots/Robot.h"
 
@@ -8,5 +7,3 @@ struct RobotStatusSnapshot {
     float batteryPercentage;
     bool emergencyStopActive;
 };
-
-#endif // ROBOT_STATUS_SNAPSHOT_H

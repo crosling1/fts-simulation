@@ -1,5 +1,4 @@
-#ifndef SENSOR_H
-#define SENSOR_H
+#pragma once
 
 class Robot;
 
@@ -10,5 +9,3 @@ class Sensor {
     virtual void update(const Robot& robot) = 0;
     virtual double value() const = 0;
 };
-
-#endif // SENSOR_H

@@ -1,5 +1,4 @@
-#ifndef MAP_H
-#define MAP_H
+#pragma once
 
 #include "simulation/MapData.h"
 #include "raylib.h"
@@ -48,5 +47,3 @@ class LogisticsMap {
     void drawChargingStation(void) const;
     bool isValidLagerId(LagerId lagerId) const;
 };
-
-#endif // MAP_H

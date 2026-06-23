@@ -1,5 +1,4 @@
-#ifndef PROXIMITY_SENSOR_H
-#define PROXIMITY_SENSOR_H
+#pragma once
 
 #include "raylib.h"
 
@@ -18,5 +17,3 @@ class ProximitySensor {
   private:
     float detectionRadius_;
 };
-
-#endif // PROXIMITY_SENSOR_H

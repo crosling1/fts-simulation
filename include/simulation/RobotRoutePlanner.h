@@ -1,5 +1,4 @@
-#ifndef ROBOT_ROUTE_PLANNER_H
-#define ROBOT_ROUTE_PLANNER_H
+#pragma once
 
 #include "raylib.h"
 
@@ -19,5 +18,3 @@ class RobotRoutePlanner {
   private:
     const LogisticsMap& logisticsMap_;
 };
-
-#endif // ROBOT_ROUTE_PLANNER_H

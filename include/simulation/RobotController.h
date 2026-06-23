@@ -1,5 +1,4 @@
-#ifndef ROBOT_CONTROLLER_H
-#define ROBOT_CONTROLLER_H
+#pragma once
 
 #include "robots/Robot.h"
 #include "simulation/InputState.h"
@@ -55,5 +54,3 @@ class RobotController {
     bool emergencyStopActive_ = false;
     Robot::State stateBeforeEmergencyStop_ = Robot::State::Idle;
 };
-
-#endif // ROBOT_CONTROLLER_H

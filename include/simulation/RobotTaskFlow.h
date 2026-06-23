@@ -1,5 +1,4 @@
-#ifndef ROBOT_TASK_FLOW_H
-#define ROBOT_TASK_FLOW_H
+#pragma once
 
 #include <cstdint>
 
@@ -16,7 +15,6 @@ class RobotTaskFlow {
   public:
     void reset(void);
 
-    RobotTaskPhase phase(void) const;
     bool isPickingUp(void) const;
     bool isDroppingOff(void) const;
     bool isCharging(void) const;
@@ -38,5 +36,3 @@ class RobotTaskFlow {
     RobotTaskPhase phase_ = RobotTaskPhase::ToPickup;
     float stateTimer_ = 0.0f;
 };
-
-#endif // ROBOT_TASK_FLOW_H
