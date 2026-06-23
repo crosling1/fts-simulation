@@ -2,7 +2,6 @@
 
 #include "robots/Robot.h"
 #include "robots/WorkerRobot.h"
-#include "sensors/ProximitySensor.h"
 #include "simulation/BlockingRobotController.h"
 #include "simulation/map.h"
 #include "simulation/navigation.h"
@@ -22,7 +21,6 @@ constexpr float robotIntegralGain = 0.25f;
 constexpr float robotMaxIntegralError = 200.0f;
 constexpr float pickupDuration = 1.0f;
 constexpr float dropoffDuration = 1.0f;
-constexpr float proximityDetectionRadius = robotSize * 2.0f;
 constexpr float chargeRatePercentagePerSecond = 10.0f;
 constexpr float chargeAfterDropoffThreshold = 10.0f;
 constexpr float minimumBatteryAfterJob = 10.0f;
@@ -41,7 +39,7 @@ float Distance(Vector2 from, Vector2 to) {
 }
 } // namespace
 
-RobotController::RobotController() : proximitySensor_(proximityDetectionRadius) {}
+RobotController::RobotController() = default;
 
 void RobotController::initialize() {
     robot_ = std::make_unique<WorkerRobot>(GetRobotStartPosition(), robotConfig);
@@ -79,7 +77,7 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
         return;
     }
 
-    if (HasBlockingRobotNear(robotPosition, proximitySensor_.getDetectionRadius())) {
+    if (HasBlockingRobotNear(robotPosition, robot_->getProximityDetectionRadius())) {
         return;
     }
 
@@ -100,9 +98,7 @@ void RobotController::draw() const {
         previousPoint = waypoint;
     }
 
-    const Vector2 robotPosition = robot_->getPosition();
-
-    proximitySensor_.drawScanArea(robotPosition);
+    robot_->drawProximityScanArea();
     robot_->draw();
 }
 

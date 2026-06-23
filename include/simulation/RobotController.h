@@ -2,7 +2,6 @@
 #define ROBOT_CONTROLLER_H
 
 #include "robots/Robot.h"
-#include "sensors/ProximitySensor.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotStatusSnapshot.h"
 
@@ -54,7 +53,6 @@ class RobotController {
     void updateEmergencyStop(const InputState& inputState);
 
     std::unique_ptr<Robot> robot_;
-    ProximitySensor proximitySensor_;
     std::vector<Vector2> activePath_;
     Vector2 activePathStart_ = {0.0f, 0.0f};
     std::size_t currentWaypointIndex_ = 0;

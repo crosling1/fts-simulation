@@ -1,9 +1,11 @@
 #ifndef PROXIMITY_SENSOR_H
 #define PROXIMITY_SENSOR_H
 
-#include "simulation/BlockingRobotManager.h"
 #include "raylib.h"
 
+class BlockingRobotManager;
+
+// Helper for radius-based proximity checks.
 class ProximitySensor {
   public:
     explicit ProximitySensor(float detectionRadius);

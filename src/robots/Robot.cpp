@@ -9,6 +9,7 @@ constexpr float radToDeg = 57.29577951308232f;
 constexpr float fullTurn = 360.0f;
 constexpr float halfTurn = 180.0f;
 constexpr float batteryDrainPercentagePerPixel = 0.01f;
+constexpr float proximityDetectionRadiusMultiplier = 2.0f;
 
 double DegreesToRadians(double degree) {
     return degree * pi / 180.0;
@@ -74,7 +75,8 @@ Robot::Robot(Pose startPose, Config config)
     : x_(startPose.position.x), y_(startPose.position.y), angle_(startPose.angleDegrees),
       speed_(config.motion.speed), targetPosition_(startPose.position),
       rotationSpeed_(config.motion.rotationSpeed), size_(config.motion.size),
-      speedController_(config.controller), state_(State::Idle) {}
+      speedController_(config.controller), state_(State::Idle),
+      proximitySensor_(config.motion.size * proximityDetectionRadiusMultiplier) {}
 
 Robot::Robot(const Vector2& startPosition, Config config) : Robot(Pose{startPosition}, config) {}
 
@@ -222,6 +224,14 @@ bool Robot::hasReachedTarget(void) const {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
 
     return Distance(position, targetPosition_) <= reachedDistance;
+}
+
+float Robot::getProximityDetectionRadius(void) const {
+    return proximitySensor_.getDetectionRadius();
+}
+
+void Robot::drawProximityScanArea(void) const {
+    proximitySensor_.drawScanArea(getPosition());
 }
 
 Battery& Robot::getBattery(void) {
