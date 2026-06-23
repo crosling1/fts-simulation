@@ -1,4 +1,4 @@
-#include "simulation/BlockingRobotController.h"
+#include "simulation/BlockingRobotManager.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
 #include "simulation/map.h"
@@ -15,28 +15,32 @@ int main(void) {
 
     LogisticsMap logisticsMap;
     logisticsMap.init();
-    InitBlockingRobotController(logisticsMap);
-    InitRobotController(logisticsMap);
+
+    BlockingRobotManager blockingRobotManager;
+    blockingRobotManager.initBlockingRobots(logisticsMap);
+
+    RobotController robotController(logisticsMap, blockingRobotManager);
+    robotController.initialize();
 
     while (!WindowShouldClose()) {
         const float deltaTime = GetFrameTime();
         const InputState inputState = ReadInputState();
 
-        UpdateBlockingRobotController();
-        UpdateRobotController(deltaTime, inputState);
+        blockingRobotManager.update(deltaTime);
+        robotController.update(deltaTime, inputState);
 
         BeginDrawing();
 
         logisticsMap.draw();
-        DrawBlockingRobotController();
-        DrawRobotController();
-        DrawStatusOverlay(GetRobotStatusSnapshot());
+        blockingRobotManager.draw();
+        robotController.draw();
+        DrawStatusOverlay(robotController.statusSnapshot());
 
         EndDrawing();
     }
 
-    UnloadRobotController();
-    UnloadBlockingRobotController();
+    robotController.unload();
+    blockingRobotManager.clear();
     logisticsMap.unload();
     CloseWindow();
 

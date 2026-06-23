@@ -2,7 +2,7 @@
 
 #include "robots/Robot.h"
 #include "robots/WorkerRobot.h"
-#include "simulation/BlockingRobotController.h"
+#include "simulation/BlockingRobotManager.h"
 #include "simulation/map.h"
 #include "simulation/navigation.h"
 
@@ -39,7 +39,9 @@ float Distance(Vector2 from, Vector2 to) {
 }
 } // namespace
 
-RobotController::RobotController(const LogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
+RobotController::RobotController(const LogisticsMap& logisticsMap,
+                                 const BlockingRobotManager& blockingRobotManager)
+    : logisticsMap_(logisticsMap), blockingRobotManager_(blockingRobotManager) {}
 
 void RobotController::initialize() {
     robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
@@ -78,7 +80,8 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
         return;
     }
 
-    if (HasBlockingRobotNear(robotPosition, robot_->getProximityDetectionRadius())) {
+    if (blockingRobotManager_.hasActiveBlockingRobotNear(robotPosition,
+                                                         robot_->getProximityDetectionRadius())) {
         return;
     }
 
@@ -299,46 +302,4 @@ void RobotController::updateEmergencyStop(const InputState& inputState) {
         emergencyStopActive_ = false;
         robot_->setState(stateBeforeEmergencyStop_);
     }
-}
-
-namespace {
-std::unique_ptr<RobotController> robotController;
-} // namespace
-
-void InitRobotController(const LogisticsMap& logisticsMap) {
-    robotController = std::make_unique<RobotController>(logisticsMap);
-    robotController->initialize();
-}
-
-void UpdateRobotController(float deltaTime, const InputState& inputState) {
-    if (robotController == nullptr) {
-        return;
-    }
-
-    robotController->update(deltaTime, inputState);
-}
-
-void DrawRobotController(void) {
-    if (robotController == nullptr) {
-        return;
-    }
-
-    robotController->draw();
-}
-
-void UnloadRobotController(void) {
-    if (robotController == nullptr) {
-        return;
-    }
-
-    robotController->unload();
-    robotController.reset();
-}
-
-std::optional<RobotStatusSnapshot> GetRobotStatusSnapshot(void) {
-    if (robotController == nullptr) {
-        return std::nullopt;
-    }
-
-    return robotController->statusSnapshot();
 }
