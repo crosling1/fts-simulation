@@ -1,11 +1,12 @@
-#ifndef BLOCKING_ROBOT_MANAGER_H
-#define BLOCKING_ROBOT_MANAGER_H
+#pragma once
 
 #include "raylib.h"
 
 #include <cstddef>
 #include <random>
 #include <vector>
+
+class LogisticsMap;
 
 struct BlockingRobot {
     Vector2 position;
@@ -24,7 +25,7 @@ class BlockingRobotManager {
 
     void clear(void);
     void addBlockingRobot(const BlockingRobot& blockingRobot);
-    void initBlockingRobots(void);
+    void initBlockingRobots(const LogisticsMap& logisticsMap);
     void update(float deltaTime);
     void draw(void) const;
     bool hasActiveBlockingRobotNear(Vector2 position, float detectionRadius) const;
@@ -38,5 +39,3 @@ class BlockingRobotManager {
     void moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime);
     void chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking);
 };
-
-#endif // BLOCKING_ROBOT_MANAGER_H

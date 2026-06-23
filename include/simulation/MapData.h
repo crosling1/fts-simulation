@@ -1,5 +1,4 @@
-#ifndef MAP_DATA_H
-#define MAP_DATA_H
+#pragma once
 
 #include "raylib.h"
 
@@ -46,5 +45,3 @@ struct MapData {
 };
 
 MapData LoadMapData(const std::string& path);
-
-#endif // MAP_DATA_H

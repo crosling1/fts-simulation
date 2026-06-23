@@ -1,43 +1,34 @@
-#ifndef ROBOT_CONTROLLER_H
-#define ROBOT_CONTROLLER_H
+#pragma once
 
 #include "robots/Robot.h"
-#include "sensors/ProximitySensor.h"
+#include "simulation/InputState.h"
+#include "simulation/RobotRoutePlanner.h"
 #include "simulation/RobotStatusSnapshot.h"
+#include "simulation/RobotTaskFlow.h"
 
 #include "raylib.h"
 
 #include <cstddef>
-#include <cstdint>
 #include <memory>
 #include <optional>
 #include <vector>
 
+class LogisticsMap;
+class BlockingRobotManager;
+
 class RobotController {
   public:
-    RobotController();
+    RobotController(const LogisticsMap& logisticsMap,
+                    const BlockingRobotManager& blockingRobotManager);
 
     void initialize();
-    void update(float deltaTime);
+    void update(float deltaTime, const InputState& inputState);
     void draw() const;
     void unload();
     std::optional<RobotStatusSnapshot> statusSnapshot() const;
 
   private:
-    enum class TaskPhase : std::uint8_t {
-        ToPickup,
-        PickingUp,
-        ToDropoff,
-        DroppingOff,
-        ToCharging,
-        Charging,
-    };
-
     Vector2 getRobotPosition() const;
-    std::vector<Vector2> buildPathToPickup(Vector2 startPosition) const;
-    std::vector<Vector2> buildPathToDropoff(Vector2 startPosition) const;
-    std::vector<Vector2> buildPathToChargingStation(Vector2 startPosition) const;
-    float pathDistance(Vector2 startPosition, const std::vector<Vector2>& path) const;
     bool setNextWaypoint();
     void setActivePath(const std::vector<Vector2>& path, Vector2 pathStart);
     bool shouldChargeAtOrBelow(float thresholdPercentage) const;
@@ -50,23 +41,16 @@ class RobotController {
     void updateDropoff(float deltaTime);
     void updateCharging(float deltaTime);
     void updateWaypointTravel();
-    void updateEmergencyStopInput();
+    void updateEmergencyStop(const InputState& inputState);
 
+    const LogisticsMap& logisticsMap_;
+    const BlockingRobotManager& blockingRobotManager_;
+    RobotRoutePlanner routePlanner_;
+    RobotTaskFlow taskFlow_;
     std::unique_ptr<Robot> robot_;
-    ProximitySensor proximitySensor_;
     std::vector<Vector2> activePath_;
     Vector2 activePathStart_ = {0.0f, 0.0f};
     std::size_t currentWaypointIndex_ = 0;
-    TaskPhase taskPhase_ = TaskPhase::ToPickup;
-    float stateTimer_ = 0.0f;
     bool emergencyStopActive_ = false;
     Robot::State stateBeforeEmergencyStop_ = Robot::State::Idle;
 };
-
-void InitRobotController(void);
-void UpdateRobotController(void);
-void DrawRobotController(void);
-void UnloadRobotController(void);
-std::optional<RobotStatusSnapshot> GetRobotStatusSnapshot(void);
-
-#endif // ROBOT_CONTROLLER_H

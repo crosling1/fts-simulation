@@ -8,19 +8,21 @@
 
 namespace {
 void TestMapRoadQueries(void) {
-    InitMap();
+    LogisticsMap logisticsMap;
+    logisticsMap.init();
 
-    const Vector2 start = GetRobotStartPosition();
+    const Vector2 start = logisticsMap.getRobotStartPosition();
     const Vector2 offRoad = {20.0f, 20.0f};
-    const Vector2 clamped = ClampPositionToMapRoad(offRoad);
+    const Vector2 clamped = logisticsMap.clampPositionToRoad(offRoad);
 
-    test::Expect(IsMapRoadPosition(start), "robot start should be on a road");
-    test::Expect(IsMapRoadPosition(GetChargingStationDockPosition()),
+    test::Expect(logisticsMap.isRoadPosition(start), "robot start should be on a road");
+    test::Expect(logisticsMap.isRoadPosition(logisticsMap.getChargingStationDockPosition()),
                  "charging station dock should be on a road");
-    test::Expect(!IsMapRoadPosition(offRoad), "off-road point should not be on a road");
-    test::Expect(IsMapRoadPosition(clamped), "clamped off-road point should land on a road");
-    test::ExpectVectorNear(GetLagerDockPosition(static_cast<LagerId>(LAGER_COUNT)), {0.0f, 0.0f},
-                           "invalid lager id should return origin");
+    test::Expect(!logisticsMap.isRoadPosition(offRoad), "off-road point should not be on a road");
+    test::Expect(logisticsMap.isRoadPosition(clamped),
+                 "clamped off-road point should land on a road");
+    test::ExpectVectorNear(logisticsMap.getLagerDockPosition(static_cast<LagerId>(LAGER_COUNT)),
+                           {0.0f, 0.0f}, "invalid lager id should return origin");
 }
 
 const test::TestCase mapTests[] = {

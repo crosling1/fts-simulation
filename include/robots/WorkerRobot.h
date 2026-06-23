@@ -1,5 +1,4 @@
-#ifndef WORKER_ROBOT_H
-#define WORKER_ROBOT_H
+#pragma once
 
 #include "robots/Robot.h"
 
@@ -10,5 +9,3 @@ class WorkerRobot : public Robot {
 
     void printType() const override;
 };
-
-#endif // WORKER_ROBOT_H

@@ -25,15 +25,14 @@ void TestRobotMovesToTarget(void) {
 
     robot.updateMovement(0.5f);
 
-    Vector2 position = {0.0f, 0.0f};
-    robot.getPosition(position);
+    const Vector2 position = robot.getPosition();
     test::ExpectVectorNear(position, {5.0f, 0.0f}, "robot should move by speed * deltaTime");
     test::Expect(robot.getState() == Robot::State::Moving,
                  "robot should still be moving before target");
 
     robot.updateMovement(0.5f);
-    robot.getPosition(position);
-    test::ExpectVectorNear(position, {10.0f, 0.0f}, "robot should stop exactly at the target");
+    const Vector2 finalPosition = robot.getPosition();
+    test::ExpectVectorNear(finalPosition, {10.0f, 0.0f}, "robot should stop exactly at the target");
     test::Expect(robot.getState() == Robot::State::Arrived, "robot should arrive at target");
 }
 
@@ -43,8 +42,7 @@ void TestRobotPiControllerLimitsSpeedNearTarget(void) {
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
 
-    Vector2 position = {0.0f, 0.0f};
-    robot.getPosition(position);
+    const Vector2 position = robot.getPosition();
     test::ExpectVectorNear(position, {6.0f, 0.0f},
                            "PI controller should command less than max speed near target");
     test::Expect(robot.getState() == Robot::State::Moving,
@@ -58,8 +56,7 @@ void TestRobotKeepsCarryingStateWhenArriving(void) {
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
 
-    Vector2 position = {0.0f, 0.0f};
-    robot.getPosition(position);
+    const Vector2 position = robot.getPosition();
     test::ExpectVectorNear(position, {10.0f, 0.0f}, "carrying robot should reach target");
     test::Expect(robot.getState() == Robot::State::CarryingItem,
                  "carrying robot should not switch to Arrived during route");
@@ -127,15 +124,14 @@ void TestRobotStopsWhenBatteryIsEmpty(void) {
 
     robot.updateMovement(1.0f);
 
-    Vector2 position = {0.0f, 0.0f};
-    robot.getPosition(position);
+    const Vector2 position = robot.getPosition();
     test::ExpectVectorNear(position, {0.0f, 0.0f}, "empty battery robot should not move");
 
     robot.getBattery().charge(50.0f);
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
-    robot.getPosition(position);
-    test::ExpectVectorNear(position, {10.0f, 0.0f}, "charged robot should move again");
+    const Vector2 chargedPosition = robot.getPosition();
+    test::ExpectVectorNear(chargedPosition, {10.0f, 0.0f}, "charged robot should move again");
 }
 
 const test::TestCase robotTests[] = {

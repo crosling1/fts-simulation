@@ -7,7 +7,11 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 ## Simulation Behavior
 
 - The map renders warehouses, lager dock points, the charging station, the robot start position, and the road network.
-- The `RobotController` class owns the main robot lifecycle, route state, task flow, emergency stop state, and charging decisions.
+- `main.cpp` owns the main simulation objects explicitly, including `LogisticsMap`, `BlockingRobotManager`, and `RobotController`.
+- `LogisticsMap` is an explicit object rather than hidden global map state.
+- The `RobotController` class coordinates the main robot lifecycle, emergency stop state, proximity checks, and charging decisions.
+- `RobotRoutePlanner` handles route creation and path distance calculations.
+- `RobotTaskFlow` handles pickup, dropoff, and charging phase state.
 - The navigation module calculates road-network waypoint routes with A* and validates candidate edges against the map road area.
 - The robot follows calculated waypoint routes instead of moving directly through non-road areas.
 - Navigation removes unnecessary pass-through waypoints while keeping turn points needed for dock entry.
@@ -21,7 +25,8 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 - Charging restores battery at 10% per second and then the robot resumes the pickup/delivery loop.
 - A status overlay shows the robot state, battery percentage, and currently used process memory.
 - The status overlay shows emergency stop state, and the bottom-center control hint shows `E` for emergency stop and `R` for reset.
-- A radius-based proximity sensor draws a circular scan area around the main robot.
+- The main robot owns a radius-based proximity sensor that draws a circular scan area.
+- `InputState` separates keyboard input reading from controller update logic.
 - The `BlockingRobotManager` owns moving blocking robot data, path movement, and proximity queries.
 - Blocking robots move on road-network paths and choose randomized next targets at path nodes.
 - If the main robot detects a blocking robot inside its proximity range, the robot controller pauses movement until the scan area is clear.
@@ -118,9 +123,9 @@ The CI workflow installs the required build tools, builds raylib, configures the
 
 ## Project Structure
 
-- `main.cpp`: Program entry point and main loop
-- `map.h`: Public map module functions
-- `map.cpp`: Map class, lager positions, road rendering logic, and road constraint helpers
+- `main.cpp`: Program entry point, main loop, and explicit simulation object ownership
+- `map.h`: Public `LogisticsMap` interface
+- `map.cpp`: Map data loading, lager positions, road rendering logic, and road constraint helpers
 - `navigation.h`: Public navigation pathfinding interface
 - `navigation.cpp`: Road graph definition, A* waypoint pathfinding, and map-road edge validation
 - `PIController.h`: Public reusable PI controller interface for bounded control output
@@ -129,14 +134,16 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `Robot.cpp`: Robot movement, battery drain, PI-controlled speed requests, state handling, and robot/item rendering
 - `Battery.h`: Public battery interface
 - `Battery.cpp`: Battery charge, drain, and percentage clamping logic
-- `RobotController.h`: `RobotController` class plus temporary public wrapper functions used by `main.cpp`
-- `RobotController.cpp`: Main robot lifecycle, route state, pickup/dropoff handling, charging decisions, emergency stop handling, proximity checks, and road enforcement
-- `BlockingRobotController.h`: Public blocking robot controller wrapper functions
-- `BlockingRobotController.cpp`: Thin wrapper around the blocking robot manager used by the main loop
+- `RobotController.h`: Main robot controller interface
+- `RobotController.cpp`: Main robot lifecycle coordination, charging decisions, emergency stop handling, proximity checks, and road enforcement
+- `RobotRoutePlanner.h`: Route planning helper interface for the main robot
+- `RobotRoutePlanner.cpp`: Pickup, dropoff, and charging route creation plus path distance calculations
+- `RobotTaskFlow.h`: Pickup, dropoff, and charging phase state interface
+- `RobotTaskFlow.cpp`: Task phase transitions and pickup/dropoff timers
 - `RobotStatusSnapshot.h`: Display-safe robot status data for UI overlays
 - `StatusOverlay.h`: Public status overlay drawing interface
 - `StatusOverlay.cpp`: Robot status, emergency stop state, control hints, battery, and used-memory overlay rendering
-- `ProximitySensor.h`: Public radius-based proximity detection interface
+- `ProximitySensor.h`: Public radius-based proximity detection interface owned by the main robot
 - `ProximitySensor.cpp`: Blocking robot proximity checks and scan area rendering
 - `BlockingRobotManager.h`: Blocking robot data and manager interface
 - `BlockingRobotManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
@@ -146,4 +153,4 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `tests/sensors/`: Proximity sensor tests
 - `tests/simulation/`: Map, blocking robot, and navigation tests
 
-`main.cpp` does not define map, robot task, blocking robot movement, or UI details directly. It initializes the map and controller wrappers, updates them each frame, and draws the map, blocking robots, main robot, and status overlay in order.
+`main.cpp` does not define map, robot task, blocking robot movement, or UI details directly. It owns the main simulation objects, updates them each frame, and draws the map, blocking robots, main robot, and status overlay in order.

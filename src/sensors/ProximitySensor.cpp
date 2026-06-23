@@ -1,5 +1,7 @@
 #include "sensors/ProximitySensor.h"
 
+#include "simulation/BlockingRobotManager.h"
+
 ProximitySensor::ProximitySensor(float detectionRadius) : detectionRadius_(detectionRadius) {}
 
 bool ProximitySensor::hasBlockingRobotNearby(

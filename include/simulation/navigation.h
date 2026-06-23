@@ -1,11 +1,11 @@
-#ifndef NAVIGATION_H
-#define NAVIGATION_H
+#pragma once
 
 #include "raylib.h"
 
 #include <vector>
 
-std::vector<Vector2>
-FindNavigationPath(Vector2 start, Vector2 goal); // NOLINT(bugprone-easily-swappable-parameters)
+class LogisticsMap;
 
-#endif // NAVIGATION_H
+std::vector<Vector2>
+FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
+                   Vector2 goal); // NOLINT(bugprone-easily-swappable-parameters)

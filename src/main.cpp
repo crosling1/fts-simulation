@@ -1,4 +1,5 @@
-#include "simulation/BlockingRobotController.h"
+#include "simulation/BlockingRobotManager.h"
+#include "simulation/InputState.h"
 #include "simulation/RobotController.h"
 #include "simulation/map.h"
 #include "ui/StatusOverlay.h"
@@ -12,27 +13,35 @@ int main(void) {
     InitWindow(screenWidth, screenHeight, "Robot Logistics Map Simulation");
     SetTargetFPS(targetFps);
 
-    InitMap();
-    InitBlockingRobotController();
-    InitRobotController();
+    LogisticsMap logisticsMap;
+    logisticsMap.init();
+
+    BlockingRobotManager blockingRobotManager;
+    blockingRobotManager.initBlockingRobots(logisticsMap);
+
+    RobotController robotController(logisticsMap, blockingRobotManager);
+    robotController.initialize();
 
     while (!WindowShouldClose()) {
-        UpdateBlockingRobotController();
-        UpdateRobotController();
+        const float deltaTime = GetFrameTime();
+        const InputState inputState = ReadInputState();
+
+        blockingRobotManager.update(deltaTime);
+        robotController.update(deltaTime, inputState);
 
         BeginDrawing();
 
-        DrawMap();
-        DrawBlockingRobotController();
-        DrawRobotController();
-        DrawStatusOverlay(GetRobotStatusSnapshot());
+        logisticsMap.draw();
+        blockingRobotManager.draw();
+        robotController.draw();
+        DrawStatusOverlay(robotController.statusSnapshot());
 
         EndDrawing();
     }
 
-    UnloadRobotController();
-    UnloadBlockingRobotController();
-    UnloadMap();
+    robotController.unload();
+    blockingRobotManager.clear();
+    logisticsMap.unload();
     CloseWindow();
 
     return 0;

@@ -1,5 +1,4 @@
-#ifndef PI_CONTROLLER_H
-#define PI_CONTROLLER_H
+#pragma once
 
 class PIController {
   public:
@@ -25,5 +24,3 @@ class PIController {
     Config config_;
     float errorIntegral_ = 0.0f;
 };
-
-#endif // PI_CONTROLLER_H

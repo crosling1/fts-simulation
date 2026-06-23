@@ -1,8 +1,8 @@
-#ifndef ROBOT_H
-#define ROBOT_H
+#pragma once
 
 #include "robots/Battery.h"
 #include "control/PIController.h"
+#include "sensors/ProximitySensor.h"
 #include "sensors/Sensor.h"
 #include "raylib.h"
 
@@ -54,10 +54,12 @@ class Robot {
     void setTargetPosition(const Vector2& target);
     void moveTowardsTarget(float deltaTime);
     void rotateTowardsTarget(float deltaTime);
-    void getPosition(Vector2& outPosition) const;
+    Vector2 getPosition() const;
     void getRotation(float& outRotation) const;
     State getState(void) const;
     bool hasReachedTarget(void) const;
+    float getProximityDetectionRadius(void) const;
+    void drawProximityScanArea(void) const;
     Battery& getBattery(void);
     const Battery& getBattery(void) const;
 
@@ -83,7 +85,6 @@ class Robot {
     PIController speedController_;
     State state_;
     Battery battery_;
+    ProximitySensor proximitySensor_;
     std::vector<std::unique_ptr<Sensor>> sensors_;
 };
-
-#endif // ROBOT_H

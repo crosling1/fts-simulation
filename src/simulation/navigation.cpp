@@ -42,19 +42,20 @@ float Distance(Vector2 from, Vector2 to) {
     return std::sqrt(DistanceSquared(from, to));
 }
 
-bool IsRoadSample(Vector2 position) {
-    if (IsMapRoadPosition(position)) {
+bool IsRoadSample(const LogisticsMap& logisticsMap, Vector2 position) {
+    if (logisticsMap.isRoadPosition(position)) {
         return true;
     }
 
-    return DistanceSquared(position, ClampPositionToMapRoad(position)) <=
+    return DistanceSquared(position, logisticsMap.clampPositionToRoad(position)) <=
            (roadSampleTolerance * roadSampleTolerance);
 }
 
-bool IsRoadSegment(Vector2 from, Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
+bool IsRoadSegment(const LogisticsMap& logisticsMap, Vector2 from,
+                   Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
     const float segmentLength = Distance(from, to);
     if (segmentLength <= roadSampleTolerance) {
-        return IsRoadSample(from) && IsRoadSample(to);
+        return IsRoadSample(logisticsMap, from) && IsRoadSample(logisticsMap, to);
     }
 
     const int sampleCount = static_cast<int>(std::ceil(segmentLength / roadSampleSpacing));
@@ -65,7 +66,7 @@ bool IsRoadSegment(Vector2 from, Vector2 to) { // NOLINT(bugprone-easily-swappab
             from.y + ((to.y - from.y) * t),
         };
 
-        if (!IsRoadSample(sample)) {
+        if (!IsRoadSample(logisticsMap, sample)) {
             return false;
         }
     }
@@ -119,7 +120,8 @@ std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
     return path;
 }
 
-std::vector<Vector2> SimplifyPath(const std::vector<Vector2>& path) {
+std::vector<Vector2> SimplifyPath(const LogisticsMap& logisticsMap,
+                                  const std::vector<Vector2>& path) {
     if (path.size() < 3) {
         return path;
     }
@@ -128,7 +130,7 @@ std::vector<Vector2> SimplifyPath(const std::vector<Vector2>& path) {
     simplifiedPath.push_back(path.front());
 
     for (std::size_t i = 1; i + 1 < path.size(); i++) {
-        if (IsRoadSegment(simplifiedPath.back(), path[i + 1])) {
+        if (IsRoadSegment(logisticsMap, simplifiedPath.back(), path[i + 1])) {
             continue;
         }
 
@@ -141,9 +143,10 @@ std::vector<Vector2> SimplifyPath(const std::vector<Vector2>& path) {
 } // namespace
 
 std::vector<Vector2>
-FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swappable-parameters)
-    const std::vector<Vector2>& pathNodes = GetMapNavigationNodes();
-    const std::vector<NavigationEdge>& pathEdges = GetMapNavigationEdges();
+FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
+                   Vector2 goal) { // NOLINT(bugprone-easily-swappable-parameters)
+    const std::vector<Vector2>& pathNodes = logisticsMap.getNavigationNodes();
+    const std::vector<NavigationEdge>& pathEdges = logisticsMap.getNavigationEdges();
     const PathEndpointIndices endpoints = {
         FindNearestPathNode(pathNodes, start),
         FindNearestPathNode(pathNodes, goal),
@@ -178,7 +181,7 @@ FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swap
         }
 
         if (currentNodeIndex == endpoints.goalNodeIndex) {
-            return SimplifyPath(BuildPathFromParents(pathNodes, cameFrom, endpoints));
+            return SimplifyPath(logisticsMap, BuildPathFromParents(pathNodes, cameFrom, endpoints));
         }
 
         closed[currentNodeIndex] = true;
@@ -188,7 +191,8 @@ FindNavigationPath(Vector2 start, Vector2 goal) { // NOLINT(bugprone-easily-swap
                 continue;
             }
 
-            if (!IsRoadSegment(pathNodes[currentNodeIndex], pathNodes[neighborNodeIndex])) {
+            if (!IsRoadSegment(logisticsMap, pathNodes[currentNodeIndex],
+                               pathNodes[neighborNodeIndex])) {
                 continue;
             }
 
