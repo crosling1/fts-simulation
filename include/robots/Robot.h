@@ -54,7 +54,7 @@ class Robot {
     void setTargetPosition(const Vector2& target);
     void moveTowardsTarget(float deltaTime);
     void rotateTowardsTarget(float deltaTime);
-    void getPosition(Vector2& outPosition) const;
+    Vector2 getPosition() const;
     void getRotation(float& outRotation) const;
     State getState(void) const;
     bool hasReachedTarget(void) const;

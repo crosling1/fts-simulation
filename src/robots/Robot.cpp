@@ -206,8 +206,8 @@ void Robot::rotateTowardsTarget(float deltaTime) {
     angle_ = NormalizeAngle(static_cast<float>(angle_));
 }
 
-void Robot::getPosition(Vector2& outPosition) const {
-    outPosition = {static_cast<float>(x_), static_cast<float>(y_)};
+Vector2 Robot::getPosition() const {
+    return {static_cast<float>(x_), static_cast<float>(y_)};
 }
 
 void Robot::getRotation(float& outRotation) const {

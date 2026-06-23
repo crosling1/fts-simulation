@@ -62,8 +62,7 @@ void RobotController::update(float deltaTime) {
         return;
     }
 
-    Vector2 robotPosition = {0.0f, 0.0f};
-    robot_->getPosition(robotPosition);
+    const Vector2 robotPosition = robot_->getPosition();
 
     if (taskPhase_ == TaskPhase::PickingUp) {
         updatePickup(deltaTime);
@@ -101,8 +100,7 @@ void RobotController::draw() const {
         previousPoint = waypoint;
     }
 
-    Vector2 robotPosition = {0.0f, 0.0f};
-    robot_->getPosition(robotPosition);
+    const Vector2 robotPosition = robot_->getPosition();
 
     proximitySensor_.drawScanArea(robotPosition);
     robot_->draw();
@@ -125,9 +123,7 @@ std::optional<RobotStatusSnapshot> RobotController::statusSnapshot() const {
 }
 
 Vector2 RobotController::getRobotPosition() const {
-    Vector2 robotPosition = {0.0f, 0.0f};
-    robot_->getPosition(robotPosition);
-    return robotPosition;
+    return robot_->getPosition();
 }
 
 std::vector<Vector2> RobotController::buildPathToPickup(Vector2 startPosition) const {
@@ -220,8 +216,7 @@ bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
 }
 
 void RobotController::keepRobotOnRoad() {
-    Vector2 robotPosition = {0.0f, 0.0f};
-    robot_->getPosition(robotPosition);
+    const Vector2 robotPosition = robot_->getPosition();
     if (!IsMapRoadPosition(robotPosition)) {
         robot_->setPosition(ClampPositionToMapRoad(robotPosition));
     }
