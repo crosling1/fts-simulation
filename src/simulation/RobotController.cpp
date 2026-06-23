@@ -52,12 +52,12 @@ void RobotController::initialize() {
     setActivePath(buildPathToPickup(GetRobotStartPosition()), GetRobotStartPosition());
 }
 
-void RobotController::update(float deltaTime) {
+void RobotController::update(float deltaTime, const InputState& inputState) {
     if (robot_ == nullptr) {
         return;
     }
 
-    updateEmergencyStopInput();
+    updateEmergencyStop(inputState);
     if (emergencyStopActive_) {
         return;
     }
@@ -287,14 +287,14 @@ void RobotController::updateWaypointTravel() {
     }
 }
 
-void RobotController::updateEmergencyStopInput() {
-    if (IsKeyPressed(KEY_E) && !emergencyStopActive_) {
+void RobotController::updateEmergencyStop(const InputState& inputState) {
+    if (inputState.emergencyStopPressed && !emergencyStopActive_) {
         emergencyStopActive_ = true;
         stateBeforeEmergencyStop_ = robot_->getState();
         robot_->setState(Robot::State::Idle);
     }
 
-    if (IsKeyPressed(KEY_R) && emergencyStopActive_) {
+    if (inputState.resetEmergencyStopPressed && emergencyStopActive_) {
         emergencyStopActive_ = false;
         robot_->setState(stateBeforeEmergencyStop_);
     }
@@ -308,8 +308,8 @@ void InitRobotController(void) {
     robotController.initialize();
 }
 
-void UpdateRobotController(void) {
-    robotController.update(GetFrameTime());
+void UpdateRobotController(float deltaTime, const InputState& inputState) {
+    robotController.update(deltaTime, inputState);
 }
 
 void DrawRobotController(void) {

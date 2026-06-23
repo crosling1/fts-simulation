@@ -3,6 +3,7 @@
 
 #include "robots/Robot.h"
 #include "sensors/ProximitySensor.h"
+#include "simulation/InputState.h"
 #include "simulation/RobotStatusSnapshot.h"
 
 #include "raylib.h"
@@ -18,7 +19,7 @@ class RobotController {
     RobotController();
 
     void initialize();
-    void update(float deltaTime);
+    void update(float deltaTime, const InputState& inputState);
     void draw() const;
     void unload();
     std::optional<RobotStatusSnapshot> statusSnapshot() const;
@@ -50,7 +51,7 @@ class RobotController {
     void updateDropoff(float deltaTime);
     void updateCharging(float deltaTime);
     void updateWaypointTravel();
-    void updateEmergencyStopInput();
+    void updateEmergencyStop(const InputState& inputState);
 
     std::unique_ptr<Robot> robot_;
     ProximitySensor proximitySensor_;
@@ -64,7 +65,7 @@ class RobotController {
 };
 
 void InitRobotController(void);
-void UpdateRobotController(void);
+void UpdateRobotController(float deltaTime, const InputState& inputState);
 void DrawRobotController(void);
 void UnloadRobotController(void);
 std::optional<RobotStatusSnapshot> GetRobotStatusSnapshot(void);

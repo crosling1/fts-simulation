@@ -16,6 +16,7 @@ set(PROJECT_SOURCES
     src/simulation/MapData.cpp
     src/simulation/map.cpp
     src/simulation/navigation.cpp
+    src/simulation/InputState.cpp
     src/simulation/BlockingRobotController.cpp
     src/simulation/RobotController.cpp
     src/simulation/BlockingRobotManager.cpp
@@ -59,6 +60,7 @@ set(PROJECT_HEADERS
     include/simulation/MapData.h
     include/simulation/map.h
     include/simulation/navigation.h
+    include/simulation/InputState.h
     include/simulation/BlockingRobotController.h
     include/simulation/RobotController.h
     include/simulation/RobotStatusSnapshot.h

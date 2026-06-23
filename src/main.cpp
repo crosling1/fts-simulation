@@ -1,4 +1,5 @@
 #include "simulation/BlockingRobotController.h"
+#include "simulation/InputState.h"
 #include "simulation/RobotController.h"
 #include "simulation/map.h"
 #include "ui/StatusOverlay.h"
@@ -17,8 +18,11 @@ int main(void) {
     InitRobotController();
 
     while (!WindowShouldClose()) {
+        const float deltaTime = GetFrameTime();
+        const InputState inputState = ReadInputState();
+
         UpdateBlockingRobotController();
-        UpdateRobotController();
+        UpdateRobotController(deltaTime, inputState);
 
         BeginDrawing();
 
