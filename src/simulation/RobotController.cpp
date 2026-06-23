@@ -4,11 +4,8 @@
 #include "robots/WorkerRobot.h"
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/map.h"
-#include "simulation/navigation.h"
 
 #include <cstddef>
-#include <cstdint>
-#include <cmath>
 #include <memory>
 #include <vector>
 
@@ -19,8 +16,6 @@ constexpr float robotSize = 16.0f;
 constexpr float robotProportionalGain = 2.0f;
 constexpr float robotIntegralGain = 0.25f;
 constexpr float robotMaxIntegralError = 200.0f;
-constexpr float pickupDuration = 1.0f;
-constexpr float dropoffDuration = 1.0f;
 constexpr float chargeRatePercentagePerSecond = 10.0f;
 constexpr float chargeAfterDropoffThreshold = 10.0f;
 constexpr float minimumBatteryAfterJob = 10.0f;
@@ -30,26 +25,19 @@ constexpr Robot::Config robotConfig = {
     {robotSpeed, robotRotationSpeed, robotSize},
     {robotProportionalGain, robotIntegralGain, robotMaxIntegralError},
 };
-
-float Distance(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return std::sqrt((deltaX * deltaX) + (deltaY * deltaY));
-}
 } // namespace
 
 RobotController::RobotController(const LogisticsMap& logisticsMap,
                                  const BlockingRobotManager& blockingRobotManager)
-    : logisticsMap_(logisticsMap), blockingRobotManager_(blockingRobotManager) {}
+    : logisticsMap_(logisticsMap), blockingRobotManager_(blockingRobotManager),
+      routePlanner_(logisticsMap) {}
 
 void RobotController::initialize() {
     robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
-    taskPhase_ = TaskPhase::ToPickup;
-    stateTimer_ = 0.0f;
+    taskFlow_.reset();
     emergencyStopActive_ = false;
     stateBeforeEmergencyStop_ = Robot::State::Idle;
-    setActivePath(buildPathToPickup(logisticsMap_.getRobotStartPosition()),
+    setActivePath(routePlanner_.buildPathToPickup(logisticsMap_.getRobotStartPosition()),
                   logisticsMap_.getRobotStartPosition());
 }
 
@@ -65,17 +53,17 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
 
     const Vector2 robotPosition = robot_->getPosition();
 
-    if (taskPhase_ == TaskPhase::PickingUp) {
+    if (taskFlow_.isPickingUp()) {
         updatePickup(deltaTime);
         return;
     }
 
-    if (taskPhase_ == TaskPhase::DroppingOff) {
+    if (taskFlow_.isDroppingOff()) {
         updateDropoff(deltaTime);
         return;
     }
 
-    if (taskPhase_ == TaskPhase::Charging) {
+    if (taskFlow_.isCharging()) {
         updateCharging(deltaTime);
         return;
     }
@@ -126,34 +114,6 @@ Vector2 RobotController::getRobotPosition() const {
     return robot_->getPosition();
 }
 
-std::vector<Vector2> RobotController::buildPathToPickup(Vector2 startPosition) const {
-    return FindNavigationPath(logisticsMap_, startPosition,
-                              logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId()));
-}
-
-std::vector<Vector2> RobotController::buildPathToDropoff(Vector2 startPosition) const {
-    return FindNavigationPath(
-        logisticsMap_, startPosition,
-        logisticsMap_.getLagerDockPosition(logisticsMap_.getDeliveryLagerId()));
-}
-
-std::vector<Vector2> RobotController::buildPathToChargingStation(Vector2 startPosition) const {
-    return FindNavigationPath(logisticsMap_, startPosition,
-                              logisticsMap_.getChargingStationDockPosition());
-}
-
-float RobotController::pathDistance(Vector2 startPosition, const std::vector<Vector2>& path) const {
-    float distance = 0.0f;
-    Vector2 previousPoint = startPosition;
-
-    for (Vector2 waypoint : path) {
-        distance += Distance(previousPoint, waypoint);
-        previousPoint = waypoint;
-    }
-
-    return distance;
-}
-
 bool RobotController::setNextWaypoint() {
     if (robot_ == nullptr || currentWaypointIndex_ >= activePath_.size()) {
         return false;
@@ -178,13 +138,12 @@ bool RobotController::shouldChargeAtOrBelow(float thresholdPercentage) const {
 void RobotController::startChargingTrip() {
     const Vector2 startPosition = getRobotPosition();
 
-    taskPhase_ = TaskPhase::ToCharging;
+    taskFlow_.startTripToCharging();
     robot_->setState(Robot::State::Arrived);
-    setActivePath(buildPathToChargingStation(startPosition), startPosition);
+    setActivePath(routePlanner_.buildPathToChargingStation(startPosition), startPosition);
 
     if (activePath_.empty()) {
-        taskPhase_ = TaskPhase::Charging;
-        stateTimer_ = 0.0f;
+        taskFlow_.startCharging();
         robot_->setState(Robot::State::Charging);
     }
 }
@@ -192,26 +151,26 @@ void RobotController::startChargingTrip() {
 void RobotController::startPickupTrip() {
     const Vector2 startPosition = getRobotPosition();
 
-    taskPhase_ = TaskPhase::ToPickup;
+    taskFlow_.startTripToPickup();
     robot_->setState(Robot::State::Arrived);
-    setActivePath(buildPathToPickup(startPosition), startPosition);
+    setActivePath(routePlanner_.buildPathToPickup(startPosition), startPosition);
 }
 
 void RobotController::startDropoffTrip() {
     const Vector2 startPosition = getRobotPosition();
 
-    taskPhase_ = TaskPhase::ToDropoff;
+    taskFlow_.startTripToDropoff();
     robot_->setState(Robot::State::CarryingItem);
-    setActivePath(buildPathToDropoff(startPosition), startPosition);
+    setActivePath(routePlanner_.buildPathToDropoff(startPosition), startPosition);
 }
 
 bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
     const Vector2 robotPosition = getRobotPosition();
     const Vector2 pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
-    const std::vector<Vector2> pickupPath = buildPathToPickup(robotPosition);
-    const std::vector<Vector2> dropoffPath = buildPathToDropoff(pickupDock);
-    const float estimatedDistance =
-        pathDistance(robotPosition, pickupPath) + pathDistance(pickupDock, dropoffPath);
+    const std::vector<Vector2> pickupPath = routePlanner_.buildPathToPickup(robotPosition);
+    const std::vector<Vector2> dropoffPath = routePlanner_.buildPathToDropoff(pickupDock);
+    const float estimatedDistance = routePlanner_.calculatePathDistance(robotPosition, pickupPath) +
+                                    routePlanner_.calculatePathDistance(pickupDock, dropoffPath);
 
     const float estimatedBatteryAfterJob = robot_->getBattery().getChargePercentage() -
                                            (estimatedDistance * batteryDrainPercentagePerPixel);
@@ -227,8 +186,7 @@ void RobotController::keepRobotOnRoad() {
 }
 
 void RobotController::updatePickup(float deltaTime) {
-    stateTimer_ += deltaTime;
-    if (stateTimer_ < pickupDuration) {
+    if (!taskFlow_.updatePickup(deltaTime)) {
         return;
     }
 
@@ -236,8 +194,7 @@ void RobotController::updatePickup(float deltaTime) {
 }
 
 void RobotController::updateDropoff(float deltaTime) {
-    stateTimer_ += deltaTime;
-    if (stateTimer_ < dropoffDuration) {
+    if (!taskFlow_.updateDropoff(deltaTime)) {
         return;
     }
 
@@ -270,23 +227,20 @@ void RobotController::updateWaypointTravel() {
         return;
     }
 
-    if (taskPhase_ == TaskPhase::ToPickup) {
-        taskPhase_ = TaskPhase::PickingUp;
-        stateTimer_ = 0.0f;
+    if (taskFlow_.isRoutingToPickup()) {
+        taskFlow_.startPickingUp();
         robot_->setState(Robot::State::PickingUp);
         return;
     }
 
-    if (taskPhase_ == TaskPhase::ToDropoff) {
-        taskPhase_ = TaskPhase::DroppingOff;
-        stateTimer_ = 0.0f;
+    if (taskFlow_.isRoutingToDropoff()) {
+        taskFlow_.startDroppingOff();
         robot_->setState(Robot::State::DroppingOff);
         return;
     }
 
-    if (taskPhase_ == TaskPhase::ToCharging) {
-        taskPhase_ = TaskPhase::Charging;
-        stateTimer_ = 0.0f;
+    if (taskFlow_.isRoutingToCharging()) {
+        taskFlow_.startCharging();
         robot_->setState(Robot::State::Charging);
     }
 }

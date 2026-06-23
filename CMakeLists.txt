@@ -18,6 +18,8 @@ set(PROJECT_SOURCES
     src/simulation/navigation.cpp
     src/simulation/InputState.cpp
     src/simulation/RobotController.cpp
+    src/simulation/RobotRoutePlanner.cpp
+    src/simulation/RobotTaskFlow.cpp
     src/simulation/BlockingRobotManager.cpp
     src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
@@ -61,7 +63,9 @@ set(PROJECT_HEADERS
     include/simulation/navigation.h
     include/simulation/InputState.h
     include/simulation/RobotController.h
+    include/simulation/RobotRoutePlanner.h
     include/simulation/RobotStatusSnapshot.h
+    include/simulation/RobotTaskFlow.h
     include/simulation/BlockingRobotManager.h
     include/ui/StatusOverlay.h
 )
