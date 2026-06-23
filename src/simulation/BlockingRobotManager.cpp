@@ -35,10 +35,10 @@ void BlockingRobotManager::addBlockingRobot(const BlockingRobot& blockingRobot) 
     blockingRobots.push_back(blockingRobot);
 }
 
-void BlockingRobotManager::initBlockingRobots(void) {
+void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) {
     clear();
 
-    for (const BlockingRobotPath& blockingPath : GetMapBlockingRobotPaths()) {
+    for (const BlockingRobotPath& blockingPath : logisticsMap.getBlockingRobotPaths()) {
         addBlockingRobotPath(blockingPath.points,
                              blockingRobotSpeed * blockingPath.speedMultiplier);
     }

@@ -7,6 +7,8 @@
 #include <random>
 #include <vector>
 
+class LogisticsMap;
+
 struct BlockingRobot {
     Vector2 position;
     float radius;
@@ -24,7 +26,7 @@ class BlockingRobotManager {
 
     void clear(void);
     void addBlockingRobot(const BlockingRobot& blockingRobot);
-    void initBlockingRobots(void);
+    void initBlockingRobots(const LogisticsMap& logisticsMap);
     void update(float deltaTime);
     void draw(void) const;
     bool hasActiveBlockingRobotNear(Vector2 position, float detectionRadius) const;

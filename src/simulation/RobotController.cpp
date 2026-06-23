@@ -39,15 +39,16 @@ float Distance(Vector2 from, Vector2 to) {
 }
 } // namespace
 
-RobotController::RobotController() = default;
+RobotController::RobotController(const LogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
 
 void RobotController::initialize() {
-    robot_ = std::make_unique<WorkerRobot>(GetRobotStartPosition(), robotConfig);
+    robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
     taskPhase_ = TaskPhase::ToPickup;
     stateTimer_ = 0.0f;
     emergencyStopActive_ = false;
     stateBeforeEmergencyStop_ = Robot::State::Idle;
-    setActivePath(buildPathToPickup(GetRobotStartPosition()), GetRobotStartPosition());
+    setActivePath(buildPathToPickup(logisticsMap_.getRobotStartPosition()),
+                  logisticsMap_.getRobotStartPosition());
 }
 
 void RobotController::update(float deltaTime, const InputState& inputState) {
@@ -123,15 +124,19 @@ Vector2 RobotController::getRobotPosition() const {
 }
 
 std::vector<Vector2> RobotController::buildPathToPickup(Vector2 startPosition) const {
-    return FindNavigationPath(startPosition, GetLagerDockPosition(GetMapPickupLagerId()));
+    return FindNavigationPath(logisticsMap_, startPosition,
+                              logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId()));
 }
 
 std::vector<Vector2> RobotController::buildPathToDropoff(Vector2 startPosition) const {
-    return FindNavigationPath(startPosition, GetLagerDockPosition(GetMapDeliveryLagerId()));
+    return FindNavigationPath(
+        logisticsMap_, startPosition,
+        logisticsMap_.getLagerDockPosition(logisticsMap_.getDeliveryLagerId()));
 }
 
 std::vector<Vector2> RobotController::buildPathToChargingStation(Vector2 startPosition) const {
-    return FindNavigationPath(startPosition, GetChargingStationDockPosition());
+    return FindNavigationPath(logisticsMap_, startPosition,
+                              logisticsMap_.getChargingStationDockPosition());
 }
 
 float RobotController::pathDistance(Vector2 startPosition, const std::vector<Vector2>& path) const {
@@ -199,7 +204,7 @@ void RobotController::startDropoffTrip() {
 
 bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
     const Vector2 robotPosition = getRobotPosition();
-    const Vector2 pickupDock = GetLagerDockPosition(GetMapPickupLagerId());
+    const Vector2 pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
     const std::vector<Vector2> pickupPath = buildPathToPickup(robotPosition);
     const std::vector<Vector2> dropoffPath = buildPathToDropoff(pickupDock);
     const float estimatedDistance =
@@ -213,8 +218,8 @@ bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
 
 void RobotController::keepRobotOnRoad() {
     const Vector2 robotPosition = robot_->getPosition();
-    if (!IsMapRoadPosition(robotPosition)) {
-        robot_->setPosition(ClampPositionToMapRoad(robotPosition));
+    if (!logisticsMap_.isRoadPosition(robotPosition)) {
+        robot_->setPosition(logisticsMap_.clampPositionToRoad(robotPosition));
     }
 }
 
@@ -297,25 +302,43 @@ void RobotController::updateEmergencyStop(const InputState& inputState) {
 }
 
 namespace {
-RobotController robotController;
+std::unique_ptr<RobotController> robotController;
 } // namespace
 
-void InitRobotController(void) {
-    robotController.initialize();
+void InitRobotController(const LogisticsMap& logisticsMap) {
+    robotController = std::make_unique<RobotController>(logisticsMap);
+    robotController->initialize();
 }
 
 void UpdateRobotController(float deltaTime, const InputState& inputState) {
-    robotController.update(deltaTime, inputState);
+    if (robotController == nullptr) {
+        return;
+    }
+
+    robotController->update(deltaTime, inputState);
 }
 
 void DrawRobotController(void) {
-    robotController.draw();
+    if (robotController == nullptr) {
+        return;
+    }
+
+    robotController->draw();
 }
 
 void UnloadRobotController(void) {
-    robotController.unload();
+    if (robotController == nullptr) {
+        return;
+    }
+
+    robotController->unload();
+    robotController.reset();
 }
 
 std::optional<RobotStatusSnapshot> GetRobotStatusSnapshot(void) {
-    return robotController.statusSnapshot();
+    if (robotController == nullptr) {
+        return std::nullopt;
+    }
+
+    return robotController->statusSnapshot();
 }

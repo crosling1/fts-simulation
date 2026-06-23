@@ -5,7 +5,10 @@
 
 #include <vector>
 
+class LogisticsMap;
+
 std::vector<Vector2>
-FindNavigationPath(Vector2 start, Vector2 goal); // NOLINT(bugprone-easily-swappable-parameters)
+FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
+                   Vector2 goal); // NOLINT(bugprone-easily-swappable-parameters)
 
 #endif // NAVIGATION_H

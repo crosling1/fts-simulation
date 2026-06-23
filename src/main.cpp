@@ -13,9 +13,10 @@ int main(void) {
     InitWindow(screenWidth, screenHeight, "Robot Logistics Map Simulation");
     SetTargetFPS(targetFps);
 
-    InitMap();
-    InitBlockingRobotController();
-    InitRobotController();
+    LogisticsMap logisticsMap;
+    logisticsMap.init();
+    InitBlockingRobotController(logisticsMap);
+    InitRobotController(logisticsMap);
 
     while (!WindowShouldClose()) {
         const float deltaTime = GetFrameTime();
@@ -26,7 +27,7 @@ int main(void) {
 
         BeginDrawing();
 
-        DrawMap();
+        logisticsMap.draw();
         DrawBlockingRobotController();
         DrawRobotController();
         DrawStatusOverlay(GetRobotStatusSnapshot());
@@ -36,7 +37,7 @@ int main(void) {
 
     UnloadRobotController();
     UnloadBlockingRobotController();
-    UnloadMap();
+    logisticsMap.unload();
     CloseWindow();
 
     return 0;

@@ -13,9 +13,11 @@
 #include <optional>
 #include <vector>
 
+class LogisticsMap;
+
 class RobotController {
   public:
-    RobotController();
+    explicit RobotController(const LogisticsMap& logisticsMap);
 
     void initialize();
     void update(float deltaTime, const InputState& inputState);
@@ -52,6 +54,7 @@ class RobotController {
     void updateWaypointTravel();
     void updateEmergencyStop(const InputState& inputState);
 
+    const LogisticsMap& logisticsMap_;
     std::unique_ptr<Robot> robot_;
     std::vector<Vector2> activePath_;
     Vector2 activePathStart_ = {0.0f, 0.0f};
@@ -62,7 +65,7 @@ class RobotController {
     Robot::State stateBeforeEmergencyStop_ = Robot::State::Idle;
 };
 
-void InitRobotController(void);
+void InitRobotController(const LogisticsMap& logisticsMap);
 void UpdateRobotController(float deltaTime, const InputState& inputState);
 void DrawRobotController(void);
 void UnloadRobotController(void);

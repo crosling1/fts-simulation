@@ -6,8 +6,8 @@ namespace {
 BlockingRobotManager blockingRobotManager;
 } // namespace
 
-void InitBlockingRobotController(void) {
-    blockingRobotManager.initBlockingRobots();
+void InitBlockingRobotController(const LogisticsMap& logisticsMap) {
+    blockingRobotManager.initBlockingRobots(logisticsMap);
 }
 
 void UpdateBlockingRobotController(void) {

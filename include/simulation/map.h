@@ -5,10 +5,7 @@
 #include "raylib.h"
 
 #include <cstdint>
-
-void InitMap(void);
-void DrawMap(void);
-void UnloadMap(void);
+#include <vector>
 
 typedef enum LagerId : std::uint8_t {
     LAGER_1 = 0,
@@ -20,19 +17,36 @@ typedef enum LagerId : std::uint8_t {
     LAGER_COUNT
 } LagerId;
 
-Vector2 GetMapPointA(void);
-Vector2 GetMapPointB(void);
-LagerId GetMapPickupLagerId(void);
-LagerId GetMapDeliveryLagerId(void);
-Vector2 GetRobotStartPosition(void);
-Vector2 GetChargingStationPosition(void);
-Vector2 GetChargingStationDockPosition(void);
-Vector2 GetLagerPosition(LagerId lagerId);
-Vector2 GetLagerDockPosition(LagerId lagerId);
-bool IsMapRoadPosition(Vector2 position);
-Vector2 ClampPositionToMapRoad(Vector2 position);
-const std::vector<Vector2>& GetMapNavigationNodes(void);
-const std::vector<NavigationEdge>& GetMapNavigationEdges(void);
-const std::vector<BlockingRobotPath>& GetMapBlockingRobotPaths(void);
+class LogisticsMap {
+  public:
+    void init(void);
+    void draw(void) const;
+    void unload(void);
+
+    Vector2 getPointA(void) const;
+    Vector2 getPointB(void) const;
+    LagerId getPickupLagerId(void) const;
+    LagerId getDeliveryLagerId(void) const;
+    Vector2 getRobotStartPosition(void) const;
+    Vector2 getChargingStationPosition(void) const;
+    Vector2 getChargingStationDockPosition(void) const;
+    Vector2 getLagerPosition(LagerId lagerId) const;
+    Vector2 getLagerDockPosition(LagerId lagerId) const;
+    bool isRoadPosition(Vector2 position) const;
+    Vector2 clampPositionToRoad(Vector2 position) const;
+    const std::vector<Vector2>& getNavigationNodes(void) const;
+    const std::vector<NavigationEdge>& getNavigationEdges(void) const;
+    const std::vector<BlockingRobotPath>& getBlockingRobotPaths(void) const;
+
+  private:
+    MapData data_;
+
+    Vector2 getWarehouseCenter(int index) const;
+    void drawGrid(void) const;
+    void drawRoads(void) const;
+    void drawWarehouse(Rectangle body, int index) const;
+    void drawChargingStation(void) const;
+    bool isValidLagerId(LagerId lagerId) const;
+};
 
 #endif // MAP_H

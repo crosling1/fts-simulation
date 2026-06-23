@@ -3,18 +3,12 @@
 
 #include "raylib.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class LogisticsMap;
 
-void InitBlockingRobotController(void);
+void InitBlockingRobotController(const LogisticsMap& logisticsMap);
 void UpdateBlockingRobotController(void);
 void DrawBlockingRobotController(void);
 void UnloadBlockingRobotController(void);
 bool HasBlockingRobotNear(Vector2 position, float detectionRadius);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // BLOCKING_ROBOT_CONTROLLER_H
