@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chargingmanager.h"
+#include "emergencystopcontroller.h"
 #include "robots/Robot.h"
 #include "routefollower.h"
 #include "simulation/InputState.h"
@@ -36,15 +37,12 @@ class RobotController {
     void updateDropoff(float deltaTime);
     void updateCharging(float deltaTime);
     void updateWaypointTravel();
-    void updateEmergencyStop(const InputState& inputState);
 
     const LogisticsMap& logisticsMap_;
-    const BlockingRobotManager& blockingRobotManager_;
     RobotRoutePlanner routePlanner_;
     RouteFollower routeFollower_;
     ChargingManager chargingManager_;
+    EmergencyStopController emergencyStopController_;
     RobotTaskFlow taskFlow_;
     std::unique_ptr<Robot> robot_;
-    bool emergencyStopActive_ = false;
-    Robot::State stateBeforeEmergencyStop_ = Robot::State::Idle;
 };

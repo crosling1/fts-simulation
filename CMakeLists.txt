@@ -18,6 +18,7 @@ set(PROJECT_SOURCES
     src/simulation/navigation.cpp
     src/simulation/InputState.cpp
     src/chargingmanager.cpp
+    src/emergencystopcontroller.cpp
     src/routefollower.cpp
     src/simulation/RobotController.cpp
     src/simulation/RobotRoutePlanner.cpp
@@ -65,6 +66,7 @@ set(PROJECT_HEADERS
     include/simulation/navigation.h
     include/simulation/InputState.h
     include/chargingmanager.h
+    include/emergencystopcontroller.h
     include/routefollower.h
     include/simulation/RobotController.h
     include/simulation/RobotRoutePlanner.h

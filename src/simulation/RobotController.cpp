@@ -25,14 +25,13 @@ constexpr Robot::Config robotConfig = {
 
 RobotController::RobotController(const LogisticsMap& logisticsMap,
                                  const BlockingRobotManager& blockingRobotManager)
-    : logisticsMap_(logisticsMap), blockingRobotManager_(blockingRobotManager),
-      routePlanner_(logisticsMap), routeFollower_(logisticsMap), chargingManager_(logisticsMap) {}
+    : logisticsMap_(logisticsMap), routePlanner_(logisticsMap), routeFollower_(logisticsMap),
+      chargingManager_(logisticsMap), emergencyStopController_(blockingRobotManager) {}
 
 void RobotController::initialize() {
     robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
     taskFlow_.reset();
-    emergencyStopActive_ = false;
-    stateBeforeEmergencyStop_ = Robot::State::Idle;
+    emergencyStopController_.reset();
     routeFollower_.setActivePath(
         routePlanner_.buildPathToPickup(logisticsMap_.getRobotStartPosition()),
         logisticsMap_.getRobotStartPosition(), *robot_);
@@ -43,8 +42,8 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
         return;
     }
 
-    updateEmergencyStop(inputState);
-    if (emergencyStopActive_) {
+    emergencyStopController_.updateEmergencyStop(inputState, *robot_);
+    if (emergencyStopController_.isEmergencyStopActive()) {
         return;
     }
 
@@ -65,8 +64,8 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
         return;
     }
 
-    if (blockingRobotManager_.hasActiveBlockingRobotNear(robotPosition,
-                                                         robot_->getProximityDetectionRadius())) {
+    if (emergencyStopController_.shouldPauseForObstacle(robotPosition,
+                                                        robot_->getProximityDetectionRadius())) {
         return;
     }
 
@@ -98,7 +97,7 @@ std::optional<RobotStatusSnapshot> RobotController::statusSnapshot() const {
     return RobotStatusSnapshot{
         robot_->getState(),
         robot_->getBattery().getChargePercentage(),
-        emergencyStopActive_,
+        emergencyStopController_.isEmergencyStopActive(),
     };
 }
 
@@ -192,18 +191,5 @@ void RobotController::updateWaypointTravel() {
     if (taskFlow_.isRoutingToCharging()) {
         taskFlow_.startCharging();
         robot_->setState(Robot::State::Charging);
-    }
-}
-
-void RobotController::updateEmergencyStop(const InputState& inputState) {
-    if (inputState.emergencyStopPressed && !emergencyStopActive_) {
-        emergencyStopActive_ = true;
-        stateBeforeEmergencyStop_ = robot_->getState();
-        robot_->setState(Robot::State::Idle);
-    }
-
-    if (inputState.resetEmergencyStopPressed && emergencyStopActive_) {
-        emergencyStopActive_ = false;
-        robot_->setState(stateBeforeEmergencyStop_);
     }
 }
