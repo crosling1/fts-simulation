@@ -1,165 +1,168 @@
 # FTS Simulation
 
-FTS Simulation is a raylib-based robot logistics simulation project.
+FTS Simulation is a C++17 and raylib-based logistics robot simulation inspired by
+Automated Guided Vehicle (AGV) and Fahrerloses Transportsystem (FTS) workflows.
 
-The current implementation shows a logistics map with L1-L6 lager positions, pickup lager A, delivery lager B, a charging station, the robot start position, and the road network between dock points. A robot starts at the map start position, requests A* routes through the road network, repeats pickup and delivery tasks, tracks battery usage while moving, charges when the next delivery would leave too little battery, and stays constrained to the road network during movement. Moving blocking robots share the road network, and the main robot uses circular proximity detection to wait when another robot blocks its path. The main robot movement uses a simple PI controller and can be stopped with the emergency stop control.
+The project simulates a warehouse environment containing storage locations,
+pickup and delivery stations, charging infrastructure, road-network navigation
+and moving robots.
 
-## Simulation Behavior
+A main robot repeatedly performs pickup and delivery tasks while remaining
+constrained to the road network. Routes are generated using A* pathfinding,
+movement is controlled by a PI controller, battery consumption is tracked during
+operation, and charging decisions are made automatically when future tasks would
+leave insufficient remaining battery capacity.
 
-- The map renders warehouses, lager dock points, the charging station, the robot start position, and the road network.
-- `main.cpp` owns the main simulation objects explicitly, including `LogisticsMap`, `BlockingRobotManager`, and `RobotController`.
-- `LogisticsMap` is an explicit object rather than hidden global map state.
-- The `RobotController` class coordinates the main robot lifecycle and delegates route following, charging decisions, emergency stop handling, and obstacle pause checks to focused helper classes.
-- `RobotRoutePlanner` handles route creation and path distance calculations.
-- `RouteFollower` handles active waypoint routes, route rendering, and road clamping.
-- `RobotTaskFlow` handles pickup, dropoff, and charging phase state.
-- `ChargingManager` handles the post-dropoff charging decision.
-- `EmergencyStopController` handles emergency stop state and obstacle pause decisions.
-- The navigation module calculates road-network waypoint routes with A* and validates candidate edges against the map road area.
-- The robot follows calculated waypoint routes instead of moving directly through non-road areas.
-- Navigation removes unnecessary pass-through waypoints while keeping turn points needed for dock entry.
-- Road constraints clamp the robot back to the nearest road if its center leaves the road network.
-- The robot state includes idle, moving, picking up, carrying an item, dropping off, arrived, battery depleted, and charging.
-- The main robot movement speed is adjusted by a reusable PI controller while still respecting the configured maximum speed.
-- The carried item is drawn on top of the robot and moves with it while pickup, carry, and dropoff states are active.
-- The robot drains battery based on distance traveled.
-- After each dropoff, the controller estimates whether the robot can complete the next pickup and delivery while staying above 10% battery.
-- If the next delivery would leave too little battery, or if the battery is 10% or lower after dropoff, the robot goes to the charging station.
-- Charging restores battery at 10% per second and then the robot resumes the pickup/delivery loop.
-- A status overlay shows the robot state, battery percentage, and currently used process memory.
-- The status overlay shows emergency stop state, and the bottom-center control hint shows `E` for emergency stop and `R` for reset.
-- The main robot owns a radius-based proximity sensor that draws a circular scan area.
-- `InputState` separates keyboard input reading from controller update logic.
-- The `BlockingRobotManager` owns moving blocking robot data, path movement, and proximity queries.
-- Blocking robots move on road-network paths and choose randomized next targets at path nodes.
-- If the main robot detects a blocking robot inside its proximity range, the robot controller pauses movement until the scan area is clear.
-- Blocking robots keep moving through blocked narrow sections instead of bouncing off the main robot.
+The simulation also includes moving blocking robots, proximity-based obstacle
+handling, emergency stop controls, runtime status monitoring, automated testing
+and continuous integration.
 
-## Requirements
+The project serves both as a robotics simulation exercise and as a portfolio
+project focused on modern C++ design, maintainability and responsibility-based
+software architecture.
 
-- CMake 3.16+
-- C++17 compiler
-- raylib
-- clang-format
-- clang-tidy
-- GitHub Actions is used for CI on pushes and pull requests
+## Features
 
-On Ubuntu-based systems, the following packages are usually required.
+### Navigation
 
-```bash
-sudo apt install cmake g++ pkg-config clang-format clang-tidy
+* A* road-network pathfinding
+* Waypoint-based route following
+* Road-constrained movement
+* Route optimization by removing unnecessary pass-through nodes
+* Route visualization
+
+### Robot Operation
+
+* Continuous pickup and delivery task loop
+* Task phase management
+* Item carrying visualization
+* PI-controlled movement
+* Configurable robot state machine
+
+### Energy Management
+
+* Distance-based battery consumption
+* Battery-aware task planning
+* Automatic charging decisions
+* Charging station navigation
+* Recharge cycle management
+
+### Safety And Obstacle Handling
+
+* Radius-based proximity sensing
+* Dynamic blocking robots
+* Automatic obstacle waiting behavior
+* Emergency stop control
+* Runtime reset support
+
+### Development Tooling
+
+* Unit testing
+* clang-format integration
+* clang-tidy integration
+* GitHub Actions CI pipeline
+* CMake build system
+* Makefile convenience commands
+
+## Architecture
+
+The simulation follows a responsibility-based architecture where the main
+controller coordinates the overall workflow while specialized components handle
+navigation, task progression, charging decisions and safety behavior.
+
+```text
+Simulation Loop
+      |
+      v
+RobotController
+      |
+      +-- Navigation Layer
+      |      |
+      |      +-- RobotRoutePlanner
+      |      +-- RouteFollower
+      |
+      +-- Task Layer
+      |      |
+      |      +-- RobotTaskFlow
+      |
+      +-- Energy Layer
+      |      |
+      |      +-- ChargingManager
+      |
+      +-- Safety Layer
+      |      |
+      |      +-- EmergencyStopController
+      |
+      v
+Robot
+      |
+      +-- Battery
+      +-- ProximitySensor
+
+Environment
+      |
+      +-- LogisticsMap
+      +-- BlockingRobotManager
+      |
+      +-- BlockingRobot
+
+UI
+      |
+      +-- StatusOverlay
 ```
 
-raylib can be provided by a system package or by a locally built installation.
+## Core Areas
 
-## Build
+| Area                | Responsibility                                                             |
+| ------------------- | -------------------------------------------------------------------------- |
+| Controller Layer    | Coordinates the overall robot workflow and delegates specialized behavior. |
+| Navigation Layer    | Route planning, waypoint following and road-network movement.              |
+| Task Layer          | Pickup, dropoff and charging phase management.                             |
+| Energy Layer        | Battery monitoring and charging decisions.                                 |
+| Safety Layer        | Emergency stop handling and obstacle pause checks.                         |
+| Robot Domain        | Robot movement, state, battery and sensor ownership.                       |
+| Environment         | Map data, road network, charging stations and blocking robots.             |
+| UI Layer            | Runtime overlays, visualization and simulation feedback.                   |
+| Development Tooling | Testing, formatting, linting and CI automation.                            |
 
-```bash
-make build
-```
+## Design Decisions
 
-## Run
+### Explicit Ownership
 
-```bash
-make run
-```
+The simulation avoids hidden global state. Main application objects are created
+and owned explicitly by `main.cpp`.
 
-## Format And Lint
+### Controller As Coordinator
 
-Run the full validation pipeline:
+`RobotController` coordinates the robot workflow but does not contain every
+behavior directly. Navigation, charging and safety decisions are delegated to
+dedicated components.
 
-```bash
-make check
-```
+### Separation Of Responsibilities
 
-Run unit tests only:
+Navigation, task management, charging logic and safety behavior are separated
+into focused modules. This reduces coupling and makes future changes easier.
 
-```bash
-make test
-```
+### Road-Constrained Navigation
 
-Apply automatic fixes:
+Robots operate exclusively on the road network. Route generation uses A*
+pathfinding and road validation to ensure realistic movement behavior.
 
-```bash
-make fix
-```
+### Extensibility
 
-Check source formatting:
-
-```bash
-make format-check
-```
-
-Apply automatic formatting:
-
-```bash
-make format
-```
-
-Run lint checks:
-
-```bash
-make lint
-```
-
-`make lint` runs `clang-tidy` on project and test `.cpp` files using `build/compile_commands.json`, with warnings treated as errors. The wrapper may print a suppressed-warning summary; those suppressed warnings come from non-user code or lines explicitly marked with `NOLINT`.
-
-Run lint checks with automatic fixes:
-
-```bash
-make lint-fix
-```
-
-The Makefile wraps CMake, so the equivalent `cmake --build build --target ...` commands still work when needed. Unit tests are registered individually with CTest and can also be run directly with:
-
-```bash
-ctest --test-dir build --output-on-failure
-./build/unit_tests
-./build/unit_tests --test "Robot moves to target"
-```
-
-## Continuous Integration
-
-GitHub Actions runs the project validation pipeline for pull requests and pushes to `main` or `master`.
-
-The CI workflow installs the required build tools, builds raylib, configures the project, builds the simulation, runs unit tests, checks formatting, and runs clang-tidy.
+The architecture is designed to support additional robot types, sensors,
+navigation strategies and workflow logic without requiring major changes to the
+central controller.
 
 ## Project Structure
 
-- `main.cpp`: Program entry point, main loop, and explicit simulation object ownership
-- `map.h`: Public `LogisticsMap` interface
-- `map.cpp`: Map data loading, lager positions, road rendering logic, and road constraint helpers
-- `navigation.h`: Public navigation pathfinding interface
-- `navigation.cpp`: Road graph definition, A* waypoint pathfinding, and map-road edge validation
-- `PIController.h`: Public reusable PI controller interface for bounded control output
-- `PIController.cpp`: PI controller integral accumulation, reset, and output clamping logic
-- `Robot.h`: Robot class interface, start pose/config types, movement state, and drawing API
-- `Robot.cpp`: Robot movement, battery drain, PI-controlled speed requests, state handling, and robot/item rendering
-- `Battery.h`: Public battery interface
-- `Battery.cpp`: Battery charge, drain, and percentage clamping logic
-- `RobotController.h`: Main robot controller interface
-- `RobotController.cpp`: Main robot lifecycle coordination across task flow, route following, charging, and emergency stop helpers
-- `routefollower.h`: Public route following helper interface for active waypoint paths
-- `routefollower.cpp`: Active path state, route rendering, waypoint progression, and road clamping
-- `chargingmanager.h`: Public charging decision helper interface
-- `chargingmanager.cpp`: Post-dropoff battery threshold and next-delivery feasibility checks
-- `emergencystopcontroller.h`: Public emergency stop and obstacle pause helper interface
-- `emergencystopcontroller.cpp`: Emergency stop state storage/reset and blocking-robot proximity pause checks
-- `RobotRoutePlanner.h`: Route planning helper interface for the main robot
-- `RobotRoutePlanner.cpp`: Pickup, dropoff, and charging route creation plus path distance calculations
-- `RobotTaskFlow.h`: Pickup, dropoff, and charging phase state interface
-- `RobotTaskFlow.cpp`: Task phase transitions and pickup/dropoff timers
-- `RobotStatusSnapshot.h`: Display-safe robot status data for UI overlays
-- `StatusOverlay.h`: Public status overlay drawing interface
-- `StatusOverlay.cpp`: Robot status, emergency stop state, control hints, battery, and used-memory overlay rendering
-- `ProximitySensor.h`: Public radius-based proximity detection interface owned by the main robot
-- `ProximitySensor.cpp`: Blocking robot proximity checks and scan area rendering
-- `BlockingRobotManager.h`: Blocking robot data and manager interface
-- `BlockingRobotManager.cpp`: Blocking robot movement, randomized target selection, pass-through behavior, and drawing
-- `tests/unit_tests.cpp`: Unit test executable entry point
-- `tests/support/`: Shared unit test helpers, test case runner, and suite declarations
-- `tests/robots/`: Robot, PI controller, and battery behavior tests
-- `tests/sensors/`: Proximity sensor tests
-- `tests/simulation/`: Map, blocking robot, and navigation tests
+* `include/` Public interfaces and class declarations.
+* `src/` Simulation, navigation, control and application logic.
+* `tests/` Unit tests and shared test utilities.
+* `assets/` Runtime assets and project resources.
+* `.github/` Continuous integration workflows.
+* `tools/` Development and maintenance utilities.
 
-`main.cpp` does not define map, robot task, blocking robot movement, or UI details directly. It owns the main simulation objects, updates them each frame, and draws the map, blocking robots, main robot, and status overlay in order.
+The codebase is organized by responsibility rather than by large monolithic
+classes. New functionality is typically added to an existing architectural area
+instead of expanding a single controller.
