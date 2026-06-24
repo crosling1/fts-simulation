@@ -29,15 +29,16 @@ constexpr Robot::Config robotConfig = {
 RobotController::RobotController(const LogisticsMap& logisticsMap,
                                  const BlockingRobotManager& blockingRobotManager)
     : logisticsMap_(logisticsMap), blockingRobotManager_(blockingRobotManager),
-      routePlanner_(logisticsMap) {}
+      routePlanner_(logisticsMap), routeFollower_(logisticsMap) {}
 
 void RobotController::initialize() {
     robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
     taskFlow_.reset();
     emergencyStopActive_ = false;
     stateBeforeEmergencyStop_ = Robot::State::Idle;
-    setActivePath(routePlanner_.buildPathToPickup(logisticsMap_.getRobotStartPosition()),
-                  logisticsMap_.getRobotStartPosition());
+    routeFollower_.setActivePath(
+        routePlanner_.buildPathToPickup(logisticsMap_.getRobotStartPosition()),
+        logisticsMap_.getRobotStartPosition(), *robot_);
 }
 
 void RobotController::update(float deltaTime, const InputState& inputState) {
@@ -73,7 +74,7 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
     }
 
     robot_->updateMovement(deltaTime);
-    keepRobotOnRoad();
+    routeFollower_.keepOnRoad(*robot_);
     updateWaypointTravel();
 }
 
@@ -82,12 +83,7 @@ void RobotController::draw() const {
         return;
     }
 
-    Vector2 previousPoint = activePathStart_;
-    for (Vector2 waypoint : activePath_) {
-        DrawLineEx(previousPoint, waypoint, 3.0f, MAGENTA);
-        DrawCircleV(waypoint, 5.0f, MAGENTA);
-        previousPoint = waypoint;
-    }
+    routeFollower_.draw();
 
     robot_->drawProximityScanArea();
     robot_->draw();
@@ -113,23 +109,6 @@ Vector2 RobotController::getRobotPosition() const {
     return robot_->getPosition();
 }
 
-bool RobotController::setNextWaypoint() {
-    if (robot_ == nullptr || currentWaypointIndex_ >= activePath_.size()) {
-        return false;
-    }
-
-    robot_->setTargetPosition(activePath_[currentWaypointIndex_]);
-    currentWaypointIndex_++;
-    return true;
-}
-
-void RobotController::setActivePath(const std::vector<Vector2>& path, Vector2 pathStart) {
-    activePath_ = path;
-    activePathStart_ = pathStart;
-    currentWaypointIndex_ = 0;
-    setNextWaypoint();
-}
-
 bool RobotController::shouldChargeAtOrBelow(float thresholdPercentage) const {
     return robot_->getBattery().getChargePercentage() <= thresholdPercentage;
 }
@@ -139,9 +118,11 @@ void RobotController::startChargingTrip() {
 
     taskFlow_.startTripToCharging();
     robot_->setState(Robot::State::Arrived);
-    setActivePath(routePlanner_.buildPathToChargingStation(startPosition), startPosition);
+    const std::vector<Vector2> chargingPath =
+        routePlanner_.buildPathToChargingStation(startPosition);
+    routeFollower_.setActivePath(chargingPath, startPosition, *robot_);
 
-    if (activePath_.empty()) {
+    if (chargingPath.empty()) {
         taskFlow_.startCharging();
         robot_->setState(Robot::State::Charging);
     }
@@ -152,7 +133,8 @@ void RobotController::startPickupTrip() {
 
     taskFlow_.startTripToPickup();
     robot_->setState(Robot::State::Arrived);
-    setActivePath(routePlanner_.buildPathToPickup(startPosition), startPosition);
+    routeFollower_.setActivePath(routePlanner_.buildPathToPickup(startPosition), startPosition,
+                                 *robot_);
 }
 
 void RobotController::startDropoffTrip() {
@@ -160,7 +142,8 @@ void RobotController::startDropoffTrip() {
 
     taskFlow_.startTripToDropoff();
     robot_->setState(Robot::State::CarryingItem);
-    setActivePath(routePlanner_.buildPathToDropoff(startPosition), startPosition);
+    routeFollower_.setActivePath(routePlanner_.buildPathToDropoff(startPosition), startPosition,
+                                 *robot_);
 }
 
 bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
@@ -175,13 +158,6 @@ bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
                                            (estimatedDistance * batteryDrainPercentagePerPixel);
 
     return estimatedBatteryAfterJob > minimumBatteryAfterJob;
-}
-
-void RobotController::keepRobotOnRoad() {
-    const Vector2 robotPosition = robot_->getPosition();
-    if (!logisticsMap_.isRoadPosition(robotPosition)) {
-        robot_->setPosition(logisticsMap_.clampPositionToRoad(robotPosition));
-    }
 }
 
 void RobotController::updatePickup(float deltaTime) {
@@ -218,11 +194,7 @@ void RobotController::updateCharging(float deltaTime) {
 }
 
 void RobotController::updateWaypointTravel() {
-    if (!robot_->hasReachedTarget()) {
-        return;
-    }
-
-    if (setNextWaypoint()) {
+    if (!routeFollower_.updateWaypointTravel(*robot_)) {
         return;
     }
 
