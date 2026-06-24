@@ -9,9 +9,12 @@ The current implementation shows a logistics map with L1-L6 lager positions, pic
 - The map renders warehouses, lager dock points, the charging station, the robot start position, and the road network.
 - `main.cpp` owns the main simulation objects explicitly, including `LogisticsMap`, `BlockingRobotManager`, and `RobotController`.
 - `LogisticsMap` is an explicit object rather than hidden global map state.
-- The `RobotController` class coordinates the main robot lifecycle, emergency stop state, proximity checks, and charging decisions.
+- The `RobotController` class coordinates the main robot lifecycle and delegates route following, charging decisions, emergency stop handling, and obstacle pause checks to focused helper classes.
 - `RobotRoutePlanner` handles route creation and path distance calculations.
+- `RouteFollower` handles active waypoint routes, route rendering, and road clamping.
 - `RobotTaskFlow` handles pickup, dropoff, and charging phase state.
+- `ChargingManager` handles the post-dropoff charging decision.
+- `EmergencyStopController` handles emergency stop state and obstacle pause decisions.
 - The navigation module calculates road-network waypoint routes with A* and validates candidate edges against the map road area.
 - The robot follows calculated waypoint routes instead of moving directly through non-road areas.
 - Navigation removes unnecessary pass-through waypoints while keeping turn points needed for dock entry.
@@ -135,7 +138,13 @@ The CI workflow installs the required build tools, builds raylib, configures the
 - `Battery.h`: Public battery interface
 - `Battery.cpp`: Battery charge, drain, and percentage clamping logic
 - `RobotController.h`: Main robot controller interface
-- `RobotController.cpp`: Main robot lifecycle coordination, charging decisions, emergency stop handling, proximity checks, and road enforcement
+- `RobotController.cpp`: Main robot lifecycle coordination across task flow, route following, charging, and emergency stop helpers
+- `routefollower.h`: Public route following helper interface for active waypoint paths
+- `routefollower.cpp`: Active path state, route rendering, waypoint progression, and road clamping
+- `chargingmanager.h`: Public charging decision helper interface
+- `chargingmanager.cpp`: Post-dropoff battery threshold and next-delivery feasibility checks
+- `emergencystopcontroller.h`: Public emergency stop and obstacle pause helper interface
+- `emergencystopcontroller.cpp`: Emergency stop state storage/reset and blocking-robot proximity pause checks
 - `RobotRoutePlanner.h`: Route planning helper interface for the main robot
 - `RobotRoutePlanner.cpp`: Pickup, dropoff, and charging route creation plus path distance calculations
 - `RobotTaskFlow.h`: Pickup, dropoff, and charging phase state interface

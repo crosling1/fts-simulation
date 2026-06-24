@@ -2,7 +2,6 @@
 
 #include "robots/Robot.h"
 #include "robots/WorkerRobot.h"
-#include "simulation/BlockingRobotManager.h"
 #include "simulation/map.h"
 
 #include <memory>
@@ -101,12 +100,8 @@ std::optional<RobotStatusSnapshot> RobotController::statusSnapshot() const {
     };
 }
 
-Vector2 RobotController::getRobotPosition() const {
-    return robot_->getPosition();
-}
-
 void RobotController::startChargingTrip() {
-    const Vector2 startPosition = getRobotPosition();
+    const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToCharging();
     robot_->setState(Robot::State::Arrived);
@@ -121,7 +116,7 @@ void RobotController::startChargingTrip() {
 }
 
 void RobotController::startPickupTrip() {
-    const Vector2 startPosition = getRobotPosition();
+    const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToPickup();
     robot_->setState(Robot::State::Arrived);
@@ -130,7 +125,7 @@ void RobotController::startPickupTrip() {
 }
 
 void RobotController::startDropoffTrip() {
-    const Vector2 startPosition = getRobotPosition();
+    const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToDropoff();
     robot_->setState(Robot::State::CarryingItem);
@@ -152,7 +147,7 @@ void RobotController::updateDropoff(float deltaTime) {
     }
 
     if (chargingManager_.shouldStartChargingAfterDropoff(*robot_, routePlanner_,
-                                                         getRobotPosition())) {
+                                                         robot_->getPosition())) {
         startChargingTrip();
         return;
     }

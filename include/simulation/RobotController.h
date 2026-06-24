@@ -9,8 +9,6 @@
 #include "simulation/RobotStatusSnapshot.h"
 #include "simulation/RobotTaskFlow.h"
 
-#include "raylib.h"
-
 #include <memory>
 #include <optional>
 
@@ -29,7 +27,6 @@ class RobotController {
     std::optional<RobotStatusSnapshot> statusSnapshot() const;
 
   private:
-    Vector2 getRobotPosition() const;
     void startPickupTrip();
     void startDropoffTrip();
     void startChargingTrip();
