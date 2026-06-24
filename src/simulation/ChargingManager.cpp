@@ -1,4 +1,4 @@
-#include "chargingmanager.h"
+#include "simulation/ChargingManager.h"
 
 #include "robots/Robot.h"
 #include "simulation/RobotRoutePlanner.h"

@@ -1,4 +1,4 @@
-#include "emergencystopcontroller.h"
+#include "simulation/EmergencyStopController.h"
 
 #include "simulation/BlockingRobotManager.h"
 
