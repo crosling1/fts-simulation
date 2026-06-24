@@ -16,9 +16,6 @@ constexpr float robotProportionalGain = 2.0f;
 constexpr float robotIntegralGain = 0.25f;
 constexpr float robotMaxIntegralError = 200.0f;
 constexpr float chargeRatePercentagePerSecond = 10.0f;
-constexpr float chargeAfterDropoffThreshold = 10.0f;
-constexpr float minimumBatteryAfterJob = 10.0f;
-constexpr float batteryDrainPercentagePerPixel = 0.01f;
 
 constexpr Robot::Config robotConfig = {
     {robotSpeed, robotRotationSpeed, robotSize},
@@ -29,7 +26,7 @@ constexpr Robot::Config robotConfig = {
 RobotController::RobotController(const LogisticsMap& logisticsMap,
                                  const BlockingRobotManager& blockingRobotManager)
     : logisticsMap_(logisticsMap), blockingRobotManager_(blockingRobotManager),
-      routePlanner_(logisticsMap), routeFollower_(logisticsMap) {}
+      routePlanner_(logisticsMap), routeFollower_(logisticsMap), chargingManager_(logisticsMap) {}
 
 void RobotController::initialize() {
     robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
@@ -109,10 +106,6 @@ Vector2 RobotController::getRobotPosition() const {
     return robot_->getPosition();
 }
 
-bool RobotController::shouldChargeAtOrBelow(float thresholdPercentage) const {
-    return robot_->getBattery().getChargePercentage() <= thresholdPercentage;
-}
-
 void RobotController::startChargingTrip() {
     const Vector2 startPosition = getRobotPosition();
 
@@ -146,20 +139,6 @@ void RobotController::startDropoffTrip() {
                                  *robot_);
 }
 
-bool RobotController::canCompleteNextDeliveryBeforeMinimumBattery() const {
-    const Vector2 robotPosition = getRobotPosition();
-    const Vector2 pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
-    const std::vector<Vector2> pickupPath = routePlanner_.buildPathToPickup(robotPosition);
-    const std::vector<Vector2> dropoffPath = routePlanner_.buildPathToDropoff(pickupDock);
-    const float estimatedDistance = routePlanner_.calculatePathDistance(robotPosition, pickupPath) +
-                                    routePlanner_.calculatePathDistance(pickupDock, dropoffPath);
-
-    const float estimatedBatteryAfterJob = robot_->getBattery().getChargePercentage() -
-                                           (estimatedDistance * batteryDrainPercentagePerPixel);
-
-    return estimatedBatteryAfterJob > minimumBatteryAfterJob;
-}
-
 void RobotController::updatePickup(float deltaTime) {
     if (!taskFlow_.updatePickup(deltaTime)) {
         return;
@@ -173,8 +152,8 @@ void RobotController::updateDropoff(float deltaTime) {
         return;
     }
 
-    if (shouldChargeAtOrBelow(chargeAfterDropoffThreshold) ||
-        !canCompleteNextDeliveryBeforeMinimumBattery()) {
+    if (chargingManager_.shouldStartChargingAfterDropoff(*robot_, routePlanner_,
+                                                         getRobotPosition())) {
         startChargingTrip();
         return;
     }

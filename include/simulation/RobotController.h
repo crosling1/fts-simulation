@@ -1,5 +1,6 @@
 #pragma once
 
+#include "chargingmanager.h"
 #include "robots/Robot.h"
 #include "routefollower.h"
 #include "simulation/InputState.h"
@@ -28,11 +29,9 @@ class RobotController {
 
   private:
     Vector2 getRobotPosition() const;
-    bool shouldChargeAtOrBelow(float thresholdPercentage) const;
     void startPickupTrip();
     void startDropoffTrip();
     void startChargingTrip();
-    bool canCompleteNextDeliveryBeforeMinimumBattery() const;
     void updatePickup(float deltaTime);
     void updateDropoff(float deltaTime);
     void updateCharging(float deltaTime);
@@ -43,6 +42,7 @@ class RobotController {
     const BlockingRobotManager& blockingRobotManager_;
     RobotRoutePlanner routePlanner_;
     RouteFollower routeFollower_;
+    ChargingManager chargingManager_;
     RobotTaskFlow taskFlow_;
     std::unique_ptr<Robot> robot_;
     bool emergencyStopActive_ = false;
