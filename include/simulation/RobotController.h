@@ -1,9 +1,9 @@
 #pragma once
 
-#include "chargingmanager.h"
-#include "emergencystopcontroller.h"
+#include "simulation/ChargingManager.h"
+#include "simulation/EmergencyStopController.h"
 #include "robots/Robot.h"
-#include "routefollower.h"
+#include "simulation/RouteFollower.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotRoutePlanner.h"
 #include "simulation/RobotStatusSnapshot.h"

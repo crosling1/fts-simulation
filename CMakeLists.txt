@@ -17,9 +17,9 @@ set(PROJECT_SOURCES
     src/simulation/map.cpp
     src/simulation/navigation.cpp
     src/simulation/InputState.cpp
-    src/chargingmanager.cpp
-    src/emergencystopcontroller.cpp
-    src/routefollower.cpp
+    src/simulation/ChargingManager.cpp
+    src/simulation/EmergencyStopController.cpp
+    src/simulation/RouteFollower.cpp
     src/simulation/RobotController.cpp
     src/simulation/RobotRoutePlanner.cpp
     src/simulation/RobotTaskFlow.cpp
@@ -65,9 +65,9 @@ set(PROJECT_HEADERS
     include/simulation/map.h
     include/simulation/navigation.h
     include/simulation/InputState.h
-    include/chargingmanager.h
-    include/emergencystopcontroller.h
-    include/routefollower.h
+    include/simulation/ChargingManager.h
+    include/simulation/EmergencyStopController.h
+    include/simulation/RouteFollower.h
     include/simulation/RobotController.h
     include/simulation/RobotRoutePlanner.h
     include/simulation/RobotStatusSnapshot.h
