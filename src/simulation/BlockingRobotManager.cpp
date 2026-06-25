@@ -22,9 +22,9 @@ bool IsBlockingRobotInRange(Vector2 position, const BlockingRobot& blockingRobot
 
 } // namespace
 
-BlockingRobotManager::BlockingRobotManager(void) : randomEngine(std::random_device{}()) {}
+BlockingRobotManager::BlockingRobotManager() : randomEngine(std::random_device{}()) {}
 
-void BlockingRobotManager::clear(void) {
+void BlockingRobotManager::clear() {
     blockingRobots.clear();
 }
 
@@ -51,7 +51,7 @@ void BlockingRobotManager::update(float deltaTime) {
     }
 }
 
-void BlockingRobotManager::draw(void) const {
+void BlockingRobotManager::draw() const {
     for (const BlockingRobot& blockingRobot : blockingRobots) {
         if (!blockingRobot.active) {
             continue;
@@ -76,7 +76,7 @@ bool BlockingRobotManager::hasActiveBlockingRobotNear(Vector2 position,
     return false;
 }
 
-const std::vector<BlockingRobot>& BlockingRobotManager::getBlockingRobots(void) const {
+const std::vector<BlockingRobot>& BlockingRobotManager::getBlockingRobots() const {
     return blockingRobots;
 }
 
