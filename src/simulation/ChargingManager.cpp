@@ -1,4 +1,5 @@
 #include "simulation/ChargingManager.h"
+#include "simulation/SimConstants.h"
 
 #include "robots/Robot.h"
 #include "simulation/RobotRoutePlanner.h"
@@ -6,18 +7,12 @@
 
 #include <vector>
 
-namespace {
-constexpr float chargeAfterDropoffThreshold = 10.0f;
-constexpr float minimumBatteryAfterJob = 10.0f;
-constexpr float batteryDrainPercentagePerPixel = 0.01f;
-} // namespace
-
 ChargingManager::ChargingManager(const LogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
 
 bool ChargingManager::shouldStartChargingAfterDropoff(Robot& robot,
                                                       const RobotRoutePlanner& routePlanner,
                                                       Vector2 robotPosition) const {
-    return shouldChargeAtOrBelow(robot, chargeAfterDropoffThreshold) ||
+    return shouldChargeAtOrBelow(robot, SimConstants::kChargeAfterDropoffThreshold) ||
            !canCompleteNextDeliveryBeforeMinimumBattery(robot, routePlanner, robotPosition);
 }
 
@@ -33,8 +28,9 @@ bool ChargingManager::canCompleteNextDeliveryBeforeMinimumBattery(
     const float estimatedDistance = routePlanner.calculatePathDistance(robotPosition, pickupPath) +
                                     routePlanner.calculatePathDistance(pickupDock, dropoffPath);
 
-    const float estimatedBatteryAfterJob = robot.getBattery().getChargePercentage() -
-                                           (estimatedDistance * batteryDrainPercentagePerPixel);
+    const float estimatedBatteryAfterJob =
+        robot.getBattery().getChargePercentage() -
+        (estimatedDistance * SimConstants::kBatteryDrainPerPixel);
 
-    return estimatedBatteryAfterJob > minimumBatteryAfterJob;
+    return estimatedBatteryAfterJob > SimConstants::kMinimumBatteryAfterJob;
 }

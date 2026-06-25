@@ -1,4 +1,5 @@
 #include "simulation/RobotController.h"
+#include "simulation/SimConstants.h"
 
 #include "robots/Robot.h"
 #include "robots/WorkerRobot.h"
@@ -14,7 +15,6 @@ constexpr float robotSize = 16.0f;
 constexpr float robotProportionalGain = 2.0f;
 constexpr float robotIntegralGain = 0.25f;
 constexpr float robotMaxIntegralError = 200.0f;
-constexpr float chargeRatePercentagePerSecond = 10.0f;
 
 constexpr Robot::Config robotConfig = {
     {robotSpeed, robotRotationSpeed, robotSize},
@@ -157,7 +157,7 @@ void RobotController::updateDropoff(float deltaTime) {
 
 void RobotController::updateCharging(float deltaTime) {
     robot_->setState(Robot::State::Charging);
-    robot_->getBattery().charge(chargeRatePercentagePerSecond * deltaTime);
+    robot_->getBattery().charge(SimConstants::kChargeRatePerSecond * deltaTime);
 
     if (!robot_->getBattery().isFull()) {
         return;

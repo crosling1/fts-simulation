@@ -1,14 +1,11 @@
 #include "simulation/BlockingRobotManager.h"
+#include "simulation/SimConstants.h"
 
 #include "simulation/map.h"
 
 #include <cmath>
 
 namespace {
-constexpr float reachedDistance = 2.0f;
-constexpr float blockingRobotRadius = 14.0f;
-constexpr float blockingRobotSpeed = 65.0f;
-
 float Distance(Vector2 from, Vector2 to) {
     const float deltaX = to.x - from.x;
     const float deltaY = to.y - from.y;
@@ -40,7 +37,7 @@ void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) 
 
     for (const BlockingRobotPath& blockingPath : logisticsMap.getBlockingRobotPaths()) {
         addBlockingRobotPath(blockingPath.points,
-                             blockingRobotSpeed * blockingPath.speedMultiplier);
+                             SimConstants::kBlockingRobotSpeed * blockingPath.speedMultiplier);
     }
 }
 
@@ -90,7 +87,7 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
 
     addBlockingRobot({
         path[0],
-        blockingRobotRadius,
+        SimConstants::kBlockingRobotRadius,
         speed,
         path,
         0,
@@ -107,7 +104,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
 
     const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
     const float distance = Distance(blockingRobot.position, target);
-    if (distance <= reachedDistance) {
+    if (distance <= SimConstants::kReachedDistance) {
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
         blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;

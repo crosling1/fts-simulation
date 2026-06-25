@@ -1,9 +1,5 @@
 #include "simulation/RobotTaskFlow.h"
-
-namespace {
-constexpr float pickupDuration = 1.0f;
-constexpr float dropoffDuration = 1.0f;
-} // namespace
+#include "simulation/SimConstants.h"
 
 void RobotTaskFlow::reset(void) {
     phase_ = RobotTaskPhase::ToPickup;
@@ -66,10 +62,10 @@ void RobotTaskFlow::startCharging(void) {
 
 bool RobotTaskFlow::updatePickup(float deltaTime) {
     stateTimer_ += deltaTime;
-    return stateTimer_ >= pickupDuration;
+    return stateTimer_ >= SimConstants::kPickupDurationSeconds;
 }
 
 bool RobotTaskFlow::updateDropoff(float deltaTime) {
     stateTimer_ += deltaTime;
-    return stateTimer_ >= dropoffDuration;
+    return stateTimer_ >= SimConstants::kDropoffDurationSeconds;
 }
