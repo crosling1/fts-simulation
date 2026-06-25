@@ -18,32 +18,32 @@ typedef enum LagerId : std::uint8_t {
 
 class LogisticsMap {
   public:
-    void init(void);
-    void draw(void) const;
-    void unload(void);
+    void init();
+    void draw() const;
+    void unload();
 
-    Vector2 getPointA(void) const;
-    Vector2 getPointB(void) const;
-    LagerId getPickupLagerId(void) const;
-    LagerId getDeliveryLagerId(void) const;
-    Vector2 getRobotStartPosition(void) const;
-    Vector2 getChargingStationPosition(void) const;
-    Vector2 getChargingStationDockPosition(void) const;
-    Vector2 getLagerPosition(LagerId lagerId) const;
-    Vector2 getLagerDockPosition(LagerId lagerId) const;
-    bool isRoadPosition(Vector2 position) const;
-    Vector2 clampPositionToRoad(Vector2 position) const;
-    const std::vector<Vector2>& getNavigationNodes(void) const;
-    const std::vector<NavigationEdge>& getNavigationEdges(void) const;
-    const std::vector<BlockingRobotPath>& getBlockingRobotPaths(void) const;
+    [[nodiscard]] Vector2 getPointA() const;
+    [[nodiscard]] Vector2 getPointB() const;
+    [[nodiscard]] LagerId getPickupLagerId() const;
+    [[nodiscard]] LagerId getDeliveryLagerId() const;
+    [[nodiscard]] Vector2 getRobotStartPosition() const;
+    [[nodiscard]] Vector2 getChargingStationPosition() const;
+    [[nodiscard]] Vector2 getChargingStationDockPosition() const;
+    [[nodiscard]] Vector2 getLagerPosition(LagerId lagerId) const;
+    [[nodiscard]] Vector2 getLagerDockPosition(LagerId lagerId) const;
+    [[nodiscard]] bool isRoadPosition(Vector2 position) const;
+    [[nodiscard]] Vector2 clampPositionToRoad(Vector2 position) const;
+    [[nodiscard]] const std::vector<Vector2>& getNavigationNodes() const;
+    [[nodiscard]] const std::vector<NavigationEdge>& getNavigationEdges() const;
+    [[nodiscard]] const std::vector<BlockingRobotPath>& getBlockingRobotPaths() const;
 
   private:
     MapData data_;
 
-    Vector2 getWarehouseCenter(int index) const;
-    void drawGrid(void) const;
-    void drawRoads(void) const;
+    [[nodiscard]] Vector2 getWarehouseCenter(int index) const;
+    void drawGrid() const;
+    void drawRoads() const;
     void drawWarehouse(Rectangle body, int index) const;
-    void drawChargingStation(void) const;
-    bool isValidLagerId(LagerId lagerId) const;
+    void drawChargingStation() const;
+    [[nodiscard]] bool isValidLagerId(LagerId lagerId) const;
 };
