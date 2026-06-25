@@ -9,19 +9,19 @@
 
 ChargingManager::ChargingManager(const LogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
 
-bool ChargingManager::shouldStartChargingAfterDropoff(Robot& robot,
+bool ChargingManager::shouldStartChargingAfterDropoff(const Robot& robot,
                                                       const RobotRoutePlanner& routePlanner,
                                                       Vector2 robotPosition) const {
     return shouldChargeAtOrBelow(robot, SimConstants::kChargeAfterDropoffThreshold) ||
            !canCompleteNextDeliveryBeforeMinimumBattery(robot, routePlanner, robotPosition);
 }
 
-bool ChargingManager::shouldChargeAtOrBelow(Robot& robot, float thresholdPercentage) const {
+bool ChargingManager::shouldChargeAtOrBelow(const Robot& robot, float thresholdPercentage) const {
     return robot.getBattery().getChargePercentage() <= thresholdPercentage;
 }
 
 bool ChargingManager::canCompleteNextDeliveryBeforeMinimumBattery(
-    Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const {
+    const Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const {
     const Vector2 pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
     const std::vector<Vector2> pickupPath = routePlanner.buildPathToPickup(robotPosition);
     const std::vector<Vector2> dropoffPath = routePlanner.buildPathToDropoff(pickupDock);
