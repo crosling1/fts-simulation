@@ -1,13 +1,10 @@
 #include "support/test_helpers.h"
-#include "support/test_runner.h"
-#include "support/test_suites.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include "simulation/BlockingRobotManager.h"
 
-#include <string>
-
-namespace {
-void TestBlockingRobotDetectionIgnoresInactiveRobots(void) {
+TEST_CASE("Blocking robot detection ignores inactive robots", "[BlockingRobotManager]") {
     BlockingRobotManager manager;
 
     manager.addBlockingRobot({
@@ -31,13 +28,11 @@ void TestBlockingRobotDetectionIgnoresInactiveRobots(void) {
         false,
     });
 
-    test::Expect(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f),
-                 "active blocking robot should be detected when circles overlap");
-    test::Expect(!manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 4.0f),
-                 "active blocking robot should not be detected outside combined radii");
+    CHECK(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
+    CHECK_FALSE(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 4.0f));
 }
 
-void TestBlockingRobotOutsideRadiusIsNotDetected(void) {
+TEST_CASE("Blocking robot outside radius is not detected", "[BlockingRobotManager]") {
     BlockingRobotManager manager;
     manager.addBlockingRobot({
         {20.0f, 0.0f},
@@ -50,11 +45,10 @@ void TestBlockingRobotOutsideRadiusIsNotDetected(void) {
         true,
     });
 
-    test::Expect(!manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f),
-                 "blocking robot outside detection radius should not be detected");
+    CHECK_FALSE(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
 }
 
-void TestBlockingRobotInsideRadiusIsDetected(void) {
+TEST_CASE("Blocking robot inside radius is detected", "[BlockingRobotManager]") {
     BlockingRobotManager manager;
     manager.addBlockingRobot({
         {5.0f, 0.0f},
@@ -67,11 +61,10 @@ void TestBlockingRobotInsideRadiusIsDetected(void) {
         true,
     });
 
-    test::Expect(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f),
-                 "blocking robot inside detection radius should be detected");
+    CHECK(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
 }
 
-void TestBlockingRobotMovesAlongPath(void) {
+TEST_CASE("Blocking robot moves along path", "[BlockingRobotManager]") {
     BlockingRobotManager manager;
     manager.addBlockingRobot({
         {0.0f, 0.0f},
@@ -85,27 +78,8 @@ void TestBlockingRobotMovesAlongPath(void) {
     });
 
     manager.update(0.5f);
-    test::ExpectVectorNear(manager.getBlockingRobots()[0].position, {5.0f, 0.0f},
-                           "blocking robot should move along path");
+    test::CheckVectorNear(manager.getBlockingRobots()[0].position, {5.0f, 0.0f});
 
     manager.update(0.5f);
-    test::ExpectVectorNear(manager.getBlockingRobots()[0].position, {10.0f, 0.0f},
-                           "blocking robot should snap to target when step reaches it");
-}
-
-const test::TestCase blockingRobotManagerTests[] = {
-    {"Blocking robot detection ignores inactive robots",
-     TestBlockingRobotDetectionIgnoresInactiveRobots},
-    {"Blocking robot outside radius is not detected", TestBlockingRobotOutsideRadiusIsNotDetected},
-    {"Blocking robot inside radius is detected", TestBlockingRobotInsideRadiusIsDetected},
-    {"Blocking robot moves along path", TestBlockingRobotMovesAlongPath},
-};
-} // namespace
-
-void RunBlockingRobotManagerTests(void) {
-    test::RunTestCases(blockingRobotManagerTests);
-}
-
-bool RunBlockingRobotManagerTestByName(const std::string& name) {
-    return test::RunTestCaseByName(blockingRobotManagerTests, name);
+    test::CheckVectorNear(manager.getBlockingRobots()[0].position, {10.0f, 0.0f});
 }

@@ -11,6 +11,33 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(FTS_PROJECT_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}")
+set(CMAKE_CXX_CLANG_TIDY "")
+
+include(FetchContent)
+
+FetchContent_Declare(
+    Catch2
+    URL https://github.com/catchorg/Catch2/archive/refs/tags/v3.7.1.tar.gz
+)
+FetchContent_MakeAvailable(Catch2)
+
+function(fts_mark_target_includes_as_system target_name)
+    get_target_property(target_includes ${target_name} INTERFACE_INCLUDE_DIRECTORIES)
+    if(target_includes)
+        set_target_properties(${target_name} PROPERTIES
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${target_includes}"
+        )
+    endif()
+endfunction()
+
+foreach(catch2_target IN ITEMS Catch2 Catch2WithMain)
+    if(TARGET ${catch2_target})
+        set_target_properties(${catch2_target} PROPERTIES CXX_CLANG_TIDY "")
+        fts_mark_target_includes_as_system(${catch2_target})
+    endif()
+endforeach()
+
 set(FTS_CORE_SOURCES
     src/simulation/MapData.cpp
     src/simulation/map.cpp
@@ -33,7 +60,6 @@ set(FTS_CORE_SOURCES
 )
 
 set(FTS_TEST_SOURCES
-    tests/unit_tests.cpp
     tests/robots/robot_tests.cpp
     tests/robots/pi_controller_tests.cpp
     tests/sensors/proximity_sensor_tests.cpp
@@ -74,34 +100,20 @@ add_executable(robot_sim src/main.cpp)
 target_link_libraries(robot_sim PRIVATE fts_core)
 
 add_executable(unit_tests ${FTS_TEST_SOURCES})
-target_link_libraries(unit_tests PRIVATE fts_core)
+target_link_libraries(unit_tests PRIVATE fts_core Catch2::Catch2WithMain)
 target_include_directories(unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+if(FTS_PROJECT_CLANG_TIDY)
+    set_target_properties(fts_core robot_sim unit_tests PROPERTIES
+        CXX_CLANG_TIDY "${FTS_PROJECT_CLANG_TIDY}"
+    )
+endif()
 
 enable_testing()
 
-set(UNIT_TEST_CASES
-    "Robot moves to target"
-    "Robot PI controller limits speed near target"
-    "Robot keeps carrying state when arriving"
-    "Robot rotates toward target"
-    "Robot owns battery"
-    "Robot drains battery by distance moved"
-    "Robot stops when battery is empty"
-    "PI controller uses max output without gains"
-    "PI controller clamps output"
-    "PI controller reset clears integral"
-    "Blocking robot detection ignores inactive robots"
-    "Blocking robot outside radius is not detected"
-    "Blocking robot inside radius is detected"
-    "Blocking robot moves along path"
-    "Proximity sensor uses blocking robot manager"
-    "Map road queries"
-    "Navigation finds warehouse routes"
-)
-
-foreach(test_case IN LISTS UNIT_TEST_CASES)
-    add_test(NAME "${test_case}" COMMAND unit_tests --test "${test_case}")
-endforeach()
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
+catch_discover_tests(unit_tests)
 
 find_package(raylib QUIET)
 

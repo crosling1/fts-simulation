@@ -1,51 +1,29 @@
 #include "support/test_helpers.h"
-#include "support/test_runner.h"
-#include "support/test_suites.h"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "control/PIController.h"
 
-#include <string>
-
-namespace {
-void TestPiControllerUsesMaxOutputWithoutGains(void) {
+TEST_CASE("PI controller uses max output without gains", "[Robot][PIController]") {
     PIController controller;
 
-    test::Expect(test::AlmostEqual(controller.update({10.0f, 1.0f, 25.0f}), 25.0f),
-                 "PI controller without gains should return max output");
+    CHECK(controller.update({10.0f, 1.0f, 25.0f}) == Catch::Approx(25.0f).margin(test::epsilon));
 }
 
-void TestPiControllerClampsOutput(void) {
+TEST_CASE("PI controller clamps output", "[Robot][PIController]") {
     PIController controller({2.0f, 1.0f, 100.0f});
 
-    test::Expect(test::AlmostEqual(controller.update({100.0f, 1.0f, 50.0f}), 50.0f),
-                 "PI controller output should clamp to max output");
+    CHECK(controller.update({100.0f, 1.0f, 50.0f}) == Catch::Approx(50.0f).margin(test::epsilon));
 }
 
-void TestPiControllerResetClearsIntegral(void) {
+TEST_CASE("PI controller reset clears integral", "[Robot][PIController]") {
     PIController controller({0.0f, 1.0f, 100.0f});
 
-    test::Expect(test::AlmostEqual(controller.update({10.0f, 1.0f, 100.0f}), 10.0f),
-                 "PI controller should integrate first error");
-    test::Expect(test::AlmostEqual(controller.update({10.0f, 1.0f, 100.0f}), 20.0f),
-                 "PI controller should accumulate integral error");
+    CHECK(controller.update({10.0f, 1.0f, 100.0f}) == Catch::Approx(10.0f).margin(test::epsilon));
+    CHECK(controller.update({10.0f, 1.0f, 100.0f}) == Catch::Approx(20.0f).margin(test::epsilon));
 
     controller.reset();
 
-    test::Expect(test::AlmostEqual(controller.update({10.0f, 1.0f, 100.0f}), 10.0f),
-                 "PI controller reset should clear integral error");
-}
-
-const test::TestCase piControllerTests[] = {
-    {"PI controller uses max output without gains", TestPiControllerUsesMaxOutputWithoutGains},
-    {"PI controller clamps output", TestPiControllerClampsOutput},
-    {"PI controller reset clears integral", TestPiControllerResetClearsIntegral},
-};
-} // namespace
-
-void RunPiControllerTests(void) {
-    test::RunTestCases(piControllerTests);
-}
-
-bool RunPiControllerTestByName(const std::string& name) {
-    return test::RunTestCaseByName(piControllerTests, name);
+    CHECK(controller.update({10.0f, 1.0f, 100.0f}) == Catch::Approx(10.0f).margin(test::epsilon));
 }
