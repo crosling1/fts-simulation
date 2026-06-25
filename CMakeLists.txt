@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
     src/simulation/RobotRoutePlanner.cpp
     src/simulation/RobotTaskFlow.cpp
     src/simulation/BlockingRobotManager.cpp
+    src/rendering/RobotRenderer.cpp
     src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
     src/control/PIController.cpp
@@ -37,6 +38,7 @@ set(COMMON_SOURCES
     src/simulation/map.cpp
     src/simulation/navigation.cpp
     src/simulation/BlockingRobotManager.cpp
+    src/rendering/RobotRenderer.cpp
     src/robots/Battery.cpp
     src/control/PIController.cpp
     src/robots/Robot.cpp
@@ -56,9 +58,12 @@ set(TEST_SOURCES
 
 set(PROJECT_HEADERS
     include/robots/Robot.h
+    include/robots/RobotRenderData.h
+    include/robots/RobotState.h
     include/robots/Battery.h
     include/control/PIController.h
     include/robots/WorkerRobot.h
+    include/rendering/RobotRenderer.h
     include/sensors/Sensor.h
     include/sensors/ProximitySensor.h
     include/simulation/MapData.h

@@ -80,8 +80,7 @@ void RobotController::draw() const {
 
     routeFollower_.draw();
 
-    robot_->drawProximityScanArea();
-    robot_->draw();
+    robotRenderer_.draw(robot_->renderData());
 }
 
 void RobotController::unload() {
