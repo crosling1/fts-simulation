@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rendering/RobotRenderer.h"
 #include "simulation/ChargingManager.h"
 #include "simulation/EmergencyStopController.h"
 #include "robots/Robot.h"
@@ -41,5 +42,6 @@ class RobotController {
     ChargingManager chargingManager_;
     EmergencyStopController emergencyStopController_;
     RobotTaskFlow taskFlow_;
+    RobotRenderer robotRenderer_;
     std::unique_ptr<Robot> robot_;
 };

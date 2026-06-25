@@ -1,28 +1,20 @@
 #pragma once
 
 #include "robots/Battery.h"
+#include "robots/RobotRenderData.h"
+#include "robots/RobotState.h"
 #include "control/PIController.h"
 #include "sensors/ProximitySensor.h"
 #include "sensors/Sensor.h"
 #include "raylib.h"
 
-#include <cstdint>
 #include <memory>
 #include <string_view>
 #include <vector>
 
 class Robot {
   public:
-    enum class State : std::uint8_t {
-        Idle,
-        Moving,
-        PickingUp,
-        CarryingItem,
-        DroppingOff,
-        Arrived,
-        BatteryDepleted,
-        Charging,
-    };
+    using State = RobotState;
 
     struct MotionConfig {
         float speed;
@@ -49,7 +41,7 @@ class Robot {
     [[nodiscard]] virtual std::string_view typeName() const noexcept = 0;
 
     void updateMovement(float deltaTime);
-    void draw();
+    [[nodiscard]] RobotRenderData renderData() const noexcept;
     void setPosition(const Vector2& newPosition);
     void setState(State newState);
     void setTargetPosition(const Vector2& target);
@@ -60,7 +52,6 @@ class Robot {
     [[nodiscard]] State getState() const;
     [[nodiscard]] bool hasReachedTarget() const;
     [[nodiscard]] float getProximityDetectionRadius() const;
-    void drawProximityScanArea() const;
     [[nodiscard]] Battery& getBattery();
     [[nodiscard]] const Battery& getBattery() const;
 

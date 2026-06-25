@@ -17,6 +17,13 @@ struct BlockingRobot {
     std::size_t targetNodeIndex = 0;
     std::size_t previousNodeIndex = 0;
     bool active = false;
+
+    void update(float deltaTime, std::mt19937& randomEngine);
+    void chooseNextTarget(std::mt19937& randomEngine, bool allowBacktracking);
+    [[nodiscard]] bool isNear(Vector2 position, float detectionRadius) const;
+    [[nodiscard]] Vector2 getPosition() const noexcept;
+    [[nodiscard]] float getRadius() const noexcept;
+    [[nodiscard]] bool isActive() const noexcept;
 };
 
 class BlockingRobotManager {
@@ -36,6 +43,4 @@ class BlockingRobotManager {
     std::mt19937 randomEngine;
 
     void addBlockingRobotPath(const std::vector<Vector2>& path, float speed);
-    void moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime);
-    void chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking);
 };

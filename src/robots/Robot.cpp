@@ -34,29 +34,6 @@ float TargetRotation(Vector2 from, Vector2 to) {
     return std::atan2(to.y - from.y, to.x - from.x) * radToDeg;
 }
 
-Color GetRobotColor(Robot::State state) {
-    switch (state) {
-    case Robot::State::Idle:
-        return GRAY;
-    case Robot::State::Moving:
-        return GREEN;
-    case Robot::State::PickingUp:
-        return YELLOW;
-    case Robot::State::CarryingItem:
-        return ORANGE;
-    case Robot::State::DroppingOff:
-        return SKYBLUE;
-    case Robot::State::Arrived:
-        return LIME;
-    case Robot::State::BatteryDepleted:
-        return RED;
-    case Robot::State::Charging:
-        return BLUE;
-    }
-
-    return ORANGE;
-}
-
 bool ShouldMove(Robot::State state) {
     return state == Robot::State::Moving || state == Robot::State::CarryingItem;
 }
@@ -101,29 +78,16 @@ void Robot::updateMovement(float deltaTime) {
     updateSensors();
 }
 
-void Robot::draw() {
-    const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
-    const float radius = size_;
-    const float headingLength = radius * 1.15f;
-    const float headingRadians = static_cast<float>(angle_) / radToDeg;
-    const Vector2 headingEnd = {
-        position.x + std::cos(headingRadians) * headingLength,
-        position.y + std::sin(headingRadians) * headingLength,
+RobotRenderData Robot::renderData() const noexcept {
+    return {
+        {static_cast<float>(x_), static_cast<float>(y_)},
+        static_cast<float>(angle_),
+        size_,
+        proximitySensor_.getDetectionRadius(),
+        state_,
+        ShouldDrawItem(state_),
+        typeName(),
     };
-
-    DrawCircleV(position, radius, GetRobotColor(state_));
-    DrawCircleLines((int)position.x, (int)position.y, radius, BLACK);
-    DrawCircleLines((int)position.x, (int)position.y, radius + 2.0f, WHITE);
-    DrawLineEx(position, headingEnd, 3.0f, BLACK);
-    DrawCircleV(position, radius * 0.2f, BLACK);
-    DrawText("R", (int)position.x - 5, (int)position.y - 10, 20, WHITE);
-
-    if (ShouldDrawItem(state_)) {
-        const Rectangle item = {position.x - 7.0f, position.y - 25.0f, 14.0f, 12.0f};
-
-        DrawRectangleRec(item, GOLD);
-        DrawRectangleLinesEx(item, 2.0f, BROWN);
-    }
 }
 
 void Robot::setPosition(const Vector2& newPosition) {
@@ -225,10 +189,6 @@ bool Robot::hasReachedTarget() const {
 
 float Robot::getProximityDetectionRadius() const {
     return proximitySensor_.getDetectionRadius();
-}
-
-void Robot::drawProximityScanArea() const {
-    proximitySensor_.drawScanArea(getPosition());
 }
 
 Battery& Robot::getBattery() {

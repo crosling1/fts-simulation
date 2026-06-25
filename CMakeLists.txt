@@ -11,8 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(PROJECT_SOURCES
-    src/main.cpp
+set(FTS_CORE_SOURCES
     src/simulation/MapData.cpp
     src/simulation/map.cpp
     src/simulation/navigation.cpp
@@ -24,6 +23,7 @@ set(PROJECT_SOURCES
     src/simulation/RobotRoutePlanner.cpp
     src/simulation/RobotTaskFlow.cpp
     src/simulation/BlockingRobotManager.cpp
+    src/rendering/RobotRenderer.cpp
     src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
     src/control/PIController.cpp
@@ -32,19 +32,7 @@ set(PROJECT_SOURCES
     src/sensors/ProximitySensor.cpp
 )
 
-set(COMMON_SOURCES
-    src/simulation/MapData.cpp
-    src/simulation/map.cpp
-    src/simulation/navigation.cpp
-    src/simulation/BlockingRobotManager.cpp
-    src/robots/Battery.cpp
-    src/control/PIController.cpp
-    src/robots/Robot.cpp
-    src/robots/WorkerRobot.cpp
-    src/sensors/ProximitySensor.cpp
-)
-
-set(TEST_SOURCES
+set(FTS_TEST_SOURCES
     tests/unit_tests.cpp
     tests/robots/robot_tests.cpp
     tests/robots/pi_controller_tests.cpp
@@ -54,11 +42,14 @@ set(TEST_SOURCES
     tests/simulation/navigation_tests.cpp
 )
 
-set(PROJECT_HEADERS
+set(FTS_CORE_HEADERS
     include/robots/Robot.h
+    include/robots/RobotRenderData.h
+    include/robots/RobotState.h
     include/robots/Battery.h
     include/control/PIController.h
     include/robots/WorkerRobot.h
+    include/rendering/RobotRenderer.h
     include/sensors/Sensor.h
     include/sensors/ProximitySensor.h
     include/simulation/MapData.h
@@ -76,14 +67,15 @@ set(PROJECT_HEADERS
     include/ui/StatusOverlay.h
 )
 
-add_executable(robot_sim ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_include_directories(robot_sim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_library(fts_core ${FTS_CORE_SOURCES} ${FTS_CORE_HEADERS})
+target_include_directories(fts_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(unit_tests ${TEST_SOURCES} ${COMMON_SOURCES} ${PROJECT_HEADERS})
-target_include_directories(unit_tests PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests
-)
+add_executable(robot_sim src/main.cpp)
+target_link_libraries(robot_sim PRIVATE fts_core)
+
+add_executable(unit_tests ${FTS_TEST_SOURCES})
+target_link_libraries(unit_tests PRIVATE fts_core)
+target_include_directories(unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 enable_testing()
 
@@ -114,23 +106,17 @@ endforeach()
 find_package(raylib QUIET)
 
 if(raylib_FOUND)
-    target_link_libraries(robot_sim PRIVATE raylib)
-    target_link_libraries(unit_tests PRIVATE raylib)
+    target_link_libraries(fts_core PUBLIC raylib)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(RAYLIB REQUIRED raylib)
 
-    target_include_directories(robot_sim PRIVATE ${RAYLIB_INCLUDE_DIRS})
-    target_include_directories(unit_tests PRIVATE ${RAYLIB_INCLUDE_DIRS})
-    target_link_directories(robot_sim PRIVATE ${RAYLIB_LIBRARY_DIRS})
-    target_link_directories(unit_tests PRIVATE ${RAYLIB_LIBRARY_DIRS})
-    target_compile_options(robot_sim PRIVATE ${RAYLIB_CFLAGS_OTHER})
-    target_compile_options(unit_tests PRIVATE ${RAYLIB_CFLAGS_OTHER})
-    target_link_libraries(robot_sim PRIVATE ${RAYLIB_LIBRARIES})
-    target_link_libraries(unit_tests PRIVATE ${RAYLIB_LIBRARIES})
+    target_include_directories(fts_core PUBLIC ${RAYLIB_INCLUDE_DIRS})
+    target_link_directories(fts_core PUBLIC ${RAYLIB_LIBRARY_DIRS})
+    target_compile_options(fts_core PUBLIC ${RAYLIB_CFLAGS_OTHER})
+    target_link_libraries(fts_core PUBLIC ${RAYLIB_LIBRARIES})
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(robot_sim PRIVATE m dl pthread GL rt X11)
-    target_link_libraries(unit_tests PRIVATE m dl pthread GL rt X11)
+    target_link_libraries(fts_core PUBLIC m dl pthread GL rt X11)
 endif()
