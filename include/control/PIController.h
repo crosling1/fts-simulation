@@ -17,8 +17,8 @@ class PIController {
     PIController();
     explicit PIController(Config config);
 
-    float update(UpdateInput input);
-    void reset();
+    [[nodiscard]] float update(UpdateInput input) noexcept;
+    void reset() noexcept;
 
   private:
     Config config_;
