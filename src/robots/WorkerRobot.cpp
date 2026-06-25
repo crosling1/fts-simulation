@@ -1,12 +1,12 @@
 #include "robots/WorkerRobot.h"
 
-#include <iostream>
+#include <string_view>
 
 WorkerRobot::WorkerRobot(Pose startPose, Config config) : Robot(startPose, config) {}
 
 WorkerRobot::WorkerRobot(const Vector2& startPosition, Config config)
     : Robot(startPosition, config) {}
 
-void WorkerRobot::printType() const {
-    std::cout << "WorkerRobot\n";
+std::string_view WorkerRobot::typeName() const noexcept {
+    return "WorkerRobot";
 }
