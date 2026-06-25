@@ -1,71 +1,65 @@
 #include "simulation/RobotTaskFlow.h"
 #include "simulation/SimConstants.h"
 
+void RobotTaskFlow::enterPhase(RobotTaskPhase newPhase) {
+    phase_ = newPhase;
+    stateTimer_ = 0.0f;
+}
+
 void RobotTaskFlow::reset(void) {
     phase_ = RobotTaskPhase::ToPickup;
     stateTimer_ = 0.0f;
 }
 
-bool RobotTaskFlow::isPickingUp(void) const {
+[[nodiscard]] bool RobotTaskFlow::isPickingUp() const {
     return phase_ == RobotTaskPhase::PickingUp;
 }
 
-bool RobotTaskFlow::isDroppingOff(void) const {
+[[nodiscard]] bool RobotTaskFlow::isDroppingOff() const {
     return phase_ == RobotTaskPhase::DroppingOff;
 }
 
-bool RobotTaskFlow::isCharging(void) const {
+[[nodiscard]] bool RobotTaskFlow::isCharging() const {
     return phase_ == RobotTaskPhase::Charging;
 }
 
-bool RobotTaskFlow::isRoutingToPickup(void) const {
+[[nodiscard]] bool RobotTaskFlow::isRoutingToPickup() const {
     return phase_ == RobotTaskPhase::ToPickup;
 }
 
-bool RobotTaskFlow::isRoutingToDropoff(void) const {
+[[nodiscard]] bool RobotTaskFlow::isRoutingToDropoff() const {
     return phase_ == RobotTaskPhase::ToDropoff;
 }
 
-bool RobotTaskFlow::isRoutingToCharging(void) const {
+[[nodiscard]] bool RobotTaskFlow::isRoutingToCharging() const {
     return phase_ == RobotTaskPhase::ToCharging;
 }
 
-void RobotTaskFlow::startTripToPickup(void) {
-    phase_ = RobotTaskPhase::ToPickup;
-    stateTimer_ = 0.0f;
+void RobotTaskFlow::startTripToPickup() {
+    enterPhase(RobotTaskPhase::ToPickup);
+}
+void RobotTaskFlow::startTripToDropoff() {
+    enterPhase(RobotTaskPhase::ToDropoff);
+}
+void RobotTaskFlow::startTripToCharging() {
+    enterPhase(RobotTaskPhase::ToCharging);
+}
+void RobotTaskFlow::startPickingUp() {
+    enterPhase(RobotTaskPhase::PickingUp);
+}
+void RobotTaskFlow::startDroppingOff() {
+    enterPhase(RobotTaskPhase::DroppingOff);
+}
+void RobotTaskFlow::startCharging() {
+    enterPhase(RobotTaskPhase::Charging);
 }
 
-void RobotTaskFlow::startTripToDropoff(void) {
-    phase_ = RobotTaskPhase::ToDropoff;
-    stateTimer_ = 0.0f;
-}
-
-void RobotTaskFlow::startTripToCharging(void) {
-    phase_ = RobotTaskPhase::ToCharging;
-    stateTimer_ = 0.0f;
-}
-
-void RobotTaskFlow::startPickingUp(void) {
-    phase_ = RobotTaskPhase::PickingUp;
-    stateTimer_ = 0.0f;
-}
-
-void RobotTaskFlow::startDroppingOff(void) {
-    phase_ = RobotTaskPhase::DroppingOff;
-    stateTimer_ = 0.0f;
-}
-
-void RobotTaskFlow::startCharging(void) {
-    phase_ = RobotTaskPhase::Charging;
-    stateTimer_ = 0.0f;
-}
-
-bool RobotTaskFlow::updatePickup(float deltaTime) {
+[[nodiscard]] bool RobotTaskFlow::updatePickup(float deltaTime) {
     stateTimer_ += deltaTime;
     return stateTimer_ >= SimConstants::kPickupDurationSeconds;
 }
 
-bool RobotTaskFlow::updateDropoff(float deltaTime) {
+[[nodiscard]] bool RobotTaskFlow::updateDropoff(float deltaTime) {
     stateTimer_ += deltaTime;
     return stateTimer_ >= SimConstants::kDropoffDurationSeconds;
 }
