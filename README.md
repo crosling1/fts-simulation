@@ -57,7 +57,7 @@ software architecture.
 
 ### Development Tooling
 
-* Unit testing
+* Catch2 unit testing
 * clang-format integration
 * clang-tidy integration
 * GitHub Actions CI pipeline
@@ -109,21 +109,41 @@ Environment
 UI
       |
       +-- StatusOverlay
+      +-- RobotRenderer
 ```
 
 ## Core Areas
 
-| Area                | Responsibility                                                             |
-| ------------------- | -------------------------------------------------------------------------- |
-| Controller Layer    | Coordinates the overall robot workflow and delegates specialized behavior. |
-| Navigation Layer    | Route planning, waypoint following and road-network movement.              |
-| Task Layer          | Pickup, dropoff and charging phase management.                             |
-| Energy Layer        | Battery monitoring and charging decisions.                                 |
-| Safety Layer        | Emergency stop handling and obstacle pause checks.                         |
-| Robot Domain        | Robot movement, state, battery and sensor ownership.                       |
-| Environment         | Map data, road network, charging stations and blocking robots.             |
-| UI Layer            | Runtime overlays, visualization and simulation feedback.                   |
-| Development Tooling | Testing, formatting, linting and CI automation.                            |
+| Area                         | Responsibility                                                        |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `Robot`                      | Movement, battery ownership, state transitions and target handling.   |
+| `RobotRenderer`              | raylib rendering for robot visuals and carried-item display.          |
+| `BlockingRobot`              | Individual blocking robot position, path following and proximity data. |
+| `BlockingRobotManager`       | Blocking robot collection, initialization, updates and queries.       |
+| `RobotTaskFlow`              | Pickup, dropoff and charging phase progression.                       |
+| `ChargingManager`            | Battery-aware charging decision logic.                                |
+| Navigation                   | A* pathfinding over map nodes using an adjacency list.                |
+| `SimConstants`               | Shared simulation constants for timing, battery and movement values.  |
+| `RobotController`            | Coordinates workflow by delegating to the focused components above.   |
+| Development Tooling          | Catch2 tests, formatting, linting and CI automation.                  |
+
+## Code Quality Improvements
+
+Recent refactoring work focused on reducing coupling and making the codebase
+easier to review and extend:
+
+* Centralized duplicated simulation values in `SimConstants`.
+* Added `[[nodiscard]]`, `noexcept` and modern C++ empty parameter lists where
+  appropriate.
+* Made `ChargingManager` query functions const-correct.
+* Replaced one-off `printType()` behavior with reusable `typeName()` data.
+* Extracted robot drawing from `Robot` into `RobotRenderer`.
+* Moved per-robot blocking behavior into `BlockingRobot`, keeping
+  `BlockingRobotManager` focused on collection management.
+* Optimized A* pathfinding by building an adjacency list from navigation edges.
+* Migrated unit tests from a custom expectation runner to Catch2.
+* Split production code into the reusable `fts_core` CMake library, shared by
+  the application and unit tests.
 
 ## Design Decisions
 
@@ -146,7 +166,8 @@ into focused modules. This reduces coupling and makes future changes easier.
 ### Road-Constrained Navigation
 
 Robots operate exclusively on the road network. Route generation uses A*
-pathfinding and road validation to ensure realistic movement behavior.
+pathfinding over an adjacency list and road validation to ensure realistic
+movement behavior.
 
 ### Extensibility
 
