@@ -28,11 +28,11 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
                            logisticsMap.getLagerDockPosition(LAGER_6));
     const Vector2 l6EntryWaypoint = {545.0f, 450.0f};
 
-    REQUIRE_FALSE(pickupPath.empty());
-    REQUIRE_FALSE(dropoffPath.empty());
-    REQUIRE_FALSE(chargingPath.empty());
-    REQUIRE_FALSE(dropoffToChargingPath.empty());
-    REQUIRE_FALSE(l6Path.empty());
+    REQUIRE(!pickupPath.empty());
+    REQUIRE(!dropoffPath.empty());
+    REQUIRE(!chargingPath.empty());
+    REQUIRE(!dropoffToChargingPath.empty());
+    REQUIRE(!l6Path.empty());
 
     test::CheckVectorNear(pickupPath.back(),
                           logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId()));
@@ -42,7 +42,7 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     test::CheckVectorNear(dropoffToChargingPath.back(),
                           logisticsMap.getChargingStationDockPosition());
     CHECK(dropoffToChargingPath.size() <= 3);
-    CHECK_FALSE(test::PathContainsPoint(pickupPath, l6EntryWaypoint));
+    CHECK(!test::PathContainsPoint(pickupPath, l6EntryWaypoint));
     CHECK(test::PathContainsPoint(l6Path, l6EntryWaypoint));
 
     for (Vector2 waypoint : pickupPath) {

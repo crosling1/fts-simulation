@@ -14,7 +14,7 @@ TEST_CASE("Map road queries", "[Navigation]") {
 
     CHECK(logisticsMap.isRoadPosition(start));
     CHECK(logisticsMap.isRoadPosition(logisticsMap.getChargingStationDockPosition()));
-    CHECK_FALSE(logisticsMap.isRoadPosition(offRoad));
+    CHECK(!logisticsMap.isRoadPosition(offRoad));
     CHECK(logisticsMap.isRoadPosition(clamped));
     test::CheckVectorNear(logisticsMap.getLagerDockPosition(static_cast<LagerId>(LAGER_COUNT)),
                           {0.0f, 0.0f});

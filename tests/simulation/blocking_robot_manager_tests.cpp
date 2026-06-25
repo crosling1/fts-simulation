@@ -29,7 +29,7 @@ TEST_CASE("Blocking robot detection ignores inactive robots", "[BlockingRobotMan
     });
 
     CHECK(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
-    CHECK_FALSE(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 4.0f));
+    CHECK(!manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 4.0f));
 }
 
 TEST_CASE("Blocking robot outside radius is not detected", "[BlockingRobotManager]") {
@@ -45,7 +45,7 @@ TEST_CASE("Blocking robot outside radius is not detected", "[BlockingRobotManage
         true,
     });
 
-    CHECK_FALSE(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
+    CHECK(!manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
 }
 
 TEST_CASE("Blocking robot inside radius is detected", "[BlockingRobotManager]") {
