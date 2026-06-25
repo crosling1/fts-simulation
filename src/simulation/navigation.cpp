@@ -89,18 +89,6 @@ int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position)
     return nearestNodeIndex;
 }
 
-int GetNeighborNodeIndex(NavigationEdge edge, int nodeIndex) {
-    if (edge.from == static_cast<std::size_t>(nodeIndex)) {
-        return static_cast<int>(edge.to);
-    }
-
-    if (edge.to == static_cast<std::size_t>(nodeIndex)) {
-        return static_cast<int>(edge.from);
-    }
-
-    return invalidPathNode;
-}
-
 std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
                                           const std::vector<int>& cameFrom,
                                           PathEndpointIndices endpoints) {

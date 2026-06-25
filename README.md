@@ -37,7 +37,7 @@ software architecture.
 * Task phase management
 * Item carrying visualization
 * PI-controlled movement
-* Configurable robot state machine
+* Explicit robot state machine
 
 ### Energy Management
 
@@ -49,7 +49,7 @@ software architecture.
 
 ### Safety And Obstacle Handling
 
-* Radius-based proximity sensing
+* Radius-based proximity checks
 * Dynamic blocking robots
 * Automatic obstacle waiting behavior
 * Emergency stop control
