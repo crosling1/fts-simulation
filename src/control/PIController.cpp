@@ -6,7 +6,7 @@ PIController::PIController() : PIController(Config{}) {}
 
 PIController::PIController(Config config) : config_(config) {}
 
-float PIController::update(UpdateInput input) {
+float PIController::update(UpdateInput input) noexcept {
     errorIntegral_ += input.error * input.deltaTime;
     errorIntegral_ = std::clamp(errorIntegral_, 0.0f, std::max(0.0f, config_.maxIntegralError));
 
@@ -19,6 +19,6 @@ float PIController::update(UpdateInput input) {
     return std::clamp(output, 0.0f, input.maxOutput);
 }
 
-void PIController::reset() {
+void PIController::reset() noexcept {
     errorIntegral_ = 0.0f;
 }

@@ -13,26 +13,28 @@ enum class RobotTaskPhase : std::uint8_t {
 
 class RobotTaskFlow {
   public:
-    void reset(void);
+    void reset();
 
-    bool isPickingUp(void) const;
-    bool isDroppingOff(void) const;
-    bool isCharging(void) const;
-    bool isRoutingToPickup(void) const;
-    bool isRoutingToDropoff(void) const;
-    bool isRoutingToCharging(void) const;
+    [[nodiscard]] bool isPickingUp() const;
+    [[nodiscard]] bool isDroppingOff() const;
+    [[nodiscard]] bool isCharging() const;
+    [[nodiscard]] bool isRoutingToPickup() const;
+    [[nodiscard]] bool isRoutingToDropoff() const;
+    [[nodiscard]] bool isRoutingToCharging() const;
 
-    void startTripToPickup(void);
-    void startTripToDropoff(void);
-    void startTripToCharging(void);
-    void startPickingUp(void);
-    void startDroppingOff(void);
-    void startCharging(void);
+    void startTripToPickup();
+    void startTripToDropoff();
+    void startTripToCharging();
+    void startPickingUp();
+    void startDroppingOff();
+    void startCharging();
 
-    bool updatePickup(float deltaTime);
-    bool updateDropoff(float deltaTime);
+    [[nodiscard]] bool updatePickup(float deltaTime);
+    [[nodiscard]] bool updateDropoff(float deltaTime);
 
   private:
+    void enterPhase(RobotTaskPhase newPhase);
+
     RobotTaskPhase phase_ = RobotTaskPhase::ToPickup;
     float stateTimer_ = 0.0f;
 };

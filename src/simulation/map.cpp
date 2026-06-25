@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace {
-MapData LoadDefaultMapData(void) {
+[[nodiscard]] MapData LoadDefaultMapData() {
     try {
         return LoadMapData("assets/maps/warehouse_map.json");
     } catch (const std::exception&) {
@@ -13,11 +13,11 @@ MapData LoadDefaultMapData(void) {
 }
 } // namespace
 
-void LogisticsMap::init(void) {
+void LogisticsMap::init() {
     data_ = LoadDefaultMapData();
 }
 
-void LogisticsMap::draw(void) const {
+void LogisticsMap::draw() const {
     ClearBackground(RAYWHITE);
 
     drawGrid();
@@ -44,38 +44,38 @@ void LogisticsMap::draw(void) const {
     DrawText("C: Charging station", 20, 180, 18, DARKPURPLE);
 }
 
-void LogisticsMap::unload(void) {
+void LogisticsMap::unload() {
     // No resources allocated yet.
 }
 
-Vector2 LogisticsMap::getPointA(void) const {
+Vector2 LogisticsMap::getPointA() const {
     return getWarehouseCenter(data_.pickupLagerIndex);
 }
 
-Vector2 LogisticsMap::getPointB(void) const {
+Vector2 LogisticsMap::getPointB() const {
     return getWarehouseCenter(data_.deliveryLagerIndex);
 }
 
-LagerId LogisticsMap::getPickupLagerId(void) const {
+LagerId LogisticsMap::getPickupLagerId() const {
     return static_cast<LagerId>(data_.pickupLagerIndex);
 }
 
-LagerId LogisticsMap::getDeliveryLagerId(void) const {
+LagerId LogisticsMap::getDeliveryLagerId() const {
     return static_cast<LagerId>(data_.deliveryLagerIndex);
 }
 
-Vector2 LogisticsMap::getRobotStartPosition(void) const {
+Vector2 LogisticsMap::getRobotStartPosition() const {
     return data_.robotStart;
 }
 
-Vector2 LogisticsMap::getChargingStationPosition(void) const {
+Vector2 LogisticsMap::getChargingStationPosition() const {
     return {
         data_.chargingStation.body.x + data_.chargingStation.body.width * 0.5f,
         data_.chargingStation.body.y + data_.chargingStation.body.height * 0.5f,
     };
 }
 
-Vector2 LogisticsMap::getChargingStationDockPosition(void) const {
+Vector2 LogisticsMap::getChargingStationDockPosition() const {
     return data_.chargingStation.dockPoint;
 }
 
@@ -129,15 +129,15 @@ Vector2 LogisticsMap::clampPositionToRoad(Vector2 position) const {
     return closestPosition;
 }
 
-const std::vector<Vector2>& LogisticsMap::getNavigationNodes(void) const {
+const std::vector<Vector2>& LogisticsMap::getNavigationNodes() const {
     return data_.navigationNodes;
 }
 
-const std::vector<NavigationEdge>& LogisticsMap::getNavigationEdges(void) const {
+const std::vector<NavigationEdge>& LogisticsMap::getNavigationEdges() const {
     return data_.navigationEdges;
 }
 
-const std::vector<BlockingRobotPath>& LogisticsMap::getBlockingRobotPaths(void) const {
+const std::vector<BlockingRobotPath>& LogisticsMap::getBlockingRobotPaths() const {
     return data_.blockingRobotPaths;
 }
 
@@ -150,7 +150,7 @@ Vector2 LogisticsMap::getWarehouseCenter(int index) const {
     };
 }
 
-void LogisticsMap::drawGrid(void) const {
+void LogisticsMap::drawGrid() const {
     for (int x = 0; x <= data_.screenWidth; x += data_.gridSize) {
         DrawLine(x, 0, x, data_.screenHeight, Fade(LIGHTGRAY, 0.55f));
     }
@@ -160,7 +160,7 @@ void LogisticsMap::drawGrid(void) const {
     }
 }
 
-void LogisticsMap::drawRoads(void) const {
+void LogisticsMap::drawRoads() const {
     for (Rectangle road : data_.roads) {
         DrawRectangleRec(road, GRAY);
     }
@@ -190,7 +190,7 @@ void LogisticsMap::drawWarehouse(Rectangle body, int index) const {
     }
 }
 
-void LogisticsMap::drawChargingStation(void) const {
+void LogisticsMap::drawChargingStation() const {
     const Rectangle body = data_.chargingStation.body;
     const Vector2 dock = data_.chargingStation.dockPoint;
     const Vector2 connectorEnd = {body.x, body.y + body.height * 0.5f};

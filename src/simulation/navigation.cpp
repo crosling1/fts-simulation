@@ -89,18 +89,6 @@ int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position)
     return nearestNodeIndex;
 }
 
-int GetNeighborNodeIndex(NavigationEdge edge, int nodeIndex) {
-    if (edge.from == static_cast<std::size_t>(nodeIndex)) {
-        return static_cast<int>(edge.to);
-    }
-
-    if (edge.to == static_cast<std::size_t>(nodeIndex)) {
-        return static_cast<int>(edge.from);
-    }
-
-    return invalidPathNode;
-}
-
 std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
                                           const std::vector<int>& cameFrom,
                                           PathEndpointIndices endpoints) {
@@ -140,6 +128,17 @@ std::vector<Vector2> SimplifyPath(const LogisticsMap& logisticsMap,
     simplifiedPath.push_back(path.back());
     return simplifiedPath;
 }
+
+std::vector<std::vector<int>> BuildAdjacencyList(const std::vector<NavigationEdge>& edges,
+                                                 std::size_t nodeCount) {
+
+    std::vector<std::vector<int>> adj(nodeCount);
+    for (const NavigationEdge& edge : edges) {
+        adj[edge.from].push_back(static_cast<int>(edge.to));
+        adj[edge.to].push_back(static_cast<int>(edge.from));
+    }
+    return adj;
+}
 } // namespace
 
 std::vector<Vector2>
@@ -159,6 +158,8 @@ FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
     if (endpoints.startNodeIndex == endpoints.goalNodeIndex) {
         return {};
     }
+
+    const auto adjacency = BuildAdjacencyList(pathEdges, pathNodes.size());
 
     std::vector<float> costFromStart(pathNodes.size(), unreachableDistance);
     std::vector<int> cameFrom(pathNodes.size(), invalidPathNode);
@@ -185,9 +186,8 @@ FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
         }
 
         closed[currentNodeIndex] = true;
-        for (NavigationEdge edge : pathEdges) {
-            const int neighborNodeIndex = GetNeighborNodeIndex(edge, currentNodeIndex);
-            if (neighborNodeIndex == invalidPathNode || closed[neighborNodeIndex]) {
+        for (int neighborNodeIndex : adjacency[currentNodeIndex]) {
+            if (closed[neighborNodeIndex]) {
                 continue;
             }
 

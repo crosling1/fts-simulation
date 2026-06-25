@@ -1,14 +1,14 @@
 #include "robots/Robot.h"
+#include "simulation/SimConstants.h"
 
 #include <cmath>
+#include <string_view>
 
 namespace {
 constexpr double pi = 3.14159265358979323846;
-constexpr float reachedDistance = 2.0f;
 constexpr float radToDeg = 57.29577951308232f;
 constexpr float fullTurn = 360.0f;
 constexpr float halfTurn = 180.0f;
-constexpr float batteryDrainPercentagePerPixel = 0.01f;
 constexpr float proximityDetectionRadiusMultiplier = 2.0f;
 
 double DegreesToRadians(double degree) {
@@ -22,16 +22,12 @@ float Distance(Vector2 from, Vector2 to) {
     return std::sqrt((deltaX * deltaX) + (deltaY * deltaY));
 }
 
-float NormalizeAngle(float angle) {
-    while (angle > halfTurn) {
-        angle -= fullTurn;
-    }
-
-    while (angle < -halfTurn) {
+float NormalizeAngle(float angle) noexcept {
+    angle = std::fmod(angle + halfTurn, fullTurn);
+    if (angle < 0.0f) {
         angle += fullTurn;
     }
-
-    return angle;
+    return angle - halfTurn;
 }
 
 float TargetRotation(Vector2 from, Vector2 to) {
@@ -96,7 +92,8 @@ void Robot::updateMovement(float deltaTime) {
     moveTowardsTarget(deltaTime);
 
     const Vector2 currentPosition = {static_cast<float>(x_), static_cast<float>(y_)};
-    battery_.drain(Distance(previousPosition, currentPosition) * batteryDrainPercentagePerPixel);
+    battery_.drain(Distance(previousPosition, currentPosition) *
+                   SimConstants::kBatteryDrainPerPixel);
     if (battery_.isEmpty()) {
         state_ = State::BatteryDepleted;
     }
@@ -104,7 +101,7 @@ void Robot::updateMovement(float deltaTime) {
     updateSensors();
 }
 
-void Robot::draw(void) {
+void Robot::draw() {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
     const float radius = size_;
     const float headingLength = radius * 1.15f;
@@ -160,7 +157,7 @@ void Robot::setTargetPosition(const Vector2& target) {
 void Robot::moveTowardsTarget(float deltaTime) {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
     const float distance = Distance(position, targetPosition_);
-    if (distance <= reachedDistance) {
+    if (distance <= SimConstants::kReachedDistance) {
         x_ = targetPosition_.x;
         y_ = targetPosition_.y;
         speedController_.reset();
@@ -216,29 +213,29 @@ void Robot::getRotation(float& outRotation) const {
     outRotation = static_cast<float>(angle_);
 }
 
-Robot::State Robot::getState(void) const {
+Robot::State Robot::getState() const {
     return state_;
 }
 
-bool Robot::hasReachedTarget(void) const {
+bool Robot::hasReachedTarget() const {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
 
-    return Distance(position, targetPosition_) <= reachedDistance;
+    return Distance(position, targetPosition_) <= SimConstants::kReachedDistance;
 }
 
-float Robot::getProximityDetectionRadius(void) const {
+float Robot::getProximityDetectionRadius() const {
     return proximitySensor_.getDetectionRadius();
 }
 
-void Robot::drawProximityScanArea(void) const {
+void Robot::drawProximityScanArea() const {
     proximitySensor_.drawScanArea(getPosition());
 }
 
-Battery& Robot::getBattery(void) {
+Battery& Robot::getBattery() {
     return battery_;
 }
 
-const Battery& Robot::getBattery(void) const {
+const Battery& Robot::getBattery() const {
     return battery_;
 }
 
@@ -252,15 +249,15 @@ void Robot::updateSensors() {
     }
 }
 
-double Robot::x() const {
+double Robot::x() const noexcept {
     return x_;
 }
 
-double Robot::y() const {
+double Robot::y() const noexcept {
     return y_;
 }
 
-double Robot::angle() const {
+double Robot::angle() const noexcept {
     return angle_;
 }
 

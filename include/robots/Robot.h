@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 class Robot {
@@ -45,30 +46,30 @@ class Robot {
     Robot(const Vector2& startPosition, Config config);
     virtual ~Robot() = default;
 
-    virtual void printType() const = 0;
+    [[nodiscard]] virtual std::string_view typeName() const noexcept = 0;
 
     void updateMovement(float deltaTime);
-    void draw(void);
+    void draw();
     void setPosition(const Vector2& newPosition);
     void setState(State newState);
     void setTargetPosition(const Vector2& target);
     void moveTowardsTarget(float deltaTime);
     void rotateTowardsTarget(float deltaTime);
-    Vector2 getPosition() const;
+    [[nodiscard]] Vector2 getPosition() const;
     void getRotation(float& outRotation) const;
-    State getState(void) const;
-    bool hasReachedTarget(void) const;
-    float getProximityDetectionRadius(void) const;
-    void drawProximityScanArea(void) const;
-    Battery& getBattery(void);
-    const Battery& getBattery(void) const;
+    [[nodiscard]] State getState() const;
+    [[nodiscard]] bool hasReachedTarget() const;
+    [[nodiscard]] float getProximityDetectionRadius() const;
+    void drawProximityScanArea() const;
+    [[nodiscard]] Battery& getBattery();
+    [[nodiscard]] const Battery& getBattery() const;
 
     void addSensor(std::unique_ptr<Sensor> sensor);
     void updateSensors();
 
-    double x() const;
-    double y() const;
-    double angle() const;
+    [[nodiscard]] double x() const noexcept;
+    [[nodiscard]] double y() const noexcept;
+    [[nodiscard]] double angle() const noexcept;
 
   protected:
     void moveForward(double distance);

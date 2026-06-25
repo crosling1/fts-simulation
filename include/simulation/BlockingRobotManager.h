@@ -9,27 +9,27 @@
 class LogisticsMap;
 
 struct BlockingRobot {
-    Vector2 position;
-    float radius;
-    float speed;
+    Vector2 position = {0.0f, 0.0f};
+    float radius = 0.0f;
+    float speed = 0.0f;
     std::vector<Vector2> path;
-    std::size_t currentNodeIndex;
-    std::size_t targetNodeIndex;
-    std::size_t previousNodeIndex;
-    bool active;
+    std::size_t currentNodeIndex = 0;
+    std::size_t targetNodeIndex = 0;
+    std::size_t previousNodeIndex = 0;
+    bool active = false;
 };
 
 class BlockingRobotManager {
   public:
-    BlockingRobotManager(void);
+    BlockingRobotManager();
 
-    void clear(void);
+    void clear();
     void addBlockingRobot(const BlockingRobot& blockingRobot);
     void initBlockingRobots(const LogisticsMap& logisticsMap);
     void update(float deltaTime);
-    void draw(void) const;
-    bool hasActiveBlockingRobotNear(Vector2 position, float detectionRadius) const;
-    const std::vector<BlockingRobot>& getBlockingRobots(void) const;
+    void draw() const;
+    [[nodiscard]] bool hasActiveBlockingRobotNear(Vector2 position, float detectionRadius) const;
+    [[nodiscard]] const std::vector<BlockingRobot>& getBlockingRobots() const;
 
   private:
     std::vector<BlockingRobot> blockingRobots;

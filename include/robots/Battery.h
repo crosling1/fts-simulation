@@ -4,14 +4,14 @@ class Battery {
   public:
     explicit Battery(float chargePercentage = 100.0f);
 
-    float getChargePercentage(void) const;
-    bool isFull(void) const;
-    bool isEmpty(void) const;
-    bool isLow(float thresholdPercentage) const;
+    [[nodiscard]] float getChargePercentage() const noexcept;
+    [[nodiscard]] bool isFull() const noexcept;
+    [[nodiscard]] bool isEmpty() const noexcept;
+    [[nodiscard]] bool isLow(float thresholdPercentage) const noexcept;
 
-    void drain(float percentage);
-    void charge(float percentage);
-    void setChargePercentage(float percentage);
+    void drain(float percentage) noexcept;
+    void charge(float percentage) noexcept;
+    void setChargePercentage(float percentage) noexcept;
 
   private:
     float chargePercentage_;

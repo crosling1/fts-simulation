@@ -10,14 +10,14 @@ class ChargingManager {
   public:
     explicit ChargingManager(const LogisticsMap& logisticsMap);
 
-    bool shouldStartChargingAfterDropoff(Robot& robot, const RobotRoutePlanner& routePlanner,
-                                         Vector2 robotPosition) const;
+    [[nodiscard]] bool shouldStartChargingAfterDropoff(const Robot& robot,
+                                                       const RobotRoutePlanner& routePlanner,
+                                                       Vector2 robotPosition) const;
 
   private:
-    bool shouldChargeAtOrBelow(Robot& robot, float thresholdPercentage) const;
-    bool canCompleteNextDeliveryBeforeMinimumBattery(Robot& robot,
-                                                     const RobotRoutePlanner& routePlanner,
-                                                     Vector2 robotPosition) const;
+    [[nodiscard]] bool shouldChargeAtOrBelow(const Robot& robot, float thresholdPercentage) const;
+    [[nodiscard]] bool canCompleteNextDeliveryBeforeMinimumBattery(
+        const Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const;
 
     const LogisticsMap& logisticsMap_;
 };

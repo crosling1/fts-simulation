@@ -1,14 +1,11 @@
 #include "simulation/BlockingRobotManager.h"
+#include "simulation/SimConstants.h"
 
 #include "simulation/map.h"
 
 #include <cmath>
 
 namespace {
-constexpr float reachedDistance = 2.0f;
-constexpr float blockingRobotRadius = 14.0f;
-constexpr float blockingRobotSpeed = 65.0f;
-
 float Distance(Vector2 from, Vector2 to) {
     const float deltaX = to.x - from.x;
     const float deltaY = to.y - from.y;
@@ -25,9 +22,9 @@ bool IsBlockingRobotInRange(Vector2 position, const BlockingRobot& blockingRobot
 
 } // namespace
 
-BlockingRobotManager::BlockingRobotManager(void) : randomEngine(std::random_device{}()) {}
+BlockingRobotManager::BlockingRobotManager() : randomEngine(std::random_device{}()) {}
 
-void BlockingRobotManager::clear(void) {
+void BlockingRobotManager::clear() {
     blockingRobots.clear();
 }
 
@@ -40,7 +37,7 @@ void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) 
 
     for (const BlockingRobotPath& blockingPath : logisticsMap.getBlockingRobotPaths()) {
         addBlockingRobotPath(blockingPath.points,
-                             blockingRobotSpeed * blockingPath.speedMultiplier);
+                             SimConstants::kBlockingRobotSpeed * blockingPath.speedMultiplier);
     }
 }
 
@@ -54,7 +51,7 @@ void BlockingRobotManager::update(float deltaTime) {
     }
 }
 
-void BlockingRobotManager::draw(void) const {
+void BlockingRobotManager::draw() const {
     for (const BlockingRobot& blockingRobot : blockingRobots) {
         if (!blockingRobot.active) {
             continue;
@@ -79,7 +76,7 @@ bool BlockingRobotManager::hasActiveBlockingRobotNear(Vector2 position,
     return false;
 }
 
-const std::vector<BlockingRobot>& BlockingRobotManager::getBlockingRobots(void) const {
+const std::vector<BlockingRobot>& BlockingRobotManager::getBlockingRobots() const {
     return blockingRobots;
 }
 
@@ -90,7 +87,7 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
 
     addBlockingRobot({
         path[0],
-        blockingRobotRadius,
+        SimConstants::kBlockingRobotRadius,
         speed,
         path,
         0,
@@ -107,7 +104,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
 
     const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
     const float distance = Distance(blockingRobot.position, target);
-    if (distance <= reachedDistance) {
+    if (distance <= SimConstants::kReachedDistance) {
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
         blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;
