@@ -2,6 +2,7 @@
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
 #include "simulation/map.h"
+#include "ui/MapOverlay.h"
 #include "ui/StatusOverlay.h"
 #include "raylib.h"
 
@@ -32,6 +33,7 @@ int main(void) {
         BeginDrawing();
 
         logisticsMap.draw();
+        DrawMapOverlay();
         blockingRobotManager.draw();
         robotController.draw();
         DrawStatusOverlay(robotController.statusSnapshot());
