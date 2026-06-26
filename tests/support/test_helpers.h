@@ -1,32 +1,25 @@
 #ifndef TEST_HELPERS_H
 #define TEST_HELPERS_H
 
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+
 #include "raylib.h"
 
 #include <cmath>
-#include <stdexcept>
-#include <string>
 #include <vector>
 
 namespace test {
 constexpr float epsilon = 0.001f;
 
-inline bool AlmostEqual(float left, float right) {
+inline bool AlmostEqual(float left, float right) noexcept {
     return std::fabs(left - right) <= epsilon;
 }
 
-inline void Expect(bool condition, const std::string& message) {
-    if (!condition) {
-        throw std::runtime_error(message);
-    }
-}
-
-inline void ExpectVectorNear(Vector2 actual, Vector2 expected, const std::string& message) {
-    if (!AlmostEqual(actual.x, expected.x) || !AlmostEqual(actual.y, expected.y)) {
-        throw std::runtime_error(message + " expected (" + std::to_string(expected.x) + ", " +
-                                 std::to_string(expected.y) + ") got (" + std::to_string(actual.x) +
-                                 ", " + std::to_string(actual.y) + ")");
-    }
+inline void CheckVectorNear(Vector2 actual, Vector2 expected) {
+    CAPTURE(actual.x, actual.y, expected.x, expected.y);
+    CHECK(actual.x == Catch::Approx(expected.x).margin(epsilon));
+    CHECK(actual.y == Catch::Approx(expected.y).margin(epsilon));
 }
 
 inline bool PathContainsPoint(const std::vector<Vector2>& path, Vector2 expectedPoint) {

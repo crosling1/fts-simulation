@@ -1,10 +1,9 @@
 #include "support/test_helpers.h"
-#include "support/test_runner.h"
-#include "support/test_suites.h"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "robots/WorkerRobot.h"
-
-#include <string>
 
 namespace {
 Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
@@ -15,41 +14,38 @@ Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
         {proportionalGain, integralGain, maxIntegralError},
     };
 }
+} // namespace
 
-void TestRobotMovesToTarget(void) {
+TEST_CASE("Robot moves to target", "[Robot]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({10.0f, 0.0f});
-    test::Expect(robot.getState() == Robot::State::Moving,
-                 "robot should start moving to a new target");
+    REQUIRE(robot.getState() == Robot::State::Moving);
 
     robot.updateMovement(0.5f);
 
     const Vector2 position = robot.getPosition();
-    test::ExpectVectorNear(position, {5.0f, 0.0f}, "robot should move by speed * deltaTime");
-    test::Expect(robot.getState() == Robot::State::Moving,
-                 "robot should still be moving before target");
+    test::CheckVectorNear(position, {5.0f, 0.0f});
+    CHECK(robot.getState() == Robot::State::Moving);
 
     robot.updateMovement(0.5f);
     const Vector2 finalPosition = robot.getPosition();
-    test::ExpectVectorNear(finalPosition, {10.0f, 0.0f}, "robot should stop exactly at the target");
-    test::Expect(robot.getState() == Robot::State::Arrived, "robot should arrive at target");
+    test::CheckVectorNear(finalPosition, {10.0f, 0.0f});
+    CHECK(robot.getState() == Robot::State::Arrived);
 }
 
-void TestRobotPiControllerLimitsSpeedNearTarget(void) {
+TEST_CASE("Robot PI controller limits speed near target", "[Robot]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f, 0.5f, 0.1f, 100.0f));
 
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
 
     const Vector2 position = robot.getPosition();
-    test::ExpectVectorNear(position, {6.0f, 0.0f},
-                           "PI controller should command less than max speed near target");
-    test::Expect(robot.getState() == Robot::State::Moving,
-                 "PI controlled robot should continue moving before target threshold");
+    test::CheckVectorNear(position, {6.0f, 0.0f});
+    CHECK(robot.getState() == Robot::State::Moving);
 }
 
-void TestRobotKeepsCarryingStateWhenArriving(void) {
+TEST_CASE("Robot keeps carrying state when arriving", "[Robot]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setState(Robot::State::CarryingItem);
@@ -57,12 +53,11 @@ void TestRobotKeepsCarryingStateWhenArriving(void) {
     robot.updateMovement(1.0f);
 
     const Vector2 position = robot.getPosition();
-    test::ExpectVectorNear(position, {10.0f, 0.0f}, "carrying robot should reach target");
-    test::Expect(robot.getState() == Robot::State::CarryingItem,
-                 "carrying robot should not switch to Arrived during route");
+    test::CheckVectorNear(position, {10.0f, 0.0f});
+    CHECK(robot.getState() == Robot::State::CarryingItem);
 }
 
-void TestRobotRotatesTowardTarget(void) {
+TEST_CASE("Robot rotates toward target", "[Robot]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({0.0f, -10.0f});
@@ -70,85 +65,59 @@ void TestRobotRotatesTowardTarget(void) {
 
     float rotation = 0.0f;
     robot.getRotation(rotation);
-    test::Expect(test::AlmostEqual(rotation, -45.0f),
-                 "robot rotation should be limited by rotation speed");
+    CHECK(rotation == Catch::Approx(-45.0f).margin(test::epsilon));
 
     robot.updateMovement(0.5f);
     robot.getRotation(rotation);
-    test::Expect(test::AlmostEqual(rotation, -90.0f),
-                 "robot should finish rotating toward the target");
+    CHECK(rotation == Catch::Approx(-90.0f).margin(test::epsilon));
 }
 
-void TestRobotOwnsBattery(void) {
+TEST_CASE("Battery clamps charge and reports state", "[Battery]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
-    test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
-                 "robot battery should start full");
+    REQUIRE(robot.getBattery().getChargePercentage() ==
+            Catch::Approx(100.0f).margin(test::epsilon));
 
     robot.getBattery().drain(91.0f);
-    test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 9.0f),
-                 "robot battery should drain by percentage");
-    test::Expect(robot.getBattery().isLow(10.0f), "robot battery should report low charge");
+    CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(9.0f).margin(test::epsilon));
+    CHECK(robot.getBattery().isLow(10.0f));
 
     robot.getBattery().charge(200.0f);
-    test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
-                 "robot battery should clamp charge to full");
-    test::Expect(robot.getBattery().isFull(), "robot battery should report full charge");
+    CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(100.0f).margin(test::epsilon));
+    CHECK(robot.getBattery().isFull());
 
     robot.getBattery().drain(100.0f);
-    test::Expect(robot.getBattery().isEmpty(), "robot battery should report empty charge");
+    CHECK(robot.getBattery().isEmpty());
 }
 
-void TestRobotDrainsBatteryByDistanceMoved(void) {
+TEST_CASE("Robot drains battery by distance moved", "[Robot][Battery]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({100.0f, 0.0f});
     robot.updateMovement(1.0f);
 
-    test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 99.0f),
-                 "robot battery should drain 1 percent per 100 pixels moved");
+    CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(99.0f).margin(test::epsilon));
 
     robot.getBattery().charge(1.0f);
-    test::Expect(test::AlmostEqual(robot.getBattery().getChargePercentage(), 100.0f),
-                 "robot battery should recharge by percentage");
+    CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(100.0f).margin(test::epsilon));
 }
 
-void TestRobotStopsWhenBatteryIsEmpty(void) {
+TEST_CASE("Robot stops when battery is empty", "[Robot][Battery]") {
     WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.getBattery().setChargePercentage(0.0f);
     robot.setTargetPosition({10.0f, 0.0f});
 
-    test::Expect(robot.getState() == Robot::State::BatteryDepleted,
-                 "empty battery robot should enter battery depleted state");
+    REQUIRE(robot.getState() == Robot::State::BatteryDepleted);
 
     robot.updateMovement(1.0f);
 
     const Vector2 position = robot.getPosition();
-    test::ExpectVectorNear(position, {0.0f, 0.0f}, "empty battery robot should not move");
+    test::CheckVectorNear(position, {0.0f, 0.0f});
 
     robot.getBattery().charge(50.0f);
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
     const Vector2 chargedPosition = robot.getPosition();
-    test::ExpectVectorNear(chargedPosition, {10.0f, 0.0f}, "charged robot should move again");
-}
-
-const test::TestCase robotTests[] = {
-    {"Robot moves to target", TestRobotMovesToTarget},
-    {"Robot PI controller limits speed near target", TestRobotPiControllerLimitsSpeedNearTarget},
-    {"Robot keeps carrying state when arriving", TestRobotKeepsCarryingStateWhenArriving},
-    {"Robot rotates toward target", TestRobotRotatesTowardTarget},
-    {"Robot owns battery", TestRobotOwnsBattery},
-    {"Robot drains battery by distance moved", TestRobotDrainsBatteryByDistanceMoved},
-    {"Robot stops when battery is empty", TestRobotStopsWhenBatteryIsEmpty},
-};
-} // namespace
-
-void RunRobotTests(void) {
-    test::RunTestCases(robotTests);
-}
-
-bool RunRobotTestByName(const std::string& name) {
-    return test::RunTestCaseByName(robotTests, name);
+    test::CheckVectorNear(chargedPosition, {10.0f, 0.0f});
 }
