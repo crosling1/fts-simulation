@@ -4,7 +4,7 @@
 
 #include "simulation/BlockingRobotManager.h"
 
-TEST_CASE("Blocking robot detection ignores inactive robots", "[BlockingRobotManager]") {
+TEST_CASE("Blocking robot detection uses robot radius", "[BlockingRobotManager]") {
     BlockingRobotManager manager;
 
     manager.addBlockingRobot({
@@ -15,17 +15,6 @@ TEST_CASE("Blocking robot detection ignores inactive robots", "[BlockingRobotMan
         0,
         0,
         0,
-        true,
-    });
-    manager.addBlockingRobot({
-        {2.0f, 0.0f},
-        5.0f,
-        0.0f,
-        {},
-        0,
-        0,
-        0,
-        false,
     });
 
     CHECK(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
@@ -42,7 +31,6 @@ TEST_CASE("Blocking robot outside radius is not detected", "[BlockingRobotManage
         0,
         0,
         0,
-        true,
     });
 
     CHECK(!manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
@@ -58,7 +46,6 @@ TEST_CASE("Blocking robot inside radius is detected", "[BlockingRobotManager]") 
         0,
         0,
         0,
-        true,
     });
 
     CHECK(manager.hasActiveBlockingRobotNear({0.0f, 0.0f}, 6.0f));
@@ -74,7 +61,6 @@ TEST_CASE("Blocking robot moves along path", "[BlockingRobotManager]") {
         0,
         1,
         0,
-        true,
     });
 
     manager.update(0.5f);
