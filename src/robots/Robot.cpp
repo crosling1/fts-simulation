@@ -173,10 +173,6 @@ Vector2 Robot::getPosition() const {
     return {static_cast<float>(x_), static_cast<float>(y_)};
 }
 
-void Robot::getRotation(float& outRotation) const {
-    outRotation = static_cast<float>(angle_);
-}
-
 Robot::State Robot::getState() const {
     return state_;
 }

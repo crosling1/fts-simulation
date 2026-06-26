@@ -48,7 +48,6 @@ class Robot {
     void moveTowardsTarget(float deltaTime);
     void rotateTowardsTarget(float deltaTime);
     [[nodiscard]] Vector2 getPosition() const;
-    void getRotation(float& outRotation) const;
     [[nodiscard]] State getState() const;
     [[nodiscard]] bool hasReachedTarget() const;
     [[nodiscard]] float getProximityDetectionRadius() const;
