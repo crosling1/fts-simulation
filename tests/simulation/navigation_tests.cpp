@@ -19,9 +19,9 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     REQUIRE(deliveryDock.has_value());
     REQUIRE(l6Dock.has_value());
 
-    const Vector2 pickupDockPosition = pickupDock.value();
-    const Vector2 deliveryDockPosition = deliveryDock.value();
-    const Vector2 l6DockPosition = l6Dock.value();
+    const Vector2 pickupDockPosition = pickupDock.value_or(Vector2{});
+    const Vector2 deliveryDockPosition = deliveryDock.value_or(Vector2{});
+    const Vector2 l6DockPosition = l6Dock.value_or(Vector2{});
     const std::vector<Vector2> pickupPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), pickupDockPosition);
     const std::vector<Vector2> dropoffPath =

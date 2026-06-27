@@ -39,10 +39,11 @@ void SetRobotBatteryPercentage(WorkerRobot& robot, float percentage) {
 float EstimatedNextDeliveryBatteryUse(const LogisticsMap& logisticsMap,
                                       const RobotRoutePlanner& routePlanner,
                                       Vector2 robotPosition) {
+    const Vector2 fallbackPosition{0.0F, 0.0F};
     const auto pickupDock = logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId());
     REQUIRE(pickupDock.has_value());
 
-    const Vector2 pickupDockPosition = pickupDock.value();
+    const Vector2 pickupDockPosition = pickupDock.value_or(fallbackPosition);
     const std::vector<Vector2> pickupPath = routePlanner.buildPathToPickup(robotPosition);
     const std::vector<Vector2> dropoffPath = routePlanner.buildPathToDropoff(pickupDockPosition);
 
@@ -59,7 +60,7 @@ TEST_CASE("Charging starts after dropoff at or below charging threshold", "[Char
     const ChargingManager chargingManager(logisticsMap);
     const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
     REQUIRE(deliveryDock.has_value());
-    const Vector2 deliveryDockPosition = deliveryDock.value();
+    const Vector2 deliveryDockPosition = deliveryDock.value_or(Vector2{});
     WorkerRobot robot(deliveryDockPosition, RobotConfig());
 
     SetRobotBatteryPercentage(robot, SimConfig::Default().lowBatteryThreshold);
@@ -75,7 +76,7 @@ TEST_CASE("Charging starts when next delivery would violate minimum battery", "[
     const ChargingManager chargingManager(logisticsMap);
     const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
     REQUIRE(deliveryDock.has_value());
-    const Vector2 deliveryDockPosition = deliveryDock.value();
+    const Vector2 deliveryDockPosition = deliveryDock.value_or(Vector2{});
     WorkerRobot robot(deliveryDockPosition, RobotConfig());
 
     const float nextDeliveryUse =
@@ -95,7 +96,7 @@ TEST_CASE("Charging is skipped when battery can complete next delivery safely",
     const ChargingManager chargingManager(logisticsMap);
     const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
     REQUIRE(deliveryDock.has_value());
-    const Vector2 deliveryDockPosition = deliveryDock.value();
+    const Vector2 deliveryDockPosition = deliveryDock.value_or(Vector2{});
     WorkerRobot robot(deliveryDockPosition, RobotConfig());
 
     const float nextDeliveryUse =
