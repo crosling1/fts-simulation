@@ -65,8 +65,11 @@ set(FTS_TEST_SOURCES
     tests/robots/pi_controller_tests.cpp
     tests/sensors/proximity_sensor_tests.cpp
     tests/simulation/blocking_robot_manager_tests.cpp
+    tests/simulation/charging_manager_tests.cpp
     tests/simulation/map_tests.cpp
     tests/simulation/navigation_tests.cpp
+    tests/simulation/robot_controller_tests.cpp
+    tests/simulation/robot_task_flow_tests.cpp
 )
 
 set(FTS_CORE_HEADERS
