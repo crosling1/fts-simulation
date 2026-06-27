@@ -40,16 +40,14 @@ float EstimatedNextDeliveryBatteryUse(const LogisticsMap& logisticsMap,
                                       const RobotRoutePlanner& routePlanner,
                                       Vector2 robotPosition) {
     const auto pickupDock = logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId());
-    CHECK(pickupDock.has_value());
-    if (!pickupDock) {
-        return 0.0f;
-    }
+    REQUIRE(pickupDock.has_value());
 
+    const Vector2 pickupDockPosition = pickupDock.value();
     const std::vector<Vector2> pickupPath = routePlanner.buildPathToPickup(robotPosition);
-    const std::vector<Vector2> dropoffPath = routePlanner.buildPathToDropoff(*pickupDock);
+    const std::vector<Vector2> dropoffPath = routePlanner.buildPathToDropoff(pickupDockPosition);
 
     return (routePlanner.calculatePathDistance(robotPosition, pickupPath) +
-            routePlanner.calculatePathDistance(*pickupDock, dropoffPath)) *
+            routePlanner.calculatePathDistance(pickupDockPosition, dropoffPath)) *
            SimConfig::Default().batteryDrainPerPixel;
 }
 } // namespace
@@ -61,7 +59,8 @@ TEST_CASE("Charging starts after dropoff at or below charging threshold", "[Char
     const ChargingManager chargingManager(logisticsMap);
     const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
     REQUIRE(deliveryDock.has_value());
-    WorkerRobot robot(*deliveryDock, RobotConfig());
+    const Vector2 deliveryDockPosition = deliveryDock.value();
+    WorkerRobot robot(deliveryDockPosition, RobotConfig());
 
     SetRobotBatteryPercentage(robot, SimConfig::Default().lowBatteryThreshold);
 
@@ -76,7 +75,8 @@ TEST_CASE("Charging starts when next delivery would violate minimum battery", "[
     const ChargingManager chargingManager(logisticsMap);
     const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
     REQUIRE(deliveryDock.has_value());
-    WorkerRobot robot(*deliveryDock, RobotConfig());
+    const Vector2 deliveryDockPosition = deliveryDock.value();
+    WorkerRobot robot(deliveryDockPosition, RobotConfig());
 
     const float nextDeliveryUse =
         EstimatedNextDeliveryBatteryUse(logisticsMap, routePlanner, robot.getPosition());
@@ -95,13 +95,14 @@ TEST_CASE("Charging is skipped when battery can complete next delivery safely",
     const ChargingManager chargingManager(logisticsMap);
     const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
     REQUIRE(deliveryDock.has_value());
-    WorkerRobot robot(*deliveryDock, RobotConfig());
+    const Vector2 deliveryDockPosition = deliveryDock.value();
+    WorkerRobot robot(deliveryDockPosition, RobotConfig());
 
     const float nextDeliveryUse =
         EstimatedNextDeliveryBatteryUse(logisticsMap, routePlanner, robot.getPosition());
     SetRobotBatteryPercentage(robot, SimConfig::Default().emergencyBatteryThreshold +
                                          nextDeliveryUse + 1.0f);
 
-    CHECK_FALSE(
-        chargingManager.shouldStartChargingAfterDropoff(robot, routePlanner, robot.getPosition()));
+    CHECK(
+        !chargingManager.shouldStartChargingAfterDropoff(robot, routePlanner, robot.getPosition()));
 }

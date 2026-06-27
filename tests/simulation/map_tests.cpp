@@ -16,5 +16,5 @@ TEST_CASE("Map road queries", "[Navigation]") {
     CHECK(logisticsMap.isRoadPosition(logisticsMap.getChargingStationDockPosition()));
     CHECK(!logisticsMap.isRoadPosition(offRoad));
     CHECK(logisticsMap.isRoadPosition(clamped));
-    CHECK_FALSE(logisticsMap.getLagerDockPosition(LagerId::Count).has_value());
+    CHECK(!logisticsMap.getLagerDockPosition(LagerId::Count).has_value());
 }

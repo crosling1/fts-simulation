@@ -19,17 +19,20 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     REQUIRE(deliveryDock.has_value());
     REQUIRE(l6Dock.has_value());
 
+    const Vector2 pickupDockPosition = pickupDock.value();
+    const Vector2 deliveryDockPosition = deliveryDock.value();
+    const Vector2 l6DockPosition = l6Dock.value();
     const std::vector<Vector2> pickupPath =
-        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), *pickupDock);
+        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), pickupDockPosition);
     const std::vector<Vector2> dropoffPath =
-        FindNavigationPath(logisticsMap, *pickupDock, *deliveryDock);
+        FindNavigationPath(logisticsMap, pickupDockPosition, deliveryDockPosition);
     const std::vector<Vector2> chargingPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(),
                            logisticsMap.getChargingStationDockPosition());
     const std::vector<Vector2> dropoffToChargingPath = FindNavigationPath(
-        logisticsMap, *deliveryDock, logisticsMap.getChargingStationDockPosition());
+        logisticsMap, deliveryDockPosition, logisticsMap.getChargingStationDockPosition());
     const std::vector<Vector2> l6Path =
-        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), *l6Dock);
+        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), l6DockPosition);
     const Vector2 l6EntryWaypoint = {545.0f, 450.0f};
 
     REQUIRE(!pickupPath.empty());
@@ -38,8 +41,8 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     REQUIRE(!dropoffToChargingPath.empty());
     REQUIRE(!l6Path.empty());
 
-    test::CheckVectorNear(pickupPath.back(), *pickupDock);
-    test::CheckVectorNear(dropoffPath.back(), *deliveryDock);
+    test::CheckVectorNear(pickupPath.back(), pickupDockPosition);
+    test::CheckVectorNear(dropoffPath.back(), deliveryDockPosition);
     test::CheckVectorNear(chargingPath.back(), logisticsMap.getChargingStationDockPosition());
     test::CheckVectorNear(dropoffToChargingPath.back(),
                           logisticsMap.getChargingStationDockPosition());
