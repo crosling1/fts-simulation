@@ -30,7 +30,7 @@ void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) 
 
     for (const BlockingRobotPath& blockingPath : logisticsMap.getBlockingRobotPaths()) {
         addBlockingRobotPath(blockingPath.points,
-                             SimConstants::kBlockingRobotSpeed * blockingPath.speedMultiplier);
+                             SimConstants::BlockingRobot::kSpeed * blockingPath.speedMultiplier);
     }
 }
 
@@ -74,7 +74,7 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
 
     addBlockingRobot({
         path[0],
-        SimConstants::kBlockingRobotRadius,
+        SimConstants::BlockingRobot::kRadius,
         speed,
         path,
         0,
@@ -90,7 +90,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
 
     const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
     const float distance = Distance(blockingRobot.position, target);
-    if (distance <= SimConstants::kReachedDistance) {
+    if (distance <= SimConstants::Navigation::kReachedDistance) {
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
         blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;

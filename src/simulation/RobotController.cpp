@@ -166,7 +166,7 @@ void RobotController::updateDropoff(float deltaTime) {
 
 void RobotController::updateCharging(float deltaTime) {
     robot_->setState(Robot::State::Charging);
-    robot_->getBattery().charge(SimConstants::kChargeRatePerSecond * deltaTime);
+    robot_->getBattery().charge(SimConstants::Battery::kChargeRatePerSecond * deltaTime);
 
     if (!robot_->getBattery().isFull()) {
         return;

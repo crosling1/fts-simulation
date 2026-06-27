@@ -70,7 +70,7 @@ void Robot::updateMovement(float deltaTime) {
 
     const Vector2 currentPosition = {static_cast<float>(x_), static_cast<float>(y_)};
     battery_.drain(Distance(previousPosition, currentPosition) *
-                   SimConstants::kBatteryDrainPerPixel);
+                   SimConstants::Battery::kDrainPerPixel);
     if (battery_.isEmpty()) {
         state_ = State::BatteryDepleted;
     }
@@ -121,7 +121,7 @@ void Robot::setTargetPosition(const Vector2& target) {
 void Robot::moveTowardsTarget(float deltaTime) {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
     const float distance = Distance(position, targetPosition_);
-    if (distance <= SimConstants::kReachedDistance) {
+    if (distance <= SimConstants::Navigation::kReachedDistance) {
         x_ = targetPosition_.x;
         y_ = targetPosition_.y;
         speedController_.reset();
@@ -180,7 +180,7 @@ Robot::State Robot::getState() const {
 bool Robot::hasReachedTarget() const {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
 
-    return Distance(position, targetPosition_) <= SimConstants::kReachedDistance;
+    return Distance(position, targetPosition_) <= SimConstants::Navigation::kReachedDistance;
 }
 
 float Robot::getProximityDetectionRadius() const {

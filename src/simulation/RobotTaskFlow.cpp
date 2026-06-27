@@ -56,10 +56,10 @@ void RobotTaskFlow::startCharging() {
 
 [[nodiscard]] bool RobotTaskFlow::updatePickup(float deltaTime) {
     stateTimer_ += deltaTime;
-    return stateTimer_ >= SimConstants::kPickupDurationSeconds;
+    return stateTimer_ >= SimConstants::Task::kPickupDurationSeconds;
 }
 
 [[nodiscard]] bool RobotTaskFlow::updateDropoff(float deltaTime) {
     stateTimer_ += deltaTime;
-    return stateTimer_ >= SimConstants::kDropoffDurationSeconds;
+    return stateTimer_ >= SimConstants::Task::kDropoffDurationSeconds;
 }
