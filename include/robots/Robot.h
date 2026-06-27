@@ -45,13 +45,15 @@ class Robot {
     void setPosition(const Vector2& newPosition);
     void setState(State newState);
     void setTargetPosition(const Vector2& target);
+    void chargeBy(float amount);
+    void enterChargingState();
     void moveTowardsTarget(float deltaTime);
     void rotateTowardsTarget(float deltaTime);
     [[nodiscard]] Vector2 getPosition() const;
     [[nodiscard]] State getState() const;
+    [[nodiscard]] bool hasBatteryFull() const;
     [[nodiscard]] bool hasReachedTarget() const;
     [[nodiscard]] float getProximityDetectionRadius() const;
-    [[nodiscard]] Battery& getBattery();
     [[nodiscard]] const Battery& getBattery() const;
 
     void addSensor(std::unique_ptr<Sensor> sensor);

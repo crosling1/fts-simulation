@@ -101,7 +101,7 @@ void RobotController::startChargingTrip() {
 
     if (chargingPath.empty()) {
         taskFlow_.startCharging();
-        robot_->setState(Robot::State::Charging);
+        robot_->enterChargingState();
     }
 }
 
@@ -165,10 +165,10 @@ void RobotController::updateDropoff(float deltaTime) {
 }
 
 void RobotController::updateCharging(float deltaTime) {
-    robot_->setState(Robot::State::Charging);
-    robot_->getBattery().charge(SimConstants::Battery::kChargeRatePerSecond * deltaTime);
+    robot_->enterChargingState();
+    robot_->chargeBy(SimConstants::Battery::kChargeRatePerSecond * deltaTime);
 
-    if (!robot_->getBattery().isFull()) {
+    if (!robot_->hasBatteryFull()) {
         return;
     }
 
@@ -194,6 +194,6 @@ void RobotController::updateWaypointTravel() {
 
     if (taskFlow_.isRoutingToCharging()) {
         taskFlow_.startCharging();
-        robot_->setState(Robot::State::Charging);
+        robot_->enterChargingState();
     }
 }

@@ -118,6 +118,14 @@ void Robot::setTargetPosition(const Vector2& target) {
     }
 }
 
+void Robot::chargeBy(float amount) {
+    battery_.charge(amount);
+}
+
+void Robot::enterChargingState() {
+    state_ = State::Charging;
+}
+
 void Robot::moveTowardsTarget(float deltaTime) {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
     const float distance = Distance(position, targetPosition_);
@@ -177,6 +185,10 @@ Robot::State Robot::getState() const {
     return state_;
 }
 
+bool Robot::hasBatteryFull() const {
+    return battery_.isFull();
+}
+
 bool Robot::hasReachedTarget() const {
     const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
 
@@ -185,10 +197,6 @@ bool Robot::hasReachedTarget() const {
 
 float Robot::getProximityDetectionRadius() const {
     return proximitySensor_.getDetectionRadius();
-}
-
-Battery& Robot::getBattery() {
-    return battery_;
 }
 
 const Battery& Robot::getBattery() const {

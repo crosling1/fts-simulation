@@ -3,7 +3,9 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "robots/Battery.h"
 #include "robots/WorkerRobot.h"
+#include "simulation/SimConstants.h"
 
 namespace {
 Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
@@ -13,6 +15,15 @@ Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
         {speed, rotationSpeed, size},
         {proportionalGain, integralGain, maxIntegralError},
     };
+}
+
+void DrainRobotBatteryBy(WorkerRobot& robot, float percentage) {
+    const Vector2 originalPosition = robot.getPosition();
+    const float distance = percentage / SimConstants::Battery::kDrainPerPixel;
+
+    robot.setTargetPosition({originalPosition.x + distance, originalPosition.y});
+    robot.updateMovement(distance / 100.0f);
+    robot.setPosition(originalPosition);
 }
 } // namespace
 
@@ -70,21 +81,20 @@ TEST_CASE("Robot rotates toward target", "[Robot]") {
 }
 
 TEST_CASE("Battery clamps charge and reports state", "[Battery]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    Battery battery;
 
-    REQUIRE(robot.getBattery().getChargePercentage() ==
-            Catch::Approx(100.0f).margin(test::epsilon));
+    REQUIRE(battery.getChargePercentage() == Catch::Approx(100.0f).margin(test::epsilon));
 
-    robot.getBattery().drain(91.0f);
-    CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(9.0f).margin(test::epsilon));
-    CHECK(robot.getBattery().isLow(10.0f));
+    battery.drain(91.0f);
+    CHECK(battery.getChargePercentage() == Catch::Approx(9.0f).margin(test::epsilon));
+    CHECK(battery.isLow(10.0f));
 
-    robot.getBattery().charge(200.0f);
-    CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(100.0f).margin(test::epsilon));
-    CHECK(robot.getBattery().isFull());
+    battery.charge(200.0f);
+    CHECK(battery.getChargePercentage() == Catch::Approx(100.0f).margin(test::epsilon));
+    CHECK(battery.isFull());
 
-    robot.getBattery().drain(100.0f);
-    CHECK(robot.getBattery().isEmpty());
+    battery.drain(100.0f);
+    CHECK(battery.isEmpty());
 }
 
 TEST_CASE("Robot drains battery by distance moved", "[Robot][Battery]") {
@@ -95,14 +105,15 @@ TEST_CASE("Robot drains battery by distance moved", "[Robot][Battery]") {
 
     CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(99.0f).margin(test::epsilon));
 
-    robot.getBattery().charge(1.0f);
+    robot.chargeBy(1.0f);
     CHECK(robot.getBattery().getChargePercentage() == Catch::Approx(100.0f).margin(test::epsilon));
+    CHECK(robot.hasBatteryFull());
 }
 
 TEST_CASE("Robot stops when battery is empty", "[Robot][Battery]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
 
-    robot.getBattery().setChargePercentage(0.0f);
+    DrainRobotBatteryBy(robot, 100.0f);
     robot.setTargetPosition({10.0f, 0.0f});
 
     REQUIRE(robot.getState() == Robot::State::BatteryDepleted);
@@ -112,7 +123,7 @@ TEST_CASE("Robot stops when battery is empty", "[Robot][Battery]") {
     const Vector2 position = robot.getPosition();
     test::CheckVectorNear(position, {0.0f, 0.0f});
 
-    robot.getBattery().charge(50.0f);
+    robot.chargeBy(50.0f);
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
     const Vector2 chargedPosition = robot.getPosition();
