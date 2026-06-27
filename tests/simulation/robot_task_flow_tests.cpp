@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "simulation/RobotTaskFlow.h"
-#include "simulation/SimConstants.h"
+#include "simulation/SimConfig.h"
 
 TEST_CASE("Robot task flow starts routed to pickup and resets timers", "[RobotTaskFlow]") {
     RobotTaskFlow taskFlow;
@@ -12,7 +12,7 @@ TEST_CASE("Robot task flow starts routed to pickup and resets timers", "[RobotTa
     CHECK_FALSE(taskFlow.isPickingUp());
 
     taskFlow.startPickingUp();
-    REQUIRE_FALSE(taskFlow.updatePickup(SimConstants::Task::kPickupDurationSeconds - 0.1f));
+    REQUIRE_FALSE(taskFlow.updatePickup(SimConfig::Default().pickupDurationSeconds - 0.1f));
 
     taskFlow.reset();
 
@@ -47,10 +47,10 @@ TEST_CASE("Robot task flow completes pickup and dropoff after configured duratio
     RobotTaskFlow taskFlow;
 
     taskFlow.startPickingUp();
-    CHECK_FALSE(taskFlow.updatePickup(SimConstants::Task::kPickupDurationSeconds - 0.01f));
+    CHECK_FALSE(taskFlow.updatePickup(SimConfig::Default().pickupDurationSeconds - 0.01f));
     CHECK(taskFlow.updatePickup(0.01f));
 
     taskFlow.startDroppingOff();
-    CHECK_FALSE(taskFlow.updateDropoff(SimConstants::Task::kDropoffDurationSeconds - 0.01f));
+    CHECK_FALSE(taskFlow.updateDropoff(SimConfig::Default().dropoffDurationSeconds - 0.01f));
     CHECK(taskFlow.updateDropoff(0.01f));
 }

@@ -5,7 +5,7 @@
 
 #include "robots/Battery.h"
 #include "robots/WorkerRobot.h"
-#include "simulation/SimConstants.h"
+#include "simulation/SimConfig.h"
 
 namespace {
 Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
@@ -19,7 +19,7 @@ Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
 
 void DrainRobotBatteryBy(WorkerRobot& robot, float percentage) {
     const Vector2 originalPosition = robot.getPosition();
-    const float distance = percentage / SimConstants::Battery::kDrainPerPixel;
+    const float distance = percentage / SimConfig::Default().batteryDrainPerPixel;
 
     robot.setTargetPosition({originalPosition.x + distance, originalPosition.y});
     robot.updateMovement(distance / 100.0f);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "simulation/SimConfig.h"
+
 #include "raylib.h"
 
 #include <cstddef>
@@ -20,7 +22,7 @@ struct BlockingRobot {
 
 class BlockingRobotManager {
   public:
-    BlockingRobotManager();
+    explicit BlockingRobotManager(SimConfig simConfig = SimConfig::Default());
 
     void clear();
     void addBlockingRobot(const BlockingRobot& blockingRobot);
@@ -32,6 +34,7 @@ class BlockingRobotManager {
 
   private:
     std::vector<BlockingRobot> blockingRobots_;
+    SimConfig simConfig_;
     std::mt19937 randomEngine_;
 
     void addBlockingRobotPath(const std::vector<Vector2>& path, float speed);

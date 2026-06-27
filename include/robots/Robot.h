@@ -6,6 +6,7 @@
 #include "control/PIController.h"
 #include "sensors/ProximitySensor.h"
 #include "sensors/Sensor.h"
+#include "simulation/SimConfig.h"
 #include "raylib.h"
 
 #include <memory>
@@ -34,8 +35,8 @@ class Robot {
         float angleDegrees = 0.0f;
     };
 
-    Robot(Pose startPose, Config config);
-    Robot(const Vector2& startPosition, Config config);
+    Robot(Pose startPose, Config config, SimConfig simConfig = SimConfig::Default());
+    Robot(const Vector2& startPosition, Config config, SimConfig simConfig = SimConfig::Default());
     virtual ~Robot() = default;
 
     [[nodiscard]] virtual std::string_view typeName() const noexcept = 0;
@@ -76,6 +77,7 @@ class Robot {
     float rotationSpeed_;
     float size_;
     PIController speedController_;
+    SimConfig simConfig_;
     State state_;
     Battery battery_;
     ProximitySensor proximitySensor_;

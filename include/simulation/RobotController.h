@@ -7,6 +7,7 @@
 #include "simulation/RouteFollower.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotRoutePlanner.h"
+#include "simulation/SimConfig.h"
 #include "simulation/RobotStatusSnapshot.h"
 #include "simulation/RobotTaskFlow.h"
 
@@ -19,7 +20,8 @@ class BlockingRobotManager;
 class RobotController {
   public:
     RobotController(const LogisticsMap& logisticsMap,
-                    const BlockingRobotManager& blockingRobotManager);
+                    const BlockingRobotManager& blockingRobotManager,
+                    SimConfig simConfig = SimConfig::Default());
 
     void initialize();
     void update(float deltaTime, const InputState& inputState);
@@ -39,6 +41,7 @@ class RobotController {
     void updateWaypointTravel();
 
     const LogisticsMap& logisticsMap_;
+    SimConfig simConfig_;
     RobotRoutePlanner routePlanner_;
     RouteFollower routeFollower_;
     ChargingManager chargingManager_;

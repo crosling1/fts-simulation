@@ -6,7 +6,7 @@
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
-#include "simulation/SimConstants.h"
+#include "simulation/SimConfig.h"
 #include "simulation/map.h"
 
 #include <cstdlib>
@@ -64,7 +64,7 @@ TEST_CASE("Robot controller advances pickup and dropoff workflow", "[RobotContro
 
     REQUIRE(AdvanceUntilState(controller, RobotState::PickingUp));
 
-    controller.update(SimConstants::Task::kPickupDurationSeconds, InputState{});
+    controller.update(SimConfig::Default().pickupDurationSeconds, InputState{});
 
     CHECK(RequireSnapshot(controller).state == RobotState::CarryingItem);
     CHECK(AdvanceUntilState(controller, RobotState::DroppingOff));

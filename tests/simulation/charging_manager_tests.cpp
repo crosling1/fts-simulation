@@ -5,7 +5,7 @@
 #include "robots/WorkerRobot.h"
 #include "simulation/ChargingManager.h"
 #include "simulation/RobotRoutePlanner.h"
-#include "simulation/SimConstants.h"
+#include "simulation/SimConfig.h"
 #include "simulation/map.h"
 
 namespace {
@@ -19,6 +19,7 @@ Robot::Config RobotConfig() {
 }
 
 void SetRobotBatteryPercentage(WorkerRobot& robot, float percentage) {
+    const SimConfig simConfig = SimConfig::Default();
     const float currentCharge = robot.getBattery().getChargePercentage();
 
     if (percentage >= currentCharge) {
@@ -27,7 +28,7 @@ void SetRobotBatteryPercentage(WorkerRobot& robot, float percentage) {
     }
 
     const Vector2 originalPosition = robot.getPosition();
-    const float distance = (currentCharge - percentage) / SimConstants::Battery::kDrainPerPixel;
+    const float distance = (currentCharge - percentage) / simConfig.batteryDrainPerPixel;
     const float speed = RobotConfig().motion.speed;
 
     robot.setTargetPosition({originalPosition.x + distance, originalPosition.y});
@@ -49,7 +50,7 @@ float EstimatedNextDeliveryBatteryUse(const LogisticsMap& logisticsMap,
 
     return (routePlanner.calculatePathDistance(robotPosition, pickupPath) +
             routePlanner.calculatePathDistance(*pickupDock, dropoffPath)) *
-           SimConstants::Battery::kDrainPerPixel;
+           SimConfig::Default().batteryDrainPerPixel;
 }
 } // namespace
 
@@ -62,7 +63,7 @@ TEST_CASE("Charging starts after dropoff at or below charging threshold", "[Char
     REQUIRE(deliveryDock.has_value());
     WorkerRobot robot(*deliveryDock, RobotConfig());
 
-    SetRobotBatteryPercentage(robot, SimConstants::Battery::kChargeAfterDropoffThreshold);
+    SetRobotBatteryPercentage(robot, SimConfig::Default().lowBatteryThreshold);
 
     CHECK(
         chargingManager.shouldStartChargingAfterDropoff(robot, routePlanner, robot.getPosition()));
@@ -79,8 +80,8 @@ TEST_CASE("Charging starts when next delivery would violate minimum battery", "[
 
     const float nextDeliveryUse =
         EstimatedNextDeliveryBatteryUse(logisticsMap, routePlanner, robot.getPosition());
-    SetRobotBatteryPercentage(robot, SimConstants::Battery::kMinimumAfterJob + nextDeliveryUse -
-                                         kBatteryTestMargin);
+    SetRobotBatteryPercentage(robot, SimConfig::Default().emergencyBatteryThreshold +
+                                         nextDeliveryUse - kBatteryTestMargin);
 
     CHECK(
         chargingManager.shouldStartChargingAfterDropoff(robot, routePlanner, robot.getPosition()));
@@ -98,8 +99,8 @@ TEST_CASE("Charging is skipped when battery can complete next delivery safely",
 
     const float nextDeliveryUse =
         EstimatedNextDeliveryBatteryUse(logisticsMap, routePlanner, robot.getPosition());
-    SetRobotBatteryPercentage(robot,
-                              SimConstants::Battery::kMinimumAfterJob + nextDeliveryUse + 1.0f);
+    SetRobotBatteryPercentage(robot, SimConfig::Default().emergencyBatteryThreshold +
+                                         nextDeliveryUse + 1.0f);
 
     CHECK_FALSE(
         chargingManager.shouldStartChargingAfterDropoff(robot, routePlanner, robot.getPosition()));

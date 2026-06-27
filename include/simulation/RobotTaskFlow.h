@@ -1,5 +1,7 @@
 #pragma once
 
+#include "simulation/SimConfig.h"
+
 #include <cstdint>
 
 enum class RobotTaskPhase : std::uint8_t {
@@ -13,6 +15,8 @@ enum class RobotTaskPhase : std::uint8_t {
 
 class RobotTaskFlow {
   public:
+    explicit RobotTaskFlow(SimConfig simConfig = SimConfig::Default());
+
     void reset();
 
     [[nodiscard]] bool isPickingUp() const;
@@ -36,5 +40,6 @@ class RobotTaskFlow {
     void enterPhase(RobotTaskPhase newPhase);
 
     RobotTaskPhase phase_ = RobotTaskPhase::ToPickup;
+    SimConfig simConfig_;
     float stateTimer_ = 0.0f;
 };
