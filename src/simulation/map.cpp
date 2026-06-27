@@ -54,11 +54,11 @@ void LogisticsMap::unload() {
 }
 
 Vector2 LogisticsMap::getPointA() const {
-    return getWarehouseCenter(data_.pickupLagerIndex);
+    return getWarehouseCenter(static_cast<std::size_t>(data_.pickupLagerIndex));
 }
 
 Vector2 LogisticsMap::getPointB() const {
-    return getWarehouseCenter(data_.deliveryLagerIndex);
+    return getWarehouseCenter(static_cast<std::size_t>(data_.deliveryLagerIndex));
 }
 
 LagerId LogisticsMap::getPickupLagerId() const {
@@ -89,7 +89,7 @@ Vector2 LogisticsMap::getLagerPosition(LagerId lagerId) const {
         return {0.0f, 0.0f};
     }
 
-    return getWarehouseCenter(lagerId);
+    return getWarehouseCenter(static_cast<std::size_t>(lagerId));
 }
 
 Vector2 LogisticsMap::getLagerDockPosition(LagerId lagerId) const {
@@ -97,7 +97,7 @@ Vector2 LogisticsMap::getLagerDockPosition(LagerId lagerId) const {
         return {0.0f, 0.0f};
     }
 
-    return data_.dockPoints[lagerId];
+    return data_.dockPoints[static_cast<std::size_t>(lagerId)];
 }
 
 bool LogisticsMap::isRoadPosition(Vector2 position) const {
@@ -146,7 +146,7 @@ const std::vector<BlockingRobotPath>& LogisticsMap::getBlockingRobotPaths() cons
     return data_.blockingRobotPaths;
 }
 
-Vector2 LogisticsMap::getWarehouseCenter(int index) const {
+Vector2 LogisticsMap::getWarehouseCenter(std::size_t index) const {
     Rectangle warehouse = data_.warehouses[index];
 
     return {
@@ -217,5 +217,6 @@ void LogisticsMap::drawChargingStation() const {
 }
 
 bool LogisticsMap::isValidLagerId(LagerId lagerId) const {
-    return lagerId >= LAGER_1 && static_cast<std::size_t>(lagerId) < data_.warehouses.size();
+    const std::size_t index = static_cast<std::size_t>(lagerId);
+    return isValid(lagerId) && index < data_.warehouses.size();
 }

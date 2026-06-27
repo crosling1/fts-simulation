@@ -25,7 +25,7 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
         logisticsMap.getChargingStationDockPosition());
     const std::vector<Vector2> l6Path =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(),
-                           logisticsMap.getLagerDockPosition(LAGER_6));
+                           logisticsMap.getLagerDockPosition(LagerId::L6));
     const Vector2 l6EntryWaypoint = {545.0f, 450.0f};
 
     REQUIRE(!pickupPath.empty());

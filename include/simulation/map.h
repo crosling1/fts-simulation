@@ -3,18 +3,15 @@
 #include "simulation/MapData.h"
 #include "raylib.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
-typedef enum LagerId : std::uint8_t {
-    LAGER_1 = 0,
-    LAGER_2,
-    LAGER_3,
-    LAGER_4,
-    LAGER_5,
-    LAGER_6,
-    LAGER_COUNT
-} LagerId;
+enum class LagerId : std::uint8_t { L1 = 0, L2, L3, L4, L5, L6, Count };
+
+[[nodiscard]] inline bool isValid(LagerId id) noexcept {
+    return static_cast<std::size_t>(id) < static_cast<std::size_t>(LagerId::Count);
+}
 
 class LogisticsMap {
   public:
@@ -40,7 +37,7 @@ class LogisticsMap {
   private:
     MapData data_;
 
-    [[nodiscard]] Vector2 getWarehouseCenter(int index) const;
+    [[nodiscard]] Vector2 getWarehouseCenter(std::size_t index) const;
     void drawGrid() const;
     void drawRoads() const;
     void drawWarehouse(Rectangle body, int index) const;
