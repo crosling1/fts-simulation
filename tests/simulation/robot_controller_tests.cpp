@@ -9,11 +9,17 @@
 #include "simulation/SimConstants.h"
 #include "simulation/map.h"
 
+#include <cstdlib>
+
 namespace {
 RobotStatusSnapshot RequireSnapshot(const RobotController& controller) {
     const std::optional<RobotStatusSnapshot> snapshot = controller.statusSnapshot();
-    REQUIRE(snapshot.has_value());
-    return *snapshot;
+    if (snapshot.has_value()) {
+        return snapshot.value();
+    }
+
+    FAIL("Expected robot status snapshot");
+    std::abort();
 }
 
 bool AdvanceUntilState(RobotController& controller, RobotState expectedState,
