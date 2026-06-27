@@ -17,6 +17,7 @@ constexpr int invalidPathNode = -1;
 
 struct PathQueueEntry {
     int nodeIndex;
+    float costFromStart;
     float priority;
 };
 
@@ -163,21 +164,23 @@ FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
 
     std::vector<float> costFromStart(pathNodes.size(), unreachableDistance);
     std::vector<int> cameFrom(pathNodes.size(), invalidPathNode);
-    std::vector<bool> closed(pathNodes.size(), false);
     std::priority_queue<PathQueueEntry, std::vector<PathQueueEntry>, ComparePathQueueEntry>
         openNodes;
 
     costFromStart[endpoints.startNodeIndex] = 0.0f;
     openNodes.push({
         endpoints.startNodeIndex,
+        0.0f,
         Distance(pathNodes[endpoints.startNodeIndex], pathNodes[endpoints.goalNodeIndex]),
     });
 
     while (!openNodes.empty()) {
-        const int currentNodeIndex = openNodes.top().nodeIndex;
+        const PathQueueEntry currentEntry = openNodes.top();
         openNodes.pop();
 
-        if (closed[currentNodeIndex]) {
+        const int currentNodeIndex = currentEntry.nodeIndex;
+
+        if (currentEntry.costFromStart > costFromStart[currentNodeIndex]) {
             continue;
         }
 
@@ -185,12 +188,7 @@ FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
             return SimplifyPath(logisticsMap, BuildPathFromParents(pathNodes, cameFrom, endpoints));
         }
 
-        closed[currentNodeIndex] = true;
         for (int neighborNodeIndex : adjacency[currentNodeIndex]) {
-            if (closed[neighborNodeIndex]) {
-                continue;
-            }
-
             if (!IsRoadSegment(logisticsMap, pathNodes[currentNodeIndex],
                                pathNodes[neighborNodeIndex])) {
                 continue;
@@ -199,14 +197,17 @@ FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
             const float newCost =
                 costFromStart[currentNodeIndex] +
                 Distance(pathNodes[currentNodeIndex], pathNodes[neighborNodeIndex]);
+
             if (newCost >= costFromStart[neighborNodeIndex]) {
                 continue;
             }
 
             costFromStart[neighborNodeIndex] = newCost;
             cameFrom[neighborNodeIndex] = currentNodeIndex;
+
             openNodes.push({
                 neighborNodeIndex,
+                newCost,
                 newCost +
                     Distance(pathNodes[neighborNodeIndex], pathNodes[endpoints.goalNodeIndex]),
             });
