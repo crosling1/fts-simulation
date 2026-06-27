@@ -108,8 +108,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
     blockingRobot.position.y += ((target.y - blockingRobot.position.y) / distance) * step;
 }
 
-void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot,
-                                            bool allowBacktracking) {
+void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking) {
     if (blockingRobot.path.size() < 2) {
         blockingRobot.targetNodeIndex = blockingRobot.currentNodeIndex;
         return;
