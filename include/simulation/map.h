@@ -1,20 +1,13 @@
 #pragma once
 
+#include "simulation/ILogisticsMap.h"
 #include "simulation/MapData.h"
 #include "raylib.h"
 
 #include <cstddef>
-#include <cstdint>
-#include <optional>
 #include <vector>
 
-enum class LagerId : std::uint8_t { L1 = 0, L2, L3, L4, L5, L6, Count };
-
-[[nodiscard]] inline bool isValid(LagerId id) noexcept {
-    return static_cast<std::size_t>(id) < static_cast<std::size_t>(LagerId::Count);
-}
-
-class LogisticsMap {
+class LogisticsMap : public ILogisticsMap {
   public:
     void init();
     void draw() const;
@@ -26,12 +19,14 @@ class LogisticsMap {
     [[nodiscard]] LagerId getDeliveryLagerId() const;
     [[nodiscard]] Vector2 getRobotStartPosition() const;
     [[nodiscard]] Vector2 getChargingStationPosition() const;
-    [[nodiscard]] Vector2 getChargingStationDockPosition() const;
-    [[nodiscard]] std::optional<Vector2> getLagerDockPosition(LagerId lagerId) const;
-    [[nodiscard]] bool isRoadPosition(Vector2 position) const;
-    [[nodiscard]] Vector2 clampPositionToRoad(Vector2 position) const;
-    [[nodiscard]] const std::vector<Vector2>& getNavigationNodes() const;
-    [[nodiscard]] const std::vector<NavigationEdge>& getNavigationEdges() const;
+    [[nodiscard]] Vector2 getChargingStationDockPosition() const override;
+    [[nodiscard]] std::optional<Vector2> getLagerDockPosition(LagerId lagerId) const override;
+    [[nodiscard]] std::optional<Vector2> getPickupDockPosition() const override;
+    [[nodiscard]] std::optional<Vector2> getDeliveryDockPosition() const override;
+    [[nodiscard]] bool isRoadPosition(Vector2 position) const override;
+    [[nodiscard]] Vector2 clampPositionToRoad(Vector2 position) const override;
+    [[nodiscard]] const std::vector<Vector2>& getNavigationNodes() const override;
+    [[nodiscard]] const std::vector<NavigationEdge>& getNavigationEdges() const override;
     [[nodiscard]] const std::vector<BlockingRobotPath>& getBlockingRobotPaths() const;
 
   private:

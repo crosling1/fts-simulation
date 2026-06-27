@@ -93,6 +93,14 @@ std::optional<Vector2> LogisticsMap::getLagerDockPosition(LagerId lagerId) const
     return data_.dockPoints[index];
 }
 
+std::optional<Vector2> LogisticsMap::getPickupDockPosition() const {
+    return getLagerDockPosition(getPickupLagerId());
+}
+
+std::optional<Vector2> LogisticsMap::getDeliveryDockPosition() const {
+    return getLagerDockPosition(getDeliveryLagerId());
+}
+
 bool LogisticsMap::isRoadPosition(Vector2 position) const {
     for (Rectangle road : data_.roads) {
         if (CheckCollisionPointRec(position, road)) {

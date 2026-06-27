@@ -1,6 +1,6 @@
 #include "simulation/navigation.h"
 
-#include "simulation/map.h"
+#include "simulation/ILogisticsMap.h"
 
 #include <algorithm>
 #include <cmath>
@@ -43,7 +43,7 @@ float Distance(Vector2 from, Vector2 to) {
     return std::sqrt(DistanceSquared(from, to));
 }
 
-bool IsRoadSample(const LogisticsMap& logisticsMap, Vector2 position) {
+bool IsRoadSample(const ILogisticsMap& logisticsMap, Vector2 position) {
     if (logisticsMap.isRoadPosition(position)) {
         return true;
     }
@@ -52,7 +52,7 @@ bool IsRoadSample(const LogisticsMap& logisticsMap, Vector2 position) {
            (roadSampleTolerance * roadSampleTolerance);
 }
 
-bool IsRoadSegment(const LogisticsMap& logisticsMap, Vector2 from,
+bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vector2 from,
                    Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
     const float segmentLength = Distance(from, to);
     if (segmentLength <= roadSampleTolerance) {
@@ -109,7 +109,7 @@ std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
     return path;
 }
 
-std::vector<Vector2> SimplifyPath(const LogisticsMap& logisticsMap,
+std::vector<Vector2> SimplifyPath(const ILogisticsMap& logisticsMap,
                                   const std::vector<Vector2>& path) {
     if (path.size() < 3) {
         return path;
@@ -143,7 +143,7 @@ std::vector<std::vector<int>> BuildAdjacencyList(const std::vector<NavigationEdg
 } // namespace
 
 std::vector<Vector2>
-FindNavigationPath(const LogisticsMap& logisticsMap, Vector2 start,
+FindNavigationPath(const ILogisticsMap& logisticsMap, Vector2 start,
                    Vector2 goal) { // NOLINT(bugprone-easily-swappable-parameters)
     const std::vector<Vector2>& pathNodes = logisticsMap.getNavigationNodes();
     const std::vector<NavigationEdge>& pathEdges = logisticsMap.getNavigationEdges();
