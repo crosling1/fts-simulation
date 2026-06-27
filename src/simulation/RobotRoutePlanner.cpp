@@ -18,14 +18,22 @@ RobotRoutePlanner::RobotRoutePlanner(const LogisticsMap& logisticsMap)
     : logisticsMap_(logisticsMap) {}
 
 std::vector<Vector2> RobotRoutePlanner::buildPathToPickup(Vector2 startPosition) const {
-    return FindNavigationPath(logisticsMap_, startPosition,
-                              logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId()));
+    const auto pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
+    if (!pickupDock) {
+        return {};
+    }
+
+    return FindNavigationPath(logisticsMap_, startPosition, *pickupDock);
 }
 
 std::vector<Vector2> RobotRoutePlanner::buildPathToDropoff(Vector2 startPosition) const {
-    return FindNavigationPath(
-        logisticsMap_, startPosition,
-        logisticsMap_.getLagerDockPosition(logisticsMap_.getDeliveryLagerId()));
+    const auto deliveryDock =
+        logisticsMap_.getLagerDockPosition(logisticsMap_.getDeliveryLagerId());
+    if (!deliveryDock) {
+        return {};
+    }
+
+    return FindNavigationPath(logisticsMap_, startPosition, *deliveryDock);
 }
 
 std::vector<Vector2> RobotRoutePlanner::buildPathToChargingStation(Vector2 startPosition) const {

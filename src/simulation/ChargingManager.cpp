@@ -22,11 +22,15 @@ bool ChargingManager::shouldChargeAtOrBelow(const Robot& robot, float thresholdP
 
 bool ChargingManager::canCompleteNextDeliveryBeforeMinimumBattery(
     const Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const {
-    const Vector2 pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
+    const auto pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
+    if (!pickupDock) {
+        return false;
+    }
+
     const std::vector<Vector2> pickupPath = routePlanner.buildPathToPickup(robotPosition);
-    const std::vector<Vector2> dropoffPath = routePlanner.buildPathToDropoff(pickupDock);
+    const std::vector<Vector2> dropoffPath = routePlanner.buildPathToDropoff(*pickupDock);
     const float estimatedDistance = routePlanner.calculatePathDistance(robotPosition, pickupPath) +
-                                    routePlanner.calculatePathDistance(pickupDock, dropoffPath);
+                                    routePlanner.calculatePathDistance(*pickupDock, dropoffPath);
 
     const float estimatedBatteryAfterJob =
         robot.getBattery().getChargePercentage() -

@@ -84,20 +84,13 @@ Vector2 LogisticsMap::getChargingStationDockPosition() const {
     return data_.chargingStation.dockPoint;
 }
 
-Vector2 LogisticsMap::getLagerPosition(LagerId lagerId) const {
-    if (!isValidLagerId(lagerId)) {
-        return {0.0f, 0.0f};
+std::optional<Vector2> LogisticsMap::getLagerDockPosition(LagerId lagerId) const {
+    const std::size_t index = static_cast<std::size_t>(lagerId);
+    if (!isValid(lagerId) || index >= data_.dockPoints.size()) {
+        return std::nullopt;
     }
 
-    return getWarehouseCenter(static_cast<std::size_t>(lagerId));
-}
-
-Vector2 LogisticsMap::getLagerDockPosition(LagerId lagerId) const {
-    if (!isValidLagerId(lagerId)) {
-        return {0.0f, 0.0f};
-    }
-
-    return data_.dockPoints[static_cast<std::size_t>(lagerId)];
+    return data_.dockPoints[index];
 }
 
 bool LogisticsMap::isRoadPosition(Vector2 position) const {
@@ -214,9 +207,4 @@ void LogisticsMap::drawChargingStation() const {
     DrawRectangleLinesEx(batteryBody, 2.0f, DARKPURPLE);
     DrawRectangleRec(batteryTip, DARKPURPLE);
     DrawRectangle((int)batteryBody.x + 4, (int)batteryBody.y + 4, 18, 10, GREEN);
-}
-
-bool LogisticsMap::isValidLagerId(LagerId lagerId) const {
-    const std::size_t index = static_cast<std::size_t>(lagerId);
-    return isValid(lagerId) && index < data_.warehouses.size();
 }

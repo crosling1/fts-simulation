@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 enum class LagerId : std::uint8_t { L1 = 0, L2, L3, L4, L5, L6, Count };
@@ -26,8 +27,7 @@ class LogisticsMap {
     [[nodiscard]] Vector2 getRobotStartPosition() const;
     [[nodiscard]] Vector2 getChargingStationPosition() const;
     [[nodiscard]] Vector2 getChargingStationDockPosition() const;
-    [[nodiscard]] Vector2 getLagerPosition(LagerId lagerId) const;
-    [[nodiscard]] Vector2 getLagerDockPosition(LagerId lagerId) const;
+    [[nodiscard]] std::optional<Vector2> getLagerDockPosition(LagerId lagerId) const;
     [[nodiscard]] bool isRoadPosition(Vector2 position) const;
     [[nodiscard]] Vector2 clampPositionToRoad(Vector2 position) const;
     [[nodiscard]] const std::vector<Vector2>& getNavigationNodes() const;
@@ -42,5 +42,4 @@ class LogisticsMap {
     void drawRoads() const;
     void drawWarehouse(Rectangle body, int index) const;
     void drawChargingStation() const;
-    [[nodiscard]] bool isValidLagerId(LagerId lagerId) const;
 };

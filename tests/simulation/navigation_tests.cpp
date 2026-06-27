@@ -11,21 +11,25 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     LogisticsMap logisticsMap;
     logisticsMap.init();
 
+    const auto pickupDock = logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId());
+    const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
+    const auto l6Dock = logisticsMap.getLagerDockPosition(LagerId::L6);
+
+    REQUIRE(pickupDock.has_value());
+    REQUIRE(deliveryDock.has_value());
+    REQUIRE(l6Dock.has_value());
+
     const std::vector<Vector2> pickupPath =
-        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(),
-                           logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId()));
-    const std::vector<Vector2> dropoffPath = FindNavigationPath(
-        logisticsMap, logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId()),
-        logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId()));
+        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), *pickupDock);
+    const std::vector<Vector2> dropoffPath =
+        FindNavigationPath(logisticsMap, *pickupDock, *deliveryDock);
     const std::vector<Vector2> chargingPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(),
                            logisticsMap.getChargingStationDockPosition());
     const std::vector<Vector2> dropoffToChargingPath = FindNavigationPath(
-        logisticsMap, logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId()),
-        logisticsMap.getChargingStationDockPosition());
+        logisticsMap, *deliveryDock, logisticsMap.getChargingStationDockPosition());
     const std::vector<Vector2> l6Path =
-        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(),
-                           logisticsMap.getLagerDockPosition(LagerId::L6));
+        FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), *l6Dock);
     const Vector2 l6EntryWaypoint = {545.0f, 450.0f};
 
     REQUIRE(!pickupPath.empty());
@@ -34,10 +38,8 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     REQUIRE(!dropoffToChargingPath.empty());
     REQUIRE(!l6Path.empty());
 
-    test::CheckVectorNear(pickupPath.back(),
-                          logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId()));
-    test::CheckVectorNear(dropoffPath.back(),
-                          logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId()));
+    test::CheckVectorNear(pickupPath.back(), *pickupDock);
+    test::CheckVectorNear(dropoffPath.back(), *deliveryDock);
     test::CheckVectorNear(chargingPath.back(), logisticsMap.getChargingStationDockPosition());
     test::CheckVectorNear(dropoffToChargingPath.back(),
                           logisticsMap.getChargingStationDockPosition());
