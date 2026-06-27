@@ -16,7 +16,6 @@ TEST_CASE("Proximity sensor uses blocking robot manager", "[BlockingRobotManager
         0,
         0,
         0,
-        true,
     });
     ProximitySensor proximitySensor(6.0f);
 

@@ -12,7 +12,7 @@ ChargingManager::ChargingManager(const LogisticsMap& logisticsMap) : logisticsMa
 bool ChargingManager::shouldStartChargingAfterDropoff(const Robot& robot,
                                                       const RobotRoutePlanner& routePlanner,
                                                       Vector2 robotPosition) const {
-    return shouldChargeAtOrBelow(robot, SimConstants::kChargeAfterDropoffThreshold) ||
+    return shouldChargeAtOrBelow(robot, SimConstants::Battery::kChargeAfterDropoffThreshold) ||
            !canCompleteNextDeliveryBeforeMinimumBattery(robot, routePlanner, robotPosition);
 }
 
@@ -30,7 +30,7 @@ bool ChargingManager::canCompleteNextDeliveryBeforeMinimumBattery(
 
     const float estimatedBatteryAfterJob =
         robot.getBattery().getChargePercentage() -
-        (estimatedDistance * SimConstants::kBatteryDrainPerPixel);
+        (estimatedDistance * SimConstants::Battery::kDrainPerPixel);
 
-    return estimatedBatteryAfterJob > SimConstants::kMinimumBatteryAfterJob;
+    return estimatedBatteryAfterJob > SimConstants::Battery::kMinimumAfterJob;
 }

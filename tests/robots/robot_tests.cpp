@@ -63,13 +63,10 @@ TEST_CASE("Robot rotates toward target", "[Robot]") {
     robot.setTargetPosition({0.0f, -10.0f});
     robot.updateMovement(0.5f);
 
-    float rotation = 0.0f;
-    robot.getRotation(rotation);
-    CHECK(rotation == Catch::Approx(-45.0f).margin(test::epsilon));
+    CHECK(robot.angle() == Catch::Approx(-45.0).margin(test::epsilon));
 
     robot.updateMovement(0.5f);
-    robot.getRotation(rotation);
-    CHECK(rotation == Catch::Approx(-90.0f).margin(test::epsilon));
+    CHECK(robot.angle() == Catch::Approx(-90.0).margin(test::epsilon));
 }
 
 TEST_CASE("Battery clamps charge and reports state", "[Battery]") {

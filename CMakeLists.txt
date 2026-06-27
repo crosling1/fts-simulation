@@ -51,6 +51,7 @@ set(FTS_CORE_SOURCES
     src/simulation/RobotTaskFlow.cpp
     src/simulation/BlockingRobotManager.cpp
     src/rendering/RobotRenderer.cpp
+    src/ui/MapOverlay.cpp
     src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
     src/control/PIController.cpp
@@ -64,8 +65,11 @@ set(FTS_TEST_SOURCES
     tests/robots/pi_controller_tests.cpp
     tests/sensors/proximity_sensor_tests.cpp
     tests/simulation/blocking_robot_manager_tests.cpp
+    tests/simulation/charging_manager_tests.cpp
     tests/simulation/map_tests.cpp
     tests/simulation/navigation_tests.cpp
+    tests/simulation/robot_controller_tests.cpp
+    tests/simulation/robot_task_flow_tests.cpp
 )
 
 set(FTS_CORE_HEADERS
@@ -90,6 +94,7 @@ set(FTS_CORE_HEADERS
     include/simulation/RobotStatusSnapshot.h
     include/simulation/RobotTaskFlow.h
     include/simulation/BlockingRobotManager.h
+    include/ui/MapOverlay.h
     include/ui/StatusOverlay.h
 )
 

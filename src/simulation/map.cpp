@@ -1,15 +1,28 @@
 #include "simulation/map.h"
 
 #include <algorithm>
+#include <array>
+#include <filesystem>
 #include <stdexcept>
 
 namespace {
+
+constexpr const char* kMapDataPath = "assets/maps/warehouse_map.json";
+constexpr const char* kParentMapDataPath = "../assets/maps/warehouse_map.json";
+
 [[nodiscard]] MapData LoadDefaultMapData() {
-    try {
-        return LoadMapData("assets/maps/warehouse_map.json");
-    } catch (const std::exception&) {
-        return LoadMapData("../assets/maps/warehouse_map.json");
+    const std::array<std::filesystem::path, 2> candidates = {
+        std::filesystem::path{kMapDataPath},
+        std::filesystem::path{kParentMapDataPath},
+    };
+
+    for (const std::filesystem::path& path : candidates) {
+        if (std::filesystem::exists(path)) {
+            return LoadMapData(path.string());
+        }
     }
+
+    throw std::runtime_error("Could not find warehouse map data file");
 }
 } // namespace
 
@@ -34,14 +47,6 @@ void LogisticsMap::draw() const {
     DrawCircleLines((int)data_.robotStart.x, (int)data_.robotStart.y, 24.0f, BROWN);
     DrawText("Robot Start", (int)data_.robotStart.x - 47, (int)data_.robotStart.y + 34, 18,
              DARKGRAY);
-
-    DrawText("Robot Logistics Map", 20, 20, 28, DARKGRAY);
-    DrawText("A: Pickup lager", 20, 60, 18, DARKGREEN);
-    DrawText("B: Delivery lager", 20, 84, 18, MAROON);
-    DrawText("L1~L6: Lager / warehouses", 20, 108, 18, BLUE);
-    DrawText("Orange circle: Robot start", 20, 132, 18, ORANGE);
-    DrawText("Gray rectangles: road network to each lager", 20, 156, 18, DARKGRAY);
-    DrawText("C: Charging station", 20, 180, 18, DARKPURPLE);
 }
 
 void LogisticsMap::unload() {

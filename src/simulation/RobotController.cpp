@@ -42,27 +42,18 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
     }
 
     emergencyStopController_.updateEmergencyStop(inputState, *robot_);
+
     if (emergencyStopController_.isEmergencyStopActive()) {
+        return;
+    }
+
+    if (updateStationaryTask(deltaTime)) {
         return;
     }
 
     const Vector2 robotPosition = robot_->getPosition();
 
-    if (taskFlow_.isPickingUp()) {
-        updatePickup(deltaTime);
-        return;
-    }
-
-    if (taskFlow_.isDroppingOff()) {
-        updateDropoff(deltaTime);
-        return;
-    }
-
-    if (taskFlow_.isCharging()) {
-        updateCharging(deltaTime);
-        return;
-    }
-
+    // Obstacle proximity is checked only during movement phases.
     if (emergencyStopController_.shouldPauseForObstacle(robotPosition,
                                                         robot_->getProximityDetectionRadius())) {
         return;
@@ -132,6 +123,25 @@ void RobotController::startDropoffTrip() {
                                  *robot_);
 }
 
+bool RobotController::updateStationaryTask(float deltaTime) {
+    if (taskFlow_.isPickingUp()) {
+        updatePickup(deltaTime);
+        return true;
+    }
+
+    if (taskFlow_.isDroppingOff()) {
+        updateDropoff(deltaTime);
+        return true;
+    }
+
+    if (taskFlow_.isCharging()) {
+        updateCharging(deltaTime);
+        return true;
+    }
+
+    return false;
+}
+
 void RobotController::updatePickup(float deltaTime) {
     if (!taskFlow_.updatePickup(deltaTime)) {
         return;
@@ -156,7 +166,7 @@ void RobotController::updateDropoff(float deltaTime) {
 
 void RobotController::updateCharging(float deltaTime) {
     robot_->setState(Robot::State::Charging);
-    robot_->getBattery().charge(SimConstants::kChargeRatePerSecond * deltaTime);
+    robot_->getBattery().charge(SimConstants::Battery::kChargeRatePerSecond * deltaTime);
 
     if (!robot_->getBattery().isFull()) {
         return;

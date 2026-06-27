@@ -15,87 +15,14 @@ float Distance(Vector2 from, Vector2 to) {
 
 } // namespace
 
-void BlockingRobot::update(float deltaTime, std::mt19937& randomEngine) {
-    if (!active || path.empty()) {
-        return;
-    }
-
-    const Vector2 target = path[targetNodeIndex];
-    const float distance = Distance(position, target);
-    if (distance <= SimConstants::kReachedDistance) {
-        position = target;
-        previousNodeIndex = currentNodeIndex;
-        currentNodeIndex = targetNodeIndex;
-        chooseNextTarget(randomEngine, false);
-        return;
-    }
-
-    const float step = speed * deltaTime;
-    if (step >= distance) {
-        position = target;
-        return;
-    }
-
-    position.x += ((target.x - position.x) / distance) * step;
-    position.y += ((target.y - position.y) / distance) * step;
-}
-
-void BlockingRobot::chooseNextTarget(std::mt19937& randomEngine, bool allowBacktracking) {
-    if (path.size() < 2) {
-        targetNodeIndex = currentNodeIndex;
-        return;
-    }
-
-    std::vector<std::size_t> candidates;
-    if (currentNodeIndex > 0) {
-        candidates.push_back(currentNodeIndex - 1);
-    }
-
-    if (currentNodeIndex + 1 < path.size()) {
-        candidates.push_back(currentNodeIndex + 1);
-    }
-
-    if (!allowBacktracking && candidates.size() > 1) {
-        std::vector<std::size_t> forwardCandidates;
-        for (std::size_t candidate : candidates) {
-            if (candidate != previousNodeIndex) {
-                forwardCandidates.push_back(candidate);
-            }
-        }
-
-        if (!forwardCandidates.empty()) {
-            candidates = forwardCandidates;
-        }
-    }
-
-    std::uniform_int_distribution<std::size_t> targetDistribution(0, candidates.size() - 1);
-    targetNodeIndex = candidates[targetDistribution(randomEngine)];
-}
-
-bool BlockingRobot::isNear(Vector2 otherPosition, float detectionRadius) const {
-    return active && CheckCollisionCircles(otherPosition, detectionRadius, position, radius);
-}
-
-Vector2 BlockingRobot::getPosition() const noexcept {
-    return position;
-}
-
-float BlockingRobot::getRadius() const noexcept {
-    return radius;
-}
-
-bool BlockingRobot::isActive() const noexcept {
-    return active;
-}
-
-BlockingRobotManager::BlockingRobotManager() : randomEngine(std::random_device{}()) {}
+BlockingRobotManager::BlockingRobotManager() : randomEngine_(std::random_device{}()) {}
 
 void BlockingRobotManager::clear() {
-    blockingRobots.clear();
+    blockingRobots_.clear();
 }
 
 void BlockingRobotManager::addBlockingRobot(const BlockingRobot& blockingRobot) {
-    blockingRobots.push_back(blockingRobot);
+    blockingRobots_.push_back(blockingRobot);
 }
 
 void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) {
@@ -103,24 +30,20 @@ void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) 
 
     for (const BlockingRobotPath& blockingPath : logisticsMap.getBlockingRobotPaths()) {
         addBlockingRobotPath(blockingPath.points,
-                             SimConstants::kBlockingRobotSpeed * blockingPath.speedMultiplier);
+                             SimConstants::BlockingRobot::kSpeed * blockingPath.speedMultiplier);
     }
 }
 
 void BlockingRobotManager::update(float deltaTime) {
-    for (BlockingRobot& blockingRobot : blockingRobots) {
-        blockingRobot.update(deltaTime, randomEngine);
+    for (BlockingRobot& blockingRobot : blockingRobots_) {
+        moveBlockingRobot(blockingRobot, deltaTime);
     }
 }
 
 void BlockingRobotManager::draw() const {
-    for (const BlockingRobot& blockingRobot : blockingRobots) {
-        if (!blockingRobot.isActive()) {
-            continue;
-        }
-
-        const Vector2 position = blockingRobot.getPosition();
-        const float radius = blockingRobot.getRadius();
+    for (const BlockingRobot& blockingRobot : blockingRobots_) {
+        const Vector2 position = blockingRobot.position;
+        const float radius = blockingRobot.radius;
 
         DrawCircleV(position, radius, PURPLE);
         DrawCircleLines((int)position.x, (int)position.y, radius, DARKPURPLE);
@@ -130,8 +53,9 @@ void BlockingRobotManager::draw() const {
 
 bool BlockingRobotManager::hasActiveBlockingRobotNear(Vector2 position,
                                                       float detectionRadius) const {
-    for (const BlockingRobot& blockingRobot : blockingRobots) {
-        if (blockingRobot.isNear(position, detectionRadius)) {
+    for (const BlockingRobot& blockingRobot : blockingRobots_) {
+        if (CheckCollisionCircles(position, detectionRadius, blockingRobot.position,
+                                  blockingRobot.radius)) {
             return true;
         }
     }
@@ -140,7 +64,7 @@ bool BlockingRobotManager::hasActiveBlockingRobotNear(Vector2 position,
 }
 
 const std::vector<BlockingRobot>& BlockingRobotManager::getBlockingRobots() const {
-    return blockingRobots;
+    return blockingRobots_;
 }
 
 void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path, float speed) {
@@ -150,12 +74,73 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
 
     addBlockingRobot({
         path[0],
-        SimConstants::kBlockingRobotRadius,
+        SimConstants::BlockingRobot::kRadius,
         speed,
         path,
         0,
         1,
         0,
-        true,
     });
+}
+
+void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime) {
+    if (blockingRobot.path.empty()) {
+        return;
+    }
+
+    const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
+    const float distance = Distance(blockingRobot.position, target);
+    if (distance <= SimConstants::Navigation::kReachedDistance) {
+        blockingRobot.position = target;
+        blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
+        blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;
+        chooseNextTarget(blockingRobot, false);
+        return;
+    }
+
+    const float step = blockingRobot.speed * deltaTime;
+    if (step >= distance) {
+        blockingRobot.position = target;
+        return;
+    }
+
+    blockingRobot.position.x += ((target.x - blockingRobot.position.x) / distance) * step;
+    blockingRobot.position.y += ((target.y - blockingRobot.position.y) / distance) * step;
+}
+
+void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking) {
+    if (blockingRobot.path.size() < 2) {
+        blockingRobot.targetNodeIndex = blockingRobot.currentNodeIndex;
+        return;
+    }
+
+    std::vector<std::size_t> candidates;
+    if (blockingRobot.currentNodeIndex > 0) {
+        candidates.push_back(blockingRobot.currentNodeIndex - 1);
+    }
+
+    if (blockingRobot.currentNodeIndex + 1 < blockingRobot.path.size()) {
+        candidates.push_back(blockingRobot.currentNodeIndex + 1);
+    }
+
+    if (!allowBacktracking && candidates.size() > 1) {
+        std::vector<std::size_t> forwardCandidates;
+        for (std::size_t candidate : candidates) {
+            if (candidate != blockingRobot.previousNodeIndex) {
+                forwardCandidates.push_back(candidate);
+            }
+        }
+
+        if (!forwardCandidates.empty()) {
+            candidates = forwardCandidates;
+        }
+    }
+
+    if (candidates.empty()) {
+        blockingRobot.targetNodeIndex = blockingRobot.currentNodeIndex;
+        return;
+    }
+
+    std::uniform_int_distribution<std::size_t> targetDistribution(0, candidates.size() - 1);
+    blockingRobot.targetNodeIndex = candidates[targetDistribution(randomEngine_)];
 }
