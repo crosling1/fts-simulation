@@ -1,15 +1,28 @@
 #include "simulation/map.h"
 
 #include <algorithm>
+#include <array>
+#include <filesystem>
 #include <stdexcept>
 
 namespace {
+
+constexpr const char* kMapDataPath = "assets/maps/warehouse_map.json";
+constexpr const char* kParentMapDataPath = "../assets/maps/warehouse_map.json";
+
 [[nodiscard]] MapData LoadDefaultMapData() {
-    try {
-        return LoadMapData("assets/maps/warehouse_map.json");
-    } catch (const std::exception&) {
-        return LoadMapData("../assets/maps/warehouse_map.json");
+    const std::array<std::filesystem::path, 2> candidates = {
+        std::filesystem::path{kMapDataPath},
+        std::filesystem::path{kParentMapDataPath},
+    };
+
+    for (const std::filesystem::path& path : candidates) {
+        if (std::filesystem::exists(path)) {
+            return LoadMapData(path.string());
+        }
     }
+
+    throw std::runtime_error("Could not find warehouse map data file");
 }
 } // namespace
 
