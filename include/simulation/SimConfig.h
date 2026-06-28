@@ -22,7 +22,8 @@ struct SimConfig {
     float blockingRobotRadius = 14.0f;
     float blockingRobotSpeed = 65.0f;
 
-    [[nodiscard]] static SimConfig Default() {
-        return {};
+    [[nodiscard]] static const SimConfig& Default() {
+        static const SimConfig defaultConfig{};
+        return defaultConfig;
     }
 };

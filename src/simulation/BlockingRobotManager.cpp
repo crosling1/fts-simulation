@@ -14,7 +14,7 @@ float Distance(Vector2 from, Vector2 to) {
 
 } // namespace
 
-BlockingRobotManager::BlockingRobotManager(SimConfig simConfig)
+BlockingRobotManager::BlockingRobotManager(const SimConfig& simConfig)
     : simConfig_(simConfig), randomEngine_(std::random_device{}()) {}
 
 void BlockingRobotManager::clear() {

@@ -12,7 +12,7 @@ class ProximitySensor {
     bool hasBlockingRobotNearby(Vector2 origin,
                                 const BlockingRobotManager& blockingRobotManager) const;
     void drawScanArea(Vector2 origin) const;
-    float getDetectionRadius(void) const;
+    float getDetectionRadius() const;
 
   private:
     float detectionRadius_;

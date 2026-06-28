@@ -35,8 +35,9 @@ class Robot {
         float angleDegrees = 0.0f;
     };
 
-    Robot(Pose startPose, Config config, SimConfig simConfig = SimConfig::Default());
-    Robot(const Vector2& startPosition, Config config, SimConfig simConfig = SimConfig::Default());
+    Robot(Pose startPose, Config config, const SimConfig& simConfig = SimConfig::Default());
+    Robot(const Vector2& startPosition, Config config,
+          const SimConfig& simConfig = SimConfig::Default());
     virtual ~Robot() = default;
 
     [[nodiscard]] virtual std::string_view typeName() const noexcept = 0;
@@ -60,24 +61,24 @@ class Robot {
     void addSensor(std::unique_ptr<Sensor> sensor);
     void updateSensors();
 
-    [[nodiscard]] double x() const noexcept;
-    [[nodiscard]] double y() const noexcept;
-    [[nodiscard]] double angle() const noexcept;
+    [[nodiscard]] float x() const noexcept;
+    [[nodiscard]] float y() const noexcept;
+    [[nodiscard]] float angle() const noexcept;
 
   protected:
-    void moveForward(double distance);
-    void rotate(double degree);
+    void moveForward(float distance);
+    void rotate(float degree);
 
   private:
-    double x_;
-    double y_;
-    double angle_;
+    float x_;
+    float y_;
+    float angle_;
     float speed_;
     Vector2 targetPosition_;
     float rotationSpeed_;
     float size_;
     PIController speedController_;
-    SimConfig simConfig_;
+    const SimConfig& simConfig_;
     State state_;
     Battery battery_;
     ProximitySensor proximitySensor_;

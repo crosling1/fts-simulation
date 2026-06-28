@@ -53,14 +53,6 @@ void LogisticsMap::unload() {
     // No resources allocated yet.
 }
 
-Vector2 LogisticsMap::getPointA() const {
-    return getWarehouseCenter(static_cast<std::size_t>(data_.pickupLagerIndex));
-}
-
-Vector2 LogisticsMap::getPointB() const {
-    return getWarehouseCenter(static_cast<std::size_t>(data_.deliveryLagerIndex));
-}
-
 LagerId LogisticsMap::getPickupLagerId() const {
     return static_cast<LagerId>(data_.pickupLagerIndex);
 }
@@ -177,19 +169,21 @@ void LogisticsMap::drawRoads() const {
 }
 
 void LogisticsMap::drawWarehouse(Rectangle body, int index) const {
-    const bool isPointA = index == data_.pickupLagerIndex;
-    const bool isPointB = index == data_.deliveryLagerIndex;
-    Color fillColor = isPointA ? Fade(GREEN, 0.55f) : isPointB ? Fade(RED, 0.45f) : SKYBLUE;
-    Color lineColor = isPointA ? DARKGREEN : isPointB ? MAROON : BLUE;
+    const bool isPickupLager = index == data_.pickupLagerIndex;
+    const bool isDeliveryLager = index == data_.deliveryLagerIndex;
+    Color fillColor = isPickupLager     ? Fade(GREEN, 0.55f)
+                      : isDeliveryLager ? Fade(RED, 0.45f)
+                                        : SKYBLUE;
+    Color lineColor = isPickupLager ? DARKGREEN : isDeliveryLager ? MAROON : BLUE;
 
     DrawRectangleRec(body, fillColor);
     DrawRectangleLinesEx(body, 3.0f, lineColor);
     DrawRectangle((int)body.x + 10, (int)body.y + 43, 70, 12, Fade(lineColor, 0.35f));
     DrawText(TextFormat("L%d", index + 1), (int)body.x + 28, (int)body.y + 16, 24, DARKBLUE);
 
-    if (isPointA || isPointB) {
-        const char* label = isPointA ? "A" : "B";
-        Color badgeColor = isPointA ? DARKGREEN : MAROON;
+    if (isPickupLager || isDeliveryLager) {
+        const char* label = isPickupLager ? "A" : "B";
+        Color badgeColor = isPickupLager ? DARKGREEN : MAROON;
 
         DrawCircle((int)body.x + 78, (int)body.y + 14, 15.0f, badgeColor);
         DrawText(label, (int)body.x + 70, (int)body.y + 3, 22, WHITE);

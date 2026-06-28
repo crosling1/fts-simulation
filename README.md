@@ -79,6 +79,7 @@ RobotController
       +-- Navigation Layer
       |      |
       |      +-- RobotRoutePlanner
+      |      +-- NavigationGraph
       |      +-- RouteFollower
       |
       +-- Task Layer
@@ -122,8 +123,9 @@ UI
 | `BlockingRobotManager`       | Blocking robot collection, initialization, updates and queries.       |
 | `RobotTaskFlow`              | Pickup, dropoff and charging phase progression.                       |
 | `ChargingManager`            | Battery-aware charging decision logic.                                |
-| Navigation                   | A* pathfinding over map nodes using an adjacency list.                |
-| `SimConstants`               | Shared simulation constants for timing, battery and movement values.  |
+| `NavigationGraph`            | Cached navigation adjacency and A* pathfinding over map nodes.        |
+| `RobotRoutePlanner`          | Domain-specific route construction for pickup, dropoff and charging.  |
+| `SimConfig`                  | Shared read-only configuration for timing, battery and movement values. |
 | `RobotController`            | Coordinates workflow by delegating to the focused components above.   |
 | Development Tooling          | Catch2 tests, formatting, linting and CI automation.                  |
 
@@ -132,7 +134,8 @@ UI
 Recent refactoring work focused on reducing coupling and making the codebase
 easier to review and extend:
 
-* Centralized duplicated simulation values in `SimConstants`.
+* Centralized simulation tuning values in `SimConfig` and shared them by
+  read-only reference across simulation components.
 * Added `[[nodiscard]]`, `noexcept` and modern C++ empty parameter lists where
   appropriate.
 * Made `ChargingManager` query functions const-correct.
@@ -140,7 +143,10 @@ easier to review and extend:
 * Extracted robot drawing from `Robot` into `RobotRenderer`.
 * Moved per-robot blocking behavior into `BlockingRobot`, keeping
   `BlockingRobotManager` focused on collection management.
-* Optimized A* pathfinding by building an adjacency list from navigation edges.
+* Optimized A* pathfinding with `NavigationGraph`, which builds the adjacency
+  list once and reuses it for route requests.
+* Added top-level exception handling so fatal startup errors are reported
+  clearly before the application exits.
 * Migrated unit tests from a custom expectation runner to Catch2.
 * Split production code into the reusable `fts_core` CMake library, shared by
   the application and unit tests.
@@ -150,7 +156,8 @@ easier to review and extend:
 ### Explicit Ownership
 
 The simulation avoids hidden global state. Main application objects are created
-and owned explicitly by `main.cpp`.
+and owned explicitly by `main.cpp`. Runtime configuration is owned at the
+application level and passed to dependent components as a read-only reference.
 
 ### Controller As Coordinator
 
@@ -166,8 +173,8 @@ into focused modules. This reduces coupling and makes future changes easier.
 ### Road-Constrained Navigation
 
 Robots operate exclusively on the road network. Route generation uses A*
-pathfinding over an adjacency list and road validation to ensure realistic
-movement behavior.
+pathfinding over a cached navigation graph and road validation to ensure
+realistic movement behavior.
 
 ### Extensibility
 

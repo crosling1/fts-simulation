@@ -15,7 +15,7 @@ enum class RobotTaskPhase : std::uint8_t {
 
 class RobotTaskFlow {
   public:
-    explicit RobotTaskFlow(SimConfig simConfig = SimConfig::Default());
+    explicit RobotTaskFlow(const SimConfig& simConfig = SimConfig::Default());
 
     void reset();
 
@@ -40,6 +40,6 @@ class RobotTaskFlow {
     void enterPhase(RobotTaskPhase newPhase);
 
     RobotTaskPhase phase_ = RobotTaskPhase::ToPickup;
-    SimConfig simConfig_;
+    const SimConfig& simConfig_;
     float stateTimer_ = 0.0f;
 };

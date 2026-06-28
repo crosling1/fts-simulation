@@ -6,4 +6,4 @@
 #include <optional>
 
 void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus,
-                       SimConfig simConfig = SimConfig::Default());
+                       const SimConfig& simConfig = SimConfig::Default());

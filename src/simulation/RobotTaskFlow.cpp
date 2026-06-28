@@ -1,13 +1,13 @@
 #include "simulation/RobotTaskFlow.h"
 
-RobotTaskFlow::RobotTaskFlow(SimConfig simConfig) : simConfig_(simConfig) {}
+RobotTaskFlow::RobotTaskFlow(const SimConfig& simConfig) : simConfig_(simConfig) {}
 
 void RobotTaskFlow::enterPhase(RobotTaskPhase newPhase) {
     phase_ = newPhase;
     stateTimer_ = 0.0f;
 }
 
-void RobotTaskFlow::reset(void) {
+void RobotTaskFlow::reset() {
     phase_ = RobotTaskPhase::ToPickup;
     stateTimer_ = 0.0f;
 }

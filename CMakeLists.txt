@@ -41,6 +41,7 @@ endforeach()
 set(FTS_CORE_SOURCES
     src/simulation/MapData.cpp
     src/simulation/map.cpp
+    src/simulation/NavigationGraph.cpp
     src/simulation/navigation.cpp
     src/simulation/InputState.cpp
     src/simulation/ChargingManager.cpp
@@ -88,6 +89,7 @@ set(FTS_CORE_HEADERS
     include/simulation/SimConfig.h
     include/simulation/SimConstants.h
     include/simulation/map.h
+    include/simulation/NavigationGraph.h
     include/simulation/navigation.h
     include/simulation/InputState.h
     include/simulation/ChargingManager.h
