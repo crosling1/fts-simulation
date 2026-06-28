@@ -7,7 +7,7 @@ void RobotTaskFlow::enterPhase(RobotTaskPhase newPhase) {
     stateTimer_ = 0.0f;
 }
 
-void RobotTaskFlow::reset(void) {
+void RobotTaskFlow::reset() {
     phase_ = RobotTaskPhase::ToPickup;
     stateTimer_ = 0.0f;
 }

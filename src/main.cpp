@@ -10,7 +10,7 @@
 #include <exception>
 #include <iostream>
 
-int main(void) try {
+int main() try {
     constexpr int screenWidth = 1280;
     constexpr int screenHeight = 720;
     constexpr int targetFps = 60;

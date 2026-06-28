@@ -29,7 +29,7 @@ class JsonParser {
   public:
     explicit JsonParser(std::string source) : source_(std::move(source)) {}
 
-    JsonValue Parse(void) {
+    JsonValue Parse() {
         JsonValue value = ParseValue();
         SkipWhitespace();
         if (position_ != source_.size()) {
@@ -42,7 +42,7 @@ class JsonParser {
     std::string source_;
     std::size_t position_ = 0;
 
-    JsonValue ParseValue(void) {
+    JsonValue ParseValue() {
         SkipWhitespace();
         if (position_ >= source_.size()) {
             Fail("unexpected end of JSON");
@@ -65,7 +65,7 @@ class JsonParser {
         Fail("unsupported JSON value");
     }
 
-    JsonValue ParseObject(void) {
+    JsonValue ParseObject() {
         Expect('{');
         JsonValue value = {JsonValue::Type::Object, 0.0, "", {}, {}};
         SkipWhitespace();
@@ -87,7 +87,7 @@ class JsonParser {
         }
     }
 
-    JsonValue ParseArray(void) {
+    JsonValue ParseArray() {
         Expect('[');
         JsonValue value = {JsonValue::Type::Array, 0.0, "", {}, {}};
         SkipWhitespace();
@@ -105,7 +105,7 @@ class JsonParser {
         }
     }
 
-    std::string ParseString(void) {
+    std::string ParseString() {
         Expect('"');
         std::string result;
         while (position_ < source_.size()) {
@@ -135,7 +135,7 @@ class JsonParser {
         Fail("unterminated JSON string");
     }
 
-    double ParseNumber(void) {
+    double ParseNumber() {
         const std::size_t start = position_;
         if (source_[position_] == '-') {
             position_++;
@@ -155,7 +155,7 @@ class JsonParser {
         return std::stod(source_.substr(start, position_ - start));
     }
 
-    void SkipWhitespace(void) {
+    void SkipWhitespace() {
         while (position_ < source_.size() &&
                std::isspace(static_cast<unsigned char>(source_[position_]))) {
             position_++;

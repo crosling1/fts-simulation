@@ -35,7 +35,7 @@ const char* RobotStateText(Robot::State state) {
     return "Unknown";
 }
 
-float ReadCurrentMemoryMegabytes(void) {
+float ReadCurrentMemoryMegabytes() {
     std::ifstream statusFile("/proc/self/status");
     std::string label;
 
@@ -54,7 +54,7 @@ float ReadCurrentMemoryMegabytes(void) {
     return 0.0f;
 }
 
-float GetCurrentMemoryMegabytes(void) {
+float GetCurrentMemoryMegabytes() {
     const double now = GetTime();
     if (now - lastMemoryRefreshTime >= memoryRefreshInterval) {
         cachedMemoryMegabytes = ReadCurrentMemoryMegabytes();
@@ -64,7 +64,7 @@ float GetCurrentMemoryMegabytes(void) {
     return cachedMemoryMegabytes;
 }
 
-void DrawControlHint(void) {
+void DrawControlHint() {
     constexpr int fontSize = 20;
     constexpr int horizontalPadding = 18;
     constexpr int hintHeight = 36;
