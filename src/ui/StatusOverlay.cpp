@@ -98,7 +98,8 @@ void DrawControlHint(void) {
 }
 } // namespace
 
-void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus, SimConfig simConfig) {
+void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus,
+                       const SimConfig& simConfig) {
     constexpr int panelWidth = 270;
     constexpr int panelHeight = 138;
     constexpr int panelPadding = 14;

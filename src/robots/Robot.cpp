@@ -42,14 +42,14 @@ bool ShouldDrawItem(Robot::State state) {
 }
 } // namespace
 
-Robot::Robot(Pose startPose, Config config, SimConfig simConfig)
+Robot::Robot(Pose startPose, Config config, const SimConfig& simConfig)
     : x_(startPose.position.x), y_(startPose.position.y), angle_(startPose.angleDegrees),
       speed_(config.motion.speed), targetPosition_(startPose.position),
       rotationSpeed_(config.motion.rotationSpeed), size_(config.motion.size),
       speedController_(config.controller), simConfig_(simConfig), state_(State::Idle),
       proximitySensor_(config.motion.size * simConfig.sensorRangeMultiplier) {}
 
-Robot::Robot(const Vector2& startPosition, Config config, SimConfig simConfig)
+Robot::Robot(const Vector2& startPosition, Config config, const SimConfig& simConfig)
     : Robot(Pose{startPosition}, config, simConfig) {}
 
 void Robot::updateMovement(float deltaTime) {

@@ -1,6 +1,6 @@
 #include "simulation/RobotTaskFlow.h"
 
-RobotTaskFlow::RobotTaskFlow(SimConfig simConfig) : simConfig_(simConfig) {}
+RobotTaskFlow::RobotTaskFlow(const SimConfig& simConfig) : simConfig_(simConfig) {}
 
 void RobotTaskFlow::enterPhase(RobotTaskPhase newPhase) {
     phase_ = newPhase;

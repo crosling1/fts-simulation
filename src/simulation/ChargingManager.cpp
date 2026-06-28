@@ -6,7 +6,7 @@
 
 #include <vector>
 
-ChargingManager::ChargingManager(const LogisticsMap& logisticsMap, SimConfig simConfig)
+ChargingManager::ChargingManager(const LogisticsMap& logisticsMap, const SimConfig& simConfig)
     : logisticsMap_(logisticsMap), simConfig_(simConfig) {}
 
 bool ChargingManager::shouldStartChargingAfterDropoff(const Robot& robot,

@@ -9,7 +9,7 @@
 
 RobotController::RobotController(const LogisticsMap& logisticsMap,
                                  const BlockingRobotManager& blockingRobotManager,
-                                 SimConfig simConfig)
+                                 const SimConfig& simConfig)
     : logisticsMap_(logisticsMap), simConfig_(simConfig), routePlanner_(logisticsMap),
       routeFollower_(logisticsMap), chargingManager_(logisticsMap, simConfig),
       emergencyStopController_(blockingRobotManager), taskFlow_(simConfig) {}

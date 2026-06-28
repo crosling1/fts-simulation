@@ -21,7 +21,7 @@ class RobotController {
   public:
     RobotController(const LogisticsMap& logisticsMap,
                     const BlockingRobotManager& blockingRobotManager,
-                    SimConfig simConfig = SimConfig::Default());
+                    const SimConfig& simConfig = SimConfig::Default());
 
     void initialize();
     void update(float deltaTime, const InputState& inputState);
@@ -42,7 +42,7 @@ class RobotController {
     void updateWaypointTravel();
 
     const LogisticsMap& logisticsMap_;
-    SimConfig simConfig_;
+    const SimConfig& simConfig_;
     RobotRoutePlanner routePlanner_;
     RouteFollower routeFollower_;
     ChargingManager chargingManager_;
