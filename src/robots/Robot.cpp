@@ -4,13 +4,13 @@
 #include <string_view>
 
 namespace {
-constexpr double pi = 3.14159265358979323846;
+constexpr float pi = 3.14159265358979323846f;
 constexpr float radToDeg = 57.29577951308232f;
 constexpr float fullTurn = 360.0f;
 constexpr float halfTurn = 180.0f;
 
-double DegreesToRadians(double degree) {
-    return degree * pi / 180.0;
+float DegreesToRadians(float degree) {
+    return degree * pi / halfTurn;
 }
 
 float Distance(Vector2 from, Vector2 to) {
@@ -62,12 +62,12 @@ void Robot::updateMovement(float deltaTime) {
         return;
     }
 
-    const Vector2 previousPosition = {static_cast<float>(x_), static_cast<float>(y_)};
+    const Vector2 previousPosition = {x_, y_};
 
     rotateTowardsTarget(deltaTime);
     moveTowardsTarget(deltaTime);
 
-    const Vector2 currentPosition = {static_cast<float>(x_), static_cast<float>(y_)};
+    const Vector2 currentPosition = {x_, y_};
     battery_.drain(Distance(previousPosition, currentPosition) * simConfig_.batteryDrainPerPixel);
     if (battery_.isEmpty()) {
         state_ = State::BatteryDepleted;
@@ -78,12 +78,9 @@ void Robot::updateMovement(float deltaTime) {
 
 RobotRenderData Robot::renderData() const noexcept {
     return {
-        {static_cast<float>(x_), static_cast<float>(y_)},
-        static_cast<float>(angle_),
-        size_,
-        proximitySensor_.getDetectionRadius(),
-        state_,
-        ShouldDrawItem(state_),
+        {x_, y_},   angle_,
+        size_,      proximitySensor_.getDetectionRadius(),
+        state_,     ShouldDrawItem(state_),
         typeName(),
     };
 }
@@ -125,7 +122,7 @@ void Robot::enterChargingState() {
 }
 
 void Robot::moveTowardsTarget(float deltaTime) {
-    const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
+    const Vector2 position = {x_, y_};
     const float distance = Distance(position, targetPosition_);
     if (distance <= simConfig_.reachedDistance) {
         x_ = targetPosition_.x;
@@ -161,9 +158,9 @@ void Robot::rotateTowardsTarget(float deltaTime) {
         return;
     }
 
-    const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
+    const Vector2 position = {x_, y_};
     const float desiredRotation = TargetRotation(position, targetPosition_);
-    const float angleDifference = NormalizeAngle(desiredRotation - static_cast<float>(angle_));
+    const float angleDifference = NormalizeAngle(desiredRotation - angle_);
     const float maxStep = rotationSpeed_ * deltaTime;
 
     if (std::fabs(angleDifference) <= maxStep) {
@@ -172,11 +169,11 @@ void Robot::rotateTowardsTarget(float deltaTime) {
     }
 
     angle_ += angleDifference > 0.0f ? maxStep : -maxStep;
-    angle_ = NormalizeAngle(static_cast<float>(angle_));
+    angle_ = NormalizeAngle(angle_);
 }
 
 Vector2 Robot::getPosition() const {
-    return {static_cast<float>(x_), static_cast<float>(y_)};
+    return {x_, y_};
 }
 
 Robot::State Robot::getState() const {
@@ -188,7 +185,7 @@ bool Robot::hasBatteryFull() const {
 }
 
 bool Robot::hasReachedTarget() const {
-    const Vector2 position = {static_cast<float>(x_), static_cast<float>(y_)};
+    const Vector2 position = {x_, y_};
 
     return Distance(position, targetPosition_) <= simConfig_.reachedDistance;
 }
@@ -211,25 +208,25 @@ void Robot::updateSensors() {
     }
 }
 
-double Robot::x() const noexcept {
+float Robot::x() const noexcept {
     return x_;
 }
 
-double Robot::y() const noexcept {
+float Robot::y() const noexcept {
     return y_;
 }
 
-double Robot::angle() const noexcept {
+float Robot::angle() const noexcept {
     return angle_;
 }
 
-void Robot::moveForward(double distance) {
-    const double radians = DegreesToRadians(angle_);
+void Robot::moveForward(float distance) {
+    const float radians = DegreesToRadians(angle_);
 
     x_ += std::cos(radians) * distance;
     y_ += std::sin(radians) * distance;
 }
 
-void Robot::rotate(double degree) {
+void Robot::rotate(float degree) {
     angle_ += degree;
 }
