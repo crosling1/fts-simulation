@@ -1,6 +1,6 @@
 #include "simulation/RobotRoutePlanner.h"
 
-#include "simulation/map.h"
+#include "simulation/ILogisticsMap.h"
 #include "simulation/navigation.h"
 
 #include <cmath>
@@ -14,18 +14,25 @@ float Distance(Vector2 from, Vector2 to) {
 }
 } // namespace
 
-RobotRoutePlanner::RobotRoutePlanner(const LogisticsMap& logisticsMap)
+RobotRoutePlanner::RobotRoutePlanner(const ILogisticsMap& logisticsMap)
     : logisticsMap_(logisticsMap) {}
 
 std::vector<Vector2> RobotRoutePlanner::buildPathToPickup(Vector2 startPosition) const {
-    return FindNavigationPath(logisticsMap_, startPosition,
-                              logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId()));
+    const auto pickupDock = logisticsMap_.getPickupDockPosition();
+    if (!pickupDock) {
+        return {};
+    }
+
+    return FindNavigationPath(logisticsMap_, startPosition, *pickupDock);
 }
 
 std::vector<Vector2> RobotRoutePlanner::buildPathToDropoff(Vector2 startPosition) const {
-    return FindNavigationPath(
-        logisticsMap_, startPosition,
-        logisticsMap_.getLagerDockPosition(logisticsMap_.getDeliveryLagerId()));
+    const auto deliveryDock = logisticsMap_.getDeliveryDockPosition();
+    if (!deliveryDock) {
+        return {};
+    }
+
+    return FindNavigationPath(logisticsMap_, startPosition, *deliveryDock);
 }
 
 std::vector<Vector2> RobotRoutePlanner::buildPathToChargingStation(Vector2 startPosition) const {

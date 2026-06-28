@@ -1,5 +1,4 @@
 #include "simulation/RobotController.h"
-#include "simulation/SimConstants.h"
 
 #include "robots/Robot.h"
 #include "robots/WorkerRobot.h"
@@ -8,27 +7,22 @@
 #include <memory>
 #include <vector>
 
-namespace {
-constexpr float robotSpeed = 120.0f;
-constexpr float robotRotationSpeed = 180.0f;
-constexpr float robotSize = 16.0f;
-constexpr float robotProportionalGain = 2.0f;
-constexpr float robotIntegralGain = 0.25f;
-constexpr float robotMaxIntegralError = 200.0f;
-
-constexpr Robot::Config robotConfig = {
-    {robotSpeed, robotRotationSpeed, robotSize},
-    {robotProportionalGain, robotIntegralGain, robotMaxIntegralError},
-};
-} // namespace
-
 RobotController::RobotController(const LogisticsMap& logisticsMap,
-                                 const BlockingRobotManager& blockingRobotManager)
-    : logisticsMap_(logisticsMap), routePlanner_(logisticsMap), routeFollower_(logisticsMap),
-      chargingManager_(logisticsMap), emergencyStopController_(blockingRobotManager) {}
+                                 const BlockingRobotManager& blockingRobotManager,
+                                 SimConfig simConfig)
+    : logisticsMap_(logisticsMap), simConfig_(simConfig), routePlanner_(logisticsMap),
+      routeFollower_(logisticsMap), chargingManager_(logisticsMap, simConfig),
+      emergencyStopController_(blockingRobotManager), taskFlow_(simConfig) {}
 
 void RobotController::initialize() {
-    robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig);
+    const Robot::Config robotConfig = {
+        {simConfig_.robotSpeed, simConfig_.robotRotationSpeed, simConfig_.robotSize},
+        {simConfig_.robotProportionalGain, simConfig_.robotIntegralGain,
+         simConfig_.robotMaxIntegralError},
+    };
+
+    robot_ = std::make_unique<WorkerRobot>(logisticsMap_.getRobotStartPosition(), robotConfig,
+                                           simConfig_);
     taskFlow_.reset();
     emergencyStopController_.reset();
     routeFollower_.setActivePath(
@@ -101,7 +95,7 @@ void RobotController::startChargingTrip() {
 
     if (chargingPath.empty()) {
         taskFlow_.startCharging();
-        robot_->setState(Robot::State::Charging);
+        robot_->enterChargingState();
     }
 }
 
@@ -165,10 +159,10 @@ void RobotController::updateDropoff(float deltaTime) {
 }
 
 void RobotController::updateCharging(float deltaTime) {
-    robot_->setState(Robot::State::Charging);
-    robot_->getBattery().charge(SimConstants::Battery::kChargeRatePerSecond * deltaTime);
+    robot_->enterChargingState();
+    robot_->chargeBy(simConfig_.batteryChargeRatePerSecond * deltaTime);
 
-    if (!robot_->getBattery().isFull()) {
+    if (!robot_->hasBatteryFull()) {
         return;
     }
 
@@ -194,6 +188,6 @@ void RobotController::updateWaypointTravel() {
 
     if (taskFlow_.isRoutingToCharging()) {
         taskFlow_.startCharging();
-        robot_->setState(Robot::State::Charging);
+        robot_->enterChargingState();
     }
 }

@@ -1,5 +1,6 @@
 #include "simulation/RobotTaskFlow.h"
-#include "simulation/SimConstants.h"
+
+RobotTaskFlow::RobotTaskFlow(SimConfig simConfig) : simConfig_(simConfig) {}
 
 void RobotTaskFlow::enterPhase(RobotTaskPhase newPhase) {
     phase_ = newPhase;
@@ -56,10 +57,10 @@ void RobotTaskFlow::startCharging() {
 
 [[nodiscard]] bool RobotTaskFlow::updatePickup(float deltaTime) {
     stateTimer_ += deltaTime;
-    return stateTimer_ >= SimConstants::Task::kPickupDurationSeconds;
+    return stateTimer_ >= simConfig_.pickupDurationSeconds;
 }
 
 [[nodiscard]] bool RobotTaskFlow::updateDropoff(float deltaTime) {
     stateTimer_ += deltaTime;
-    return stateTimer_ >= SimConstants::Task::kDropoffDurationSeconds;
+    return stateTimer_ >= simConfig_.dropoffDurationSeconds;
 }

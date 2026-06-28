@@ -1,5 +1,4 @@
 #include "simulation/BlockingRobotManager.h"
-#include "simulation/SimConstants.h"
 
 #include "simulation/map.h"
 
@@ -15,7 +14,8 @@ float Distance(Vector2 from, Vector2 to) {
 
 } // namespace
 
-BlockingRobotManager::BlockingRobotManager() : randomEngine_(std::random_device{}()) {}
+BlockingRobotManager::BlockingRobotManager(SimConfig simConfig)
+    : simConfig_(simConfig), randomEngine_(std::random_device{}()) {}
 
 void BlockingRobotManager::clear() {
     blockingRobots_.clear();
@@ -30,7 +30,7 @@ void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) 
 
     for (const BlockingRobotPath& blockingPath : logisticsMap.getBlockingRobotPaths()) {
         addBlockingRobotPath(blockingPath.points,
-                             SimConstants::BlockingRobot::kSpeed * blockingPath.speedMultiplier);
+                             simConfig_.blockingRobotSpeed * blockingPath.speedMultiplier);
     }
 }
 
@@ -74,7 +74,7 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
 
     addBlockingRobot({
         path[0],
-        SimConstants::BlockingRobot::kRadius,
+        simConfig_.blockingRobotRadius,
         speed,
         path,
         0,
@@ -90,7 +90,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
 
     const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
     const float distance = Distance(blockingRobot.position, target);
-    if (distance <= SimConstants::Navigation::kReachedDistance) {
+    if (distance <= simConfig_.reachedDistance) {
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
         blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;

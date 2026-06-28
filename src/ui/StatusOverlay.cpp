@@ -98,7 +98,7 @@ void DrawControlHint(void) {
 }
 } // namespace
 
-void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus) {
+void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus, SimConfig simConfig) {
     constexpr int panelWidth = 270;
     constexpr int panelHeight = 138;
     constexpr int panelPadding = 14;
@@ -125,9 +125,9 @@ void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus) {
     }
 
     const float batteryPercentage = robotStatus->batteryPercentage;
-    const Color batteryColor = batteryPercentage <= 10.0f   ? RED
-                               : batteryPercentage <= 30.0f ? ORANGE
-                                                            : DARKGREEN;
+    const Color batteryColor = batteryPercentage <= simConfig.lowBatteryThreshold       ? RED
+                               : batteryPercentage <= simConfig.batteryWarningThreshold ? ORANGE
+                                                                                        : DARKGREEN;
     const Color emergencyStopColor = robotStatus->emergencyStopActive ? RED : DARKGREEN;
     const char* emergencyStopText = robotStatus->emergencyStopActive ? "ACTIVE" : "Ready";
 

@@ -4,11 +4,11 @@
 
 #include <vector>
 
-class LogisticsMap;
+class ILogisticsMap;
 
 class RobotRoutePlanner {
   public:
-    explicit RobotRoutePlanner(const LogisticsMap& logisticsMap);
+    explicit RobotRoutePlanner(const ILogisticsMap& logisticsMap);
 
     std::vector<Vector2> buildPathToPickup(Vector2 startPosition) const;
     std::vector<Vector2> buildPathToDropoff(Vector2 startPosition) const;
@@ -16,5 +16,5 @@ class RobotRoutePlanner {
     float calculatePathDistance(Vector2 startPosition, const std::vector<Vector2>& path) const;
 
   private:
-    const LogisticsMap& logisticsMap_;
+    const ILogisticsMap& logisticsMap_;
 };

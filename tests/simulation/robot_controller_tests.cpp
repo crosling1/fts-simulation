@@ -6,20 +6,14 @@
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
-#include "simulation/SimConstants.h"
+#include "simulation/SimConfig.h"
 #include "simulation/map.h"
-
-#include <cstdlib>
 
 namespace {
 RobotStatusSnapshot RequireSnapshot(const RobotController& controller) {
     const std::optional<RobotStatusSnapshot> snapshot = controller.statusSnapshot();
-    if (snapshot.has_value()) {
-        return snapshot.value();
-    }
-
-    FAIL("Expected robot status snapshot");
-    std::abort();
+    REQUIRE(snapshot.has_value());
+    return snapshot.value_or(RobotStatusSnapshot{RobotState::Idle, 0.0f, false});
 }
 
 bool AdvanceUntilState(RobotController& controller, RobotState expectedState,
@@ -64,7 +58,7 @@ TEST_CASE("Robot controller advances pickup and dropoff workflow", "[RobotContro
 
     REQUIRE(AdvanceUntilState(controller, RobotState::PickingUp));
 
-    controller.update(SimConstants::Task::kPickupDurationSeconds, InputState{});
+    controller.update(SimConfig::Default().pickupDurationSeconds, InputState{});
 
     CHECK(RequireSnapshot(controller).state == RobotState::CarryingItem);
     CHECK(AdvanceUntilState(controller, RobotState::DroppingOff));

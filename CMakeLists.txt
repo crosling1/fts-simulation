@@ -69,6 +69,7 @@ set(FTS_TEST_SOURCES
     tests/simulation/map_tests.cpp
     tests/simulation/navigation_tests.cpp
     tests/simulation/robot_controller_tests.cpp
+    tests/simulation/robot_route_planner_tests.cpp
     tests/simulation/robot_task_flow_tests.cpp
 )
 
@@ -82,7 +83,10 @@ set(FTS_CORE_HEADERS
     include/rendering/RobotRenderer.h
     include/sensors/Sensor.h
     include/sensors/ProximitySensor.h
+    include/simulation/ILogisticsMap.h
     include/simulation/MapData.h
+    include/simulation/SimConfig.h
+    include/simulation/SimConstants.h
     include/simulation/map.h
     include/simulation/navigation.h
     include/simulation/InputState.h

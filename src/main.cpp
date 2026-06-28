@@ -1,6 +1,7 @@
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
+#include "simulation/SimConfig.h"
 #include "simulation/map.h"
 #include "ui/MapOverlay.h"
 #include "ui/StatusOverlay.h"
@@ -17,10 +18,12 @@ int main(void) {
     LogisticsMap logisticsMap;
     logisticsMap.init();
 
-    BlockingRobotManager blockingRobotManager;
+    const SimConfig simConfig = SimConfig::Default();
+
+    BlockingRobotManager blockingRobotManager(simConfig);
     blockingRobotManager.initBlockingRobots(logisticsMap);
 
-    RobotController robotController(logisticsMap, blockingRobotManager);
+    RobotController robotController(logisticsMap, blockingRobotManager, simConfig);
     robotController.initialize();
 
     while (!WindowShouldClose()) {
@@ -36,7 +39,7 @@ int main(void) {
         DrawMapOverlay();
         blockingRobotManager.draw();
         robotController.draw();
-        DrawStatusOverlay(robotController.statusSnapshot());
+        DrawStatusOverlay(robotController.statusSnapshot(), simConfig);
 
         EndDrawing();
     }
