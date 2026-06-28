@@ -33,6 +33,7 @@ class RobotController {
     void startPickupTrip();
     void startDropoffTrip();
     void startChargingTrip();
+    void startCharging();
 
     [[nodiscard]] bool updateStationaryTask(float deltaTime);
     void updatePickup(float deltaTime);
