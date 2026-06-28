@@ -6,6 +6,6 @@
 
 class ILogisticsMap;
 
-std::vector<Vector2>
+[[nodiscard]] std::vector<Vector2>
 FindNavigationPath(const ILogisticsMap& logisticsMap, Vector2 start,
                    Vector2 goal); // NOLINT(bugprone-easily-swappable-parameters)
