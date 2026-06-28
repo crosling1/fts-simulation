@@ -7,7 +7,10 @@
 #include "ui/StatusOverlay.h"
 #include "raylib.h"
 
-int main(void) {
+#include <exception>
+#include <iostream>
+
+int main(void) try {
     constexpr int screenWidth = 1280;
     constexpr int screenHeight = 720;
     constexpr int targetFps = 60;
@@ -50,4 +53,10 @@ int main(void) {
     CloseWindow();
 
     return 0;
+} catch (const std::exception& e) {
+    std::cerr << "Fatal error: " << e.what() << '\n';
+    return 1;
+} catch (...) {
+    std::cerr << "Fatal error: unknown exception\n";
+    return 1;
 }
