@@ -6,9 +6,21 @@
 #include "simulation/navigation.h"
 
 #include <optional>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
+template <typename T>
+[[nodiscard]] T RequireOptionalValue(std::optional<T> value, std::string_view message) {
+    if (value.has_value()) {
+        return value.value();
+    }
+
+    throw std::runtime_error(std::string(message));
+}
+
 bool SamePosition(Vector2 left, Vector2 right) {
     return test::AlmostEqual(left.x, right.x) && test::AlmostEqual(left.y, right.y);
 }
@@ -35,22 +47,17 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     LogisticsMap logisticsMap;
     logisticsMap.init();
 
-    const auto pickupDock = logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId());
-    const auto deliveryDock = logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId());
-    const auto l6Dock = logisticsMap.getLagerDockPosition(LagerId::L6);
-
-    REQUIRE(pickupDock.has_value());
-    REQUIRE(deliveryDock.has_value());
-    REQUIRE(l6Dock.has_value());
-
-    const Vector2 pickupDockPosition = *pickupDock;
-    const Vector2 deliveryDockPosition = *deliveryDock;
-    const Vector2 l6DockPosition = *l6Dock;
-    const std::optional<Vector2> l6EntryWaypointCandidate =
-        FindConnectedNavigationNode(logisticsMap, l6DockPosition);
-
-    REQUIRE(l6EntryWaypointCandidate.has_value());
-    const Vector2 l6EntryWaypoint = *l6EntryWaypointCandidate;
+    const Vector2 pickupDockPosition =
+        RequireOptionalValue(logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId()),
+                             "Expected pickup dock position to exist");
+    const Vector2 deliveryDockPosition =
+        RequireOptionalValue(logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId()),
+                             "Expected delivery dock position to exist");
+    const Vector2 l6DockPosition = RequireOptionalValue(
+        logisticsMap.getLagerDockPosition(LagerId::L6), "Expected L6 dock position to exist");
+    const Vector2 l6EntryWaypoint =
+        RequireOptionalValue(FindConnectedNavigationNode(logisticsMap, l6DockPosition),
+                             "Expected L6 dock position to have a connected navigation node");
 
     const std::vector<Vector2> pickupPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), pickupDockPosition);

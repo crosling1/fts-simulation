@@ -1,5 +1,5 @@
 BUILD_DIR := build
-CLANG_TIDY ?= clang-tidy
+CLANG_TIDY ?= $(shell command -v clang-tidy-18 >/dev/null 2>&1 && echo clang-tidy-18 || echo clang-tidy)
 STRICT_CLANG_TIDY_CHECKS ?= 0
 FORMAT_FILES := $(shell find include src tests -type f \( -name '*.h' -o -name '*.cpp' \))
 TIDY_FILES := $(shell find src tests -type f -name '*.cpp')
