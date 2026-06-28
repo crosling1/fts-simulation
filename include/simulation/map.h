@@ -13,8 +13,6 @@ class LogisticsMap : public ILogisticsMap {
     void draw() const;
     void unload();
 
-    [[nodiscard]] Vector2 getPointA() const;
-    [[nodiscard]] Vector2 getPointB() const;
     [[nodiscard]] LagerId getPickupLagerId() const;
     [[nodiscard]] LagerId getDeliveryLagerId() const;
     [[nodiscard]] Vector2 getRobotStartPosition() const;
