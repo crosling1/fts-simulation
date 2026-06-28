@@ -5,7 +5,31 @@
 #include "simulation/map.h"
 #include "simulation/navigation.h"
 
+#include <optional>
 #include <vector>
+
+namespace {
+bool SamePosition(Vector2 left, Vector2 right) {
+    return test::AlmostEqual(left.x, right.x) && test::AlmostEqual(left.y, right.y);
+}
+
+std::optional<Vector2> FindConnectedNavigationNode(const LogisticsMap& logisticsMap,
+                                                   Vector2 navigationNode) {
+    const std::vector<Vector2>& navigationNodes = logisticsMap.getNavigationNodes();
+
+    for (NavigationEdge edge : logisticsMap.getNavigationEdges()) {
+        if (SamePosition(navigationNodes[edge.from], navigationNode)) {
+            return navigationNodes[edge.to];
+        }
+
+        if (SamePosition(navigationNodes[edge.to], navigationNode)) {
+            return navigationNodes[edge.from];
+        }
+    }
+
+    return std::nullopt;
+}
+} // namespace
 
 TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     LogisticsMap logisticsMap;
@@ -19,9 +43,15 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     REQUIRE(deliveryDock.has_value());
     REQUIRE(l6Dock.has_value());
 
-    const Vector2 pickupDockPosition = pickupDock.value_or(Vector2{});
-    const Vector2 deliveryDockPosition = deliveryDock.value_or(Vector2{});
-    const Vector2 l6DockPosition = l6Dock.value_or(Vector2{});
+    const Vector2 pickupDockPosition = *pickupDock;
+    const Vector2 deliveryDockPosition = *deliveryDock;
+    const Vector2 l6DockPosition = *l6Dock;
+    const std::optional<Vector2> l6EntryWaypointCandidate =
+        FindConnectedNavigationNode(logisticsMap, l6DockPosition);
+
+    REQUIRE(l6EntryWaypointCandidate.has_value());
+    const Vector2 l6EntryWaypoint = *l6EntryWaypointCandidate;
+
     const std::vector<Vector2> pickupPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), pickupDockPosition);
     const std::vector<Vector2> dropoffPath =
@@ -33,7 +63,6 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
         logisticsMap, deliveryDockPosition, logisticsMap.getChargingStationDockPosition());
     const std::vector<Vector2> l6Path =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), l6DockPosition);
-    const Vector2 l6EntryWaypoint = {545.0f, 450.0f};
 
     REQUIRE(!pickupPath.empty());
     REQUIRE(!dropoffPath.empty());
