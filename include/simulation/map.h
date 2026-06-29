@@ -10,11 +10,11 @@
 class LogisticsMap : public ILogisticsMap {
   public:
     void init();
-    void draw() const;
     void unload();
 
     [[nodiscard]] LagerId getPickupLagerId() const;
     [[nodiscard]] LagerId getDeliveryLagerId() const;
+    [[nodiscard]] const MapData& getData() const noexcept;
     [[nodiscard]] Vec2 getRobotStartPosition() const;
     [[nodiscard]] Vec2 getChargingStationPosition() const;
     [[nodiscard]] Vec2 getChargingStationDockPosition() const override;
@@ -29,10 +29,4 @@ class LogisticsMap : public ILogisticsMap {
 
   private:
     MapData data_;
-
-    [[nodiscard]] Vec2 getWarehouseCenter(std::size_t index) const;
-    void drawGrid() const;
-    void drawRoads() const;
-    void drawWarehouse(Rect body, int index) const;
-    void drawChargingStation() const;
 };

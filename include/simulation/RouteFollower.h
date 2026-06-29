@@ -16,7 +16,8 @@ class RouteFollower {
     void setActivePath(const std::vector<Vec2>& path, Vec2 pathStart, Robot& robot);
     void keepOnRoad(Robot& robot) const;
     bool updateWaypointTravel(Robot& robot);
-    void draw() const;
+    [[nodiscard]] const std::vector<Vec2>& getActivePath() const noexcept;
+    [[nodiscard]] Vec2 getActivePathStart() const noexcept;
 
   private:
     bool setNextWaypoint(Robot& robot);

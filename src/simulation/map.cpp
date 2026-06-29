@@ -45,6 +45,10 @@ LagerId LogisticsMap::getDeliveryLagerId() const {
     return static_cast<LagerId>(data_.deliveryLagerIndex);
 }
 
+const MapData& LogisticsMap::getData() const noexcept {
+    return data_;
+}
+
 Vec2 LogisticsMap::getRobotStartPosition() const {
     return data_.robotStart;
 }
@@ -121,13 +125,4 @@ const std::vector<NavigationEdge>& LogisticsMap::getNavigationEdges() const {
 
 const std::vector<BlockingRobotPath>& LogisticsMap::getBlockingRobotPaths() const {
     return data_.blockingRobotPaths;
-}
-
-Vec2 LogisticsMap::getWarehouseCenter(std::size_t index) const {
-    Rect warehouse = data_.warehouses[index];
-
-    return {
-        warehouse.x + warehouse.width * 0.5f,
-        warehouse.y + warehouse.height * 0.5f,
-    };
 }
