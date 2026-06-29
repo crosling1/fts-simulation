@@ -1,9 +1,10 @@
-#include "simulation/BlockingRobotManager.h"
+#include "rendering/SimulationRenderer.h"
 
 #include "rendering/RaylibGeometry.h"
+#include "simulation/BlockingRobotManager.h"
 
-void BlockingRobotManager::draw() const {
-    for (const BlockingRobot& blockingRobot : getBlockingRobots()) {
+void DrawBlockingRobots(const BlockingRobotManager& blockingRobotManager) {
+    for (const BlockingRobot& blockingRobot : blockingRobotManager.getBlockingRobots()) {
         const Vec2 position = blockingRobot.position;
         const float radius = blockingRobot.radius;
 

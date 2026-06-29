@@ -128,6 +128,7 @@ set(FTS_RENDERING_SOURCES
 set(FTS_RENDERING_HEADERS
     include/rendering/RaylibGeometry.h
     include/rendering/RobotRenderer.h
+    include/rendering/SimulationRenderer.h
     include/ui/MapOverlay.h
     include/ui/StatusOverlay.h
 )
@@ -160,17 +161,24 @@ catch_discover_tests(unit_tests)
 find_package(raylib QUIET)
 
 if(raylib_FOUND)
-    target_link_libraries(fts_rendering PUBLIC raylib)
+    target_link_libraries(fts_rendering PRIVATE raylib)
+    target_link_libraries(robot_sim PRIVATE raylib)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(RAYLIB REQUIRED raylib)
 
-    target_include_directories(fts_rendering PUBLIC ${RAYLIB_INCLUDE_DIRS})
-    target_link_directories(fts_rendering PUBLIC ${RAYLIB_LIBRARY_DIRS})
-    target_compile_options(fts_rendering PUBLIC ${RAYLIB_CFLAGS_OTHER})
-    target_link_libraries(fts_rendering PUBLIC ${RAYLIB_LIBRARIES})
+    target_include_directories(fts_rendering PRIVATE ${RAYLIB_INCLUDE_DIRS})
+    target_link_directories(fts_rendering PRIVATE ${RAYLIB_LIBRARY_DIRS})
+    target_compile_options(fts_rendering PRIVATE ${RAYLIB_CFLAGS_OTHER})
+    target_link_libraries(fts_rendering PRIVATE ${RAYLIB_LIBRARIES})
+
+    target_include_directories(robot_sim PRIVATE ${RAYLIB_INCLUDE_DIRS})
+    target_link_directories(robot_sim PRIVATE ${RAYLIB_LIBRARY_DIRS})
+    target_compile_options(robot_sim PRIVATE ${RAYLIB_CFLAGS_OTHER})
+    target_link_libraries(robot_sim PRIVATE ${RAYLIB_LIBRARIES})
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(fts_rendering PUBLIC m dl pthread GL rt X11)
+    target_link_libraries(fts_rendering PRIVATE m dl pthread GL rt X11)
+    target_link_libraries(robot_sim PRIVATE m dl pthread GL rt X11)
 endif()

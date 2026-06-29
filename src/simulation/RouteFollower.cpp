@@ -33,6 +33,14 @@ bool RouteFollower::updateWaypointTravel(Robot& robot) {
     return !setNextWaypoint(robot);
 }
 
+const std::vector<Vec2>& RouteFollower::getActivePath() const noexcept {
+    return activePath_;
+}
+
+Vec2 RouteFollower::getActivePathStart() const noexcept {
+    return activePathStart_;
+}
+
 bool RouteFollower::setNextWaypoint(Robot& robot) {
     if (currentWaypointIndex_ >= activePath_.size()) {
         return false;

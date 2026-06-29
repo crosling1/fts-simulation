@@ -41,7 +41,6 @@ class BlockingRobotManager {
     void addBlockingRobot(const BlockingRobot& blockingRobot);
     void initBlockingRobots(const LogisticsMap& logisticsMap);
     void update(float deltaTime);
-    void draw() const;
     [[nodiscard]] bool hasActiveBlockingRobotNear(Vec2 position, float detectionRadius) const;
     [[nodiscard]] const std::vector<BlockingRobot>& getBlockingRobots() const;
 

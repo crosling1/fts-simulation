@@ -1,4 +1,5 @@
 #include "rendering/RobotRenderer.h"
+#include "rendering/SimulationRenderer.h"
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
@@ -40,10 +41,10 @@ int main() try {
 
         BeginDrawing();
 
-        logisticsMap.draw();
+        DrawLogisticsMap(logisticsMap);
         DrawMapOverlay();
-        blockingRobotManager.draw();
-        robotController.draw(robotRenderer);
+        DrawBlockingRobots(blockingRobotManager);
+        DrawRobotController(robotController, robotRenderer);
         DrawStatusOverlay(robotController.statusSnapshot(), simConfig);
 
         EndDrawing();

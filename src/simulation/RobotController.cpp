@@ -65,6 +65,18 @@ void RobotController::unload() {
     robot_.reset();
 }
 
+const RouteFollower& RobotController::routeFollower() const noexcept {
+    return routeFollower_;
+}
+
+std::optional<RobotRenderData> RobotController::robotRenderData() const {
+    if (robot_ == nullptr) {
+        return std::nullopt;
+    }
+
+    return robot_->renderData();
+}
+
 std::optional<RobotStatusSnapshot> RobotController::statusSnapshot() const {
     if (robot_ == nullptr) {
         return std::nullopt;

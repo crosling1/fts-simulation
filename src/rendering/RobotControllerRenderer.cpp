@@ -1,11 +1,15 @@
+#include "rendering/SimulationRenderer.h"
+
 #include "simulation/RobotController.h"
 
-void RobotController::draw(const IRobotRenderer& robotRenderer) const {
-    if (robot_ == nullptr) {
+void DrawRobotController(const RobotController& robotController,
+                         const IRobotRenderer& robotRenderer) {
+    const std::optional<RobotRenderData> renderData = robotController.robotRenderData();
+    if (!renderData) {
         return;
     }
 
-    routeFollower_.draw();
+    DrawRouteFollower(robotController.routeFollower());
 
-    robotRenderer.draw(robot_->renderData());
+    robotRenderer.draw(*renderData);
 }

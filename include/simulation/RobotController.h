@@ -3,7 +3,7 @@
 #include "simulation/ChargingManager.h"
 #include "simulation/EmergencyStopController.h"
 #include "robots/Robot.h"
-#include "robots/IRobotRenderer.h"
+#include "robots/RobotRenderData.h"
 #include "simulation/RouteFollower.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotRoutePlanner.h"
@@ -26,8 +26,9 @@ class RobotController {
 
     void initialize();
     void update(float deltaTime, const InputState& inputState);
-    void draw(const IRobotRenderer& robotRenderer) const;
     void unload();
+    [[nodiscard]] const RouteFollower& routeFollower() const noexcept;
+    [[nodiscard]] std::optional<RobotRenderData> robotRenderData() const;
     [[nodiscard]] std::optional<RobotStatusSnapshot> statusSnapshot() const;
 
   private:
