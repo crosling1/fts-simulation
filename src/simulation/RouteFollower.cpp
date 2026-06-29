@@ -5,6 +5,12 @@
 
 RouteFollower::RouteFollower(const ILogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
 
+void RouteFollower::reset() {
+    activePath_.clear();
+    activePathStart_ = {0.0f, 0.0f};
+    currentWaypointIndex_ = 0;
+}
+
 void RouteFollower::setActivePath(const std::vector<Vector2>& path, Vector2 pathStart,
                                   Robot& robot) {
     activePath_ = path;

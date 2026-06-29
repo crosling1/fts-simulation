@@ -12,6 +12,7 @@ class RouteFollower {
   public:
     explicit RouteFollower(const ILogisticsMap& logisticsMap);
 
+    void reset();
     void setActivePath(const std::vector<Vector2>& path, Vector2 pathStart, Robot& robot);
     void keepOnRoad(Robot& robot) const;
     bool updateWaypointTravel(Robot& robot);

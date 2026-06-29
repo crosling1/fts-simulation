@@ -16,6 +16,8 @@ RobotController::RobotController(const LogisticsMap& logisticsMap,
       emergencyStopController_(blockingRobotManager), taskFlow_(simConfig) {}
 
 void RobotController::initialize() {
+    routeFollower_.reset();
+
     const Robot::Config robotConfig = {
         {simConfig_.robotSpeed, simConfig_.robotRotationSpeed, simConfig_.robotSize},
         {simConfig_.robotProportionalGain, simConfig_.robotIntegralGain,
