@@ -90,10 +90,22 @@ void Robot::setState(State newState) {
 }
 
 void Robot::setTargetPosition(const Vector2& target) {
+    beginMovingTo(target);
+}
+
+void Robot::enterIdle() {
+    state_ = State::Idle;
+}
+
+void Robot::arriveAtWaypoint() {
+    state_ = State::Arrived;
+}
+
+void Robot::beginMovingTo(Vector2 target) {
     targetPosition_ = target;
     speedController_.reset();
     if (hasReachedTarget()) {
-        state_ = State::Arrived;
+        arriveAtWaypoint();
         return;
     }
 
@@ -105,6 +117,18 @@ void Robot::setTargetPosition(const Vector2& target) {
     if (state_ != State::CarryingItem) {
         state_ = State::Moving;
     }
+}
+
+void Robot::beginCarrying() {
+    state_ = State::CarryingItem;
+}
+
+void Robot::beginPickingUp() {
+    state_ = State::PickingUp;
+}
+
+void Robot::beginDroppingOff() {
+    state_ = State::DroppingOff;
 }
 
 void Robot::chargeBy(float amount) {
@@ -142,7 +166,7 @@ void Robot::snapToTarget() {
     y_ = targetPosition_.y;
     speedController_.reset();
     if (state_ != State::CarryingItem) {
-        state_ = State::Arrived;
+        arriveAtWaypoint();
     }
 }
 

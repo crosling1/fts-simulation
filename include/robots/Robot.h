@@ -45,8 +45,15 @@ class Robot {
     void updateMovement(float deltaTime);
     [[nodiscard]] RobotRenderData renderData() const noexcept;
     void setPosition(const Vector2& newPosition);
+    // Escape hatch kept while state transitions are moved behind intent methods.
     void setState(State newState);
     void setTargetPosition(const Vector2& target);
+    void enterIdle();
+    void arriveAtWaypoint();
+    void beginMovingTo(Vector2 target);
+    void beginCarrying();
+    void beginPickingUp();
+    void beginDroppingOff();
     void chargeBy(float amount);
     void enterChargingState();
     void moveTowardsTarget(float deltaTime);

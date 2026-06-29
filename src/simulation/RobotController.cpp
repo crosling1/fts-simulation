@@ -88,7 +88,7 @@ void RobotController::startChargingTrip() {
     const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToCharging();
-    robot_->setState(Robot::State::Arrived);
+    robot_->arriveAtWaypoint();
     const std::vector<Vector2> chargingPath =
         routePlanner_.buildPathToChargingStation(startPosition);
     routeFollower_.setActivePath(chargingPath, startPosition, *robot_);
@@ -102,7 +102,7 @@ void RobotController::startPickupTrip() {
     const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToPickup();
-    robot_->setState(Robot::State::Arrived);
+    robot_->arriveAtWaypoint();
     routeFollower_.setActivePath(routePlanner_.buildPathToPickup(startPosition), startPosition,
                                  *robot_);
 }
@@ -111,7 +111,7 @@ void RobotController::startDropoffTrip() {
     const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToDropoff();
-    robot_->setState(Robot::State::CarryingItem);
+    robot_->beginCarrying();
     routeFollower_.setActivePath(routePlanner_.buildPathToDropoff(startPosition), startPosition,
                                  *robot_);
 }
@@ -179,13 +179,13 @@ void RobotController::updateWaypointTravel() {
 
     if (taskFlow_.isRoutingToPickup()) {
         taskFlow_.startPickingUp();
-        robot_->setState(Robot::State::PickingUp);
+        robot_->beginPickingUp();
         return;
     }
 
     if (taskFlow_.isRoutingToDropoff()) {
         taskFlow_.startDroppingOff();
-        robot_->setState(Robot::State::DroppingOff);
+        robot_->beginDroppingOff();
         return;
     }
 
