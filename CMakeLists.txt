@@ -88,7 +88,6 @@ set(FTS_CORE_HEADERS
     include/simulation/ILogisticsMap.h
     include/simulation/MapData.h
     include/simulation/SimConfig.h
-    include/simulation/SimConstants.h
     include/simulation/map.h
     include/simulation/NavigationGraph.h
     include/simulation/navigation.h
