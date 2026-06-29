@@ -1,6 +1,5 @@
 #include "simulation/RouteFollower.h"
 
-#include "rendering/RaylibGeometry.h"
 #include "robots/Robot.h"
 #include "simulation/ILogisticsMap.h"
 
@@ -32,15 +31,6 @@ bool RouteFollower::updateWaypointTravel(Robot& robot) {
     }
 
     return !setNextWaypoint(robot);
-}
-
-void RouteFollower::draw() const {
-    Vec2 previousPoint = activePathStart_;
-    for (Vec2 waypoint : activePath_) {
-        DrawLineEx(ToRaylib(previousPoint), ToRaylib(waypoint), 3.0f, MAGENTA);
-        DrawCircleV(ToRaylib(waypoint), 5.0f, MAGENTA);
-        previousPoint = waypoint;
-    }
 }
 
 bool RouteFollower::setNextWaypoint(Robot& robot) {

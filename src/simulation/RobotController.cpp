@@ -61,16 +61,6 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
     updateWaypointTravel();
 }
 
-void RobotController::draw(const IRobotRenderer& robotRenderer) const {
-    if (robot_ == nullptr) {
-        return;
-    }
-
-    routeFollower_.draw();
-
-    robotRenderer.draw(robot_->renderData());
-}
-
 void RobotController::unload() {
     robot_.reset();
 }

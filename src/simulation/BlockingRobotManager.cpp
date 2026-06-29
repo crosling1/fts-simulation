@@ -1,6 +1,5 @@
 #include "simulation/BlockingRobotManager.h"
 
-#include "rendering/RaylibGeometry.h"
 #include "simulation/MathUtils.h"
 #include "simulation/map.h"
 
@@ -45,19 +44,6 @@ void BlockingRobotManager::initBlockingRobots(const LogisticsMap& logisticsMap) 
 void BlockingRobotManager::update(float deltaTime) {
     for (BlockingRobot& blockingRobot : blockingRobots_) {
         moveBlockingRobot(blockingRobot, deltaTime);
-    }
-}
-
-void BlockingRobotManager::draw() const {
-    for (const BlockingRobot& blockingRobot : blockingRobots_) {
-        const Vec2 position = blockingRobot.position;
-        const float radius = blockingRobot.radius;
-
-        DrawCircleV(ToRaylib(position), radius, PURPLE);
-        DrawCircleLines(static_cast<int>(position.x), static_cast<int>(position.y), radius,
-                        DARKPURPLE);
-        DrawText("B", static_cast<int>(position.x) - 5, static_cast<int>(position.y) - 10, 20,
-                 WHITE);
     }
 }
 

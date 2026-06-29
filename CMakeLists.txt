@@ -54,15 +54,14 @@ set(FTS_CORE_SOURCES
     src/sensors/ProximitySensor.cpp
 )
 
-set(FTS_RAYLIB_BOUNDARY_CANDIDATE_SOURCES
+set(FTS_CORE_BOUNDARY_SOURCES
     src/simulation/map.cpp
-    src/simulation/InputState.cpp
     src/simulation/RouteFollower.cpp
     src/simulation/BlockingRobotManager.cpp
 )
 
 list(APPEND FTS_CORE_SOURCES
-    ${FTS_RAYLIB_BOUNDARY_CANDIDATE_SOURCES}
+    ${FTS_CORE_BOUNDARY_SOURCES}
 )
 
 set(FTS_TEST_SOURCES
@@ -104,7 +103,7 @@ set(FTS_CORE_HEADERS
     include/simulation/MathUtils.h
 )
 
-set(FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS
+set(FTS_CORE_BOUNDARY_HEADERS
     include/simulation/map.h
     include/simulation/InputState.h
     include/simulation/RouteFollower.h
@@ -112,10 +111,15 @@ set(FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS
 )
 
 list(APPEND FTS_CORE_HEADERS
-    ${FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS}
+    ${FTS_CORE_BOUNDARY_HEADERS}
 )
 
 set(FTS_RENDERING_SOURCES
+    src/rendering/BlockingRobotRenderer.cpp
+    src/rendering/LogisticsMapRenderer.cpp
+    src/rendering/RaylibInputState.cpp
+    src/rendering/RouteFollowerRenderer.cpp
+    src/rendering/RobotControllerRenderer.cpp
     src/rendering/RobotRenderer.cpp
     src/ui/MapOverlay.cpp
     src/ui/StatusOverlay.cpp
@@ -155,25 +159,18 @@ catch_discover_tests(unit_tests)
 
 find_package(raylib QUIET)
 
-# fts_core still has a few raylib-backed drawing/input boundary implementations,
-# but its public headers use project-owned geometry types.
 if(raylib_FOUND)
-    target_link_libraries(fts_core PRIVATE raylib)
     target_link_libraries(fts_rendering PUBLIC raylib)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(RAYLIB REQUIRED raylib)
 
-    target_include_directories(fts_core PRIVATE ${RAYLIB_INCLUDE_DIRS})
     target_include_directories(fts_rendering PUBLIC ${RAYLIB_INCLUDE_DIRS})
-    target_link_directories(fts_core PRIVATE ${RAYLIB_LIBRARY_DIRS})
     target_link_directories(fts_rendering PUBLIC ${RAYLIB_LIBRARY_DIRS})
-    target_compile_options(fts_core PRIVATE ${RAYLIB_CFLAGS_OTHER})
     target_compile_options(fts_rendering PUBLIC ${RAYLIB_CFLAGS_OTHER})
-    target_link_libraries(fts_core PRIVATE ${RAYLIB_LIBRARIES})
     target_link_libraries(fts_rendering PUBLIC ${RAYLIB_LIBRARIES})
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(fts_core PRIVATE m dl pthread GL rt X11)
+    target_link_libraries(fts_rendering PUBLIC m dl pthread GL rt X11)
 endif()
