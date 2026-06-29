@@ -140,7 +140,10 @@ main.cpp / Simulation Loop
 
 ## Runtime Configuration
 
-`SimConfig` centralizes simulation tuning values. The current fields are:
+`SimConfig` centralizes simulation tuning defaults. Its settings are grouped by
+domain so robot motion, battery behavior, task timing, controller tuning and
+blocking robot parameters stay separated while sharing one configuration entry
+point. The current fields are:
 
 | Field | Purpose |
 | ----- | ------- |
