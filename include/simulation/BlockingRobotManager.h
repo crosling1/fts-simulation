@@ -5,6 +5,7 @@
 #include "raylib.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <random>
 #include <vector>
 
@@ -33,11 +34,13 @@ class BlockingRobotManager {
     [[nodiscard]] const std::vector<BlockingRobot>& getBlockingRobots() const;
 
   private:
+    enum class BacktrackPolicy : std::uint8_t { Allow, Prevent };
+
     std::vector<BlockingRobot> blockingRobots_;
     const SimConfig& simConfig_;
     std::mt19937 randomEngine_;
 
     void addBlockingRobotPath(const std::vector<Vector2>& path, float speed);
     void moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime);
-    void chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking);
+    void chooseNextTarget(BlockingRobot& blockingRobot, BacktrackPolicy policy);
 };

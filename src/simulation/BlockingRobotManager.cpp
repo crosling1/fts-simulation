@@ -83,7 +83,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
         blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;
-        chooseNextTarget(blockingRobot, false);
+        chooseNextTarget(blockingRobot, BacktrackPolicy::Prevent);
         return;
     }
 
@@ -97,7 +97,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
     blockingRobot.position.y += ((target.y - blockingRobot.position.y) / distance) * step;
 }
 
-void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking) {
+void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, BacktrackPolicy policy) {
     if (blockingRobot.path.size() < 2) {
         blockingRobot.targetNodeIndex = blockingRobot.currentNodeIndex;
         return;
@@ -112,7 +112,7 @@ void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, bool a
         candidates.push_back(blockingRobot.currentNodeIndex + 1);
     }
 
-    if (!allowBacktracking && candidates.size() > 1) {
+    if (policy == BacktrackPolicy::Prevent && candidates.size() > 1) {
         std::vector<std::size_t> forwardCandidates;
         for (std::size_t candidate : candidates) {
             if (candidate != blockingRobot.previousNodeIndex) {
