@@ -1,9 +1,9 @@
 #pragma once
 
-#include "robots/Robot.h"
+#include "robots/RobotState.h"
 
 struct RobotStatusSnapshot {
-    Robot::State state;
+    RobotState state;
     float batteryPercentage;
     bool emergencyStopActive;
 };

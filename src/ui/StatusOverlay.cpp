@@ -12,23 +12,23 @@ constexpr double memoryRefreshInterval = 0.5;
 double lastMemoryRefreshTime = -memoryRefreshInterval;
 float cachedMemoryMegabytes = 0.0f;
 
-const char* RobotStateText(Robot::State state) {
+const char* RobotStateText(RobotState state) {
     switch (state) {
-    case Robot::State::Idle:
+    case RobotState::Idle:
         return "Idle";
-    case Robot::State::Moving:
+    case RobotState::Moving:
         return "Moving";
-    case Robot::State::PickingUp:
+    case RobotState::PickingUp:
         return "Picking up";
-    case Robot::State::CarryingItem:
+    case RobotState::CarryingItem:
         return "Carrying item";
-    case Robot::State::DroppingOff:
+    case RobotState::DroppingOff:
         return "Dropping off";
-    case Robot::State::Arrived:
+    case RobotState::Arrived:
         return "Arrived";
-    case Robot::State::BatteryDepleted:
+    case RobotState::BatteryDepleted:
         return "Battery depleted";
-    case Robot::State::Charging:
+    case RobotState::Charging:
         return "Charging";
     }
 
