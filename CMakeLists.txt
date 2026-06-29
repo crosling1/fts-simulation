@@ -38,27 +38,39 @@ foreach(catch2_target IN ITEMS Catch2 Catch2WithMain)
     endif()
 endforeach()
 
-set(FTS_CORE_SOURCES
+set(FTS_HEADLESS_CORE_CANDIDATE_SOURCES
     src/simulation/MapData.cpp
-    src/simulation/map.cpp
     src/simulation/NavigationGraph.cpp
     src/simulation/navigation.cpp
-    src/simulation/InputState.cpp
     src/simulation/ChargingManager.cpp
     src/simulation/EmergencyStopController.cpp
-    src/simulation/RouteFollower.cpp
     src/simulation/RobotController.cpp
     src/simulation/RobotRoutePlanner.cpp
     src/simulation/RobotTaskFlow.cpp
-    src/simulation/BlockingRobotManager.cpp
-    src/rendering/RobotRenderer.cpp
-    src/ui/MapOverlay.cpp
-    src/ui/StatusOverlay.cpp
     src/robots/Battery.cpp
     src/control/PIController.cpp
     src/robots/Robot.cpp
     src/robots/WorkerRobot.cpp
     src/sensors/ProximitySensor.cpp
+)
+
+set(FTS_RAYLIB_BOUNDARY_CANDIDATE_SOURCES
+    src/simulation/map.cpp
+    src/simulation/InputState.cpp
+    src/simulation/RouteFollower.cpp
+    src/simulation/BlockingRobotManager.cpp
+)
+
+set(FTS_RENDERING_CANDIDATE_SOURCES
+    src/rendering/RobotRenderer.cpp
+    src/ui/MapOverlay.cpp
+    src/ui/StatusOverlay.cpp
+)
+
+set(FTS_CORE_SOURCES
+    ${FTS_HEADLESS_CORE_CANDIDATE_SOURCES}
+    ${FTS_RAYLIB_BOUNDARY_CANDIDATE_SOURCES}
+    ${FTS_RENDERING_CANDIDATE_SOURCES}
 )
 
 set(FTS_TEST_SOURCES
@@ -75,33 +87,49 @@ set(FTS_TEST_SOURCES
     tests/simulation/robot_task_flow_tests.cpp
 )
 
-set(FTS_CORE_HEADERS
+set(FTS_HEADLESS_CORE_CANDIDATE_HEADERS
     include/robots/Robot.h
     include/robots/RobotRenderData.h
     include/robots/RobotState.h
     include/robots/Battery.h
     include/control/PIController.h
     include/robots/WorkerRobot.h
-    include/rendering/RobotRenderer.h
     include/sensors/Sensor.h
     include/sensors/ProximitySensor.h
     include/simulation/ILogisticsMap.h
     include/simulation/MapData.h
     include/simulation/SimConfig.h
-    include/simulation/map.h
     include/simulation/NavigationGraph.h
     include/simulation/navigation.h
-    include/simulation/InputState.h
     include/simulation/ChargingManager.h
     include/simulation/EmergencyStopController.h
-    include/simulation/RouteFollower.h
     include/simulation/RobotController.h
     include/simulation/RobotRoutePlanner.h
     include/simulation/RobotStatusSnapshot.h
     include/simulation/RobotTaskFlow.h
+    include/simulation/MathUtils.h
+)
+
+set(FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS
+    include/simulation/map.h
+    include/simulation/InputState.h
+    include/simulation/RouteFollower.h
     include/simulation/BlockingRobotManager.h
+)
+
+set(FTS_RENDERING_CANDIDATE_HEADERS
+    include/rendering/RobotRenderer.h
     include/ui/MapOverlay.h
     include/ui/StatusOverlay.h
+)
+
+# fts_core intentionally still contains the whole simulation and raylib-backed
+# rendering surface. These grouped lists document the future split while keeping
+# behavior, public headers and test linkage unchanged.
+set(FTS_CORE_HEADERS
+    ${FTS_HEADLESS_CORE_CANDIDATE_HEADERS}
+    ${FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS}
+    ${FTS_RENDERING_CANDIDATE_HEADERS}
 )
 
 add_library(fts_core ${FTS_CORE_SOURCES} ${FTS_CORE_HEADERS})
