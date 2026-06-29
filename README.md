@@ -66,9 +66,10 @@ software architecture.
 
 ## Architecture
 
-The simulation follows a responsibility-based architecture where the main
-controller coordinates the overall workflow while specialized components handle
-navigation, task progression, charging decisions and safety behavior.
+The simulation follows a responsibility-based architecture. `RobotController`
+coordinates the runtime workflow, while focused components handle navigation,
+route following, task progression, charging decisions, obstacle checks,
+rendering and status display.
 
 ```text
 Simulation Loop
@@ -93,10 +94,12 @@ RobotController
       +-- Safety Layer
       |      |
       |      +-- EmergencyStopController
+      |      +-- BlockingRobotManager
       |
       v
 Robot
       |
+      +-- WorkerRobot
       +-- Battery
       +-- ProximitySensor
 
@@ -107,26 +110,32 @@ Environment
       |
       +-- BlockingRobot
 
-UI
+Rendering And UI
       |
-      +-- StatusOverlay
       +-- RobotRenderer
+      +-- MapOverlay
+      +-- StatusOverlay
 ```
 
 ## Core Areas
 
 | Area                         | Responsibility                                                        |
 | ---------------------------- | --------------------------------------------------------------------- |
-| `Robot`                      | Movement, battery ownership, state transitions and target handling.   |
-| `RobotRenderer`              | raylib rendering for robot visuals and carried-item display.          |
+| `Robot` / `WorkerRobot`      | Robot motion, state transitions, target handling and robot identity.  |
+| `Battery`                    | Battery charge state, drain, charging and threshold checks.           |
+| `RobotController`            | Coordinates task flow, routing, movement, charging, safety and drawing. |
+| `RouteFollower`              | Applies active waypoint paths and keeps robot movement road-constrained. |
+| `RobotRoutePlanner`          | Builds pickup, dropoff and charging routes from map navigation data.  |
+| `NavigationGraph`            | Cached road-segment validity, weighted adjacency and A* pathfinding.  |
+| `ChargingManager`            | Battery-aware charging decision logic.                                |
+| `EmergencyStopController`    | Emergency-stop toggling and obstacle-pause decisions.                 |
+| `ProximitySensor`            | Radius-based proximity checks against active blocking robots.         |
 | `BlockingRobot`              | Individual blocking robot position, path following and proximity data. |
 | `BlockingRobotManager`       | Blocking robot collection, initialization, updates and queries.       |
 | `RobotTaskFlow`              | Pickup, dropoff and charging phase progression.                       |
-| `ChargingManager`            | Battery-aware charging decision logic.                                |
-| `NavigationGraph`            | Cached navigation adjacency and A* pathfinding over map nodes.        |
-| `RobotRoutePlanner`          | Domain-specific route construction for pickup, dropoff and charging.  |
-| `SimConfig`                  | Shared read-only configuration for timing, battery and movement values. |
-| `RobotController`            | Coordinates workflow by delegating to the focused components above.   |
+| `RobotRenderer`              | raylib rendering for robot visuals, scan radius and carried items.    |
+| `MapOverlay` / `StatusOverlay` | UI overlays for map labels and runtime robot status.                |
+| `SimConfig`                  | Shared configuration for movement, battery, timing and blocking robots. |
 | Development Tooling          | Catch2 tests, formatting, linting and CI automation.                  |
 
 ## Code Quality Improvements
@@ -134,17 +143,21 @@ UI
 Recent refactoring work focused on reducing coupling and making the codebase
 easier to review and extend:
 
-* Centralized simulation tuning values in `SimConfig` and shared them by
-  read-only reference across simulation components.
+* Centralized simulation tuning values in `SimConfig`, covering movement,
+  battery, timing and blocking-robot settings.
 * Added `[[nodiscard]]`, `noexcept` and modern C++ empty parameter lists where
   appropriate.
 * Made `ChargingManager` query functions const-correct.
 * Replaced one-off `printType()` behavior with reusable `typeName()` data.
 * Extracted robot drawing from `Robot` into `RobotRenderer`.
+* Split route execution into `RouteFollower` and route construction into
+  `RobotRoutePlanner`.
 * Moved per-robot blocking behavior into `BlockingRobot`, keeping
   `BlockingRobotManager` focused on collection management.
 * Optimized A* pathfinding with `NavigationGraph`, which builds the adjacency
   list once and reuses it for route requests.
+* Kept JSON map loading local to `MapData` while exposing stable map data
+  structures to the rest of the simulation.
 * Added top-level exception handling so fatal startup errors are reported
   clearly before the application exits.
 * Migrated unit tests from a custom expectation runner to Catch2.
