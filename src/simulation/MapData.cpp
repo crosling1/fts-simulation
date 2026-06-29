@@ -151,6 +151,22 @@ class JsonParser {
                 position_++;
             }
         }
+        if (position_ < source_.size() &&
+            (source_[position_] == 'e' || source_[position_] == 'E')) {
+            position_++;
+            if (position_ < source_.size() &&
+                (source_[position_] == '-' || source_[position_] == '+')) {
+                position_++;
+            }
+            if (position_ >= source_.size() ||
+                !std::isdigit(static_cast<unsigned char>(source_[position_]))) {
+                Fail("expected JSON number exponent digit");
+            }
+            while (position_ < source_.size() &&
+                   std::isdigit(static_cast<unsigned char>(source_[position_]))) {
+                position_++;
+            }
+        }
 
         return std::stod(source_.substr(start, position_ - start));
     }
