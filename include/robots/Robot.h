@@ -47,6 +47,12 @@ class Robot {
     void setPosition(const Vector2& newPosition);
     void setState(State newState);
     void setTargetPosition(const Vector2& target);
+    void enterIdle();
+    void arriveAtWaypoint();
+    void beginMovingTo(Vector2 target);
+    void beginCarrying();
+    void beginPickingUp();
+    void beginDroppingOff();
     void chargeBy(float amount);
     void enterChargingState();
     void moveTowardsTarget(float deltaTime);
@@ -70,6 +76,8 @@ class Robot {
     void rotate(float degree);
 
   private:
+    void snapToTarget();
+
     float x_;
     float y_;
     float angle_;
@@ -78,7 +86,7 @@ class Robot {
     float rotationSpeed_;
     float size_;
     PIController speedController_;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
     State state_;
     Battery battery_;
     ProximitySensor proximitySensor_;

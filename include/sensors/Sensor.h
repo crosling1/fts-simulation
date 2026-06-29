@@ -7,5 +7,5 @@ class Sensor {
     virtual ~Sensor() = default;
 
     virtual void update(const Robot& robot) = 0;
-    virtual double value() const = 0;
+    [[nodiscard]] virtual double value() const = 0;
 };

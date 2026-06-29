@@ -1,6 +1,7 @@
 #include "simulation/NavigationGraph.h"
 
 #include "simulation/ILogisticsMap.h"
+#include "simulation/MathUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -32,29 +33,18 @@ struct ComparePathQueueEntry {
     }
 };
 
-float DistanceSquared(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return (deltaX * deltaX) + (deltaY * deltaY);
-}
-
-float Distance(Vector2 from, Vector2 to) {
-    return std::sqrt(DistanceSquared(from, to));
-}
-
 bool IsRoadSample(const ILogisticsMap& logisticsMap, Vector2 position) {
     if (logisticsMap.isRoadPosition(position)) {
         return true;
     }
 
-    return DistanceSquared(position, logisticsMap.clampPositionToRoad(position)) <=
+    return math::distanceSq(position, logisticsMap.clampPositionToRoad(position)) <=
            (roadSampleTolerance * roadSampleTolerance);
 }
 
 bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vector2 from,
                    Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
-    const float segmentLength = Distance(from, to);
+    const float segmentLength = math::distance(from, to);
     if (segmentLength <= roadSampleTolerance) {
         return IsRoadSample(logisticsMap, from) && IsRoadSample(logisticsMap, to);
     }
@@ -80,7 +70,7 @@ int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position)
     float nearestDistanceSquared = unreachableDistance;
 
     for (std::size_t i = 0; i < pathNodes.size(); i++) {
-        const float candidateDistanceSquared = DistanceSquared(position, pathNodes[i]);
+        const float candidateDistanceSquared = math::distanceSq(position, pathNodes[i]);
         if (candidateDistanceSquared < nearestDistanceSquared) {
             nearestDistanceSquared = candidateDistanceSquared;
             nearestNodeIndex = static_cast<int>(i);
@@ -90,14 +80,13 @@ int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position)
     return nearestNodeIndex;
 }
 
-std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
-                                          const std::vector<int>& cameFrom,
-                                          PathEndpointIndices endpoints) {
-    std::vector<Vector2> path;
+std::vector<int> BuildPathFromParents(const std::vector<int>& cameFrom,
+                                      PathEndpointIndices endpoints) {
+    std::vector<int> path;
     int currentNodeIndex = endpoints.goalNodeIndex;
 
     while (currentNodeIndex != invalidPathNode && currentNodeIndex != endpoints.startNodeIndex) {
-        path.push_back(pathNodes[currentNodeIndex]);
+        path.push_back(currentNodeIndex);
         currentNodeIndex = cameFrom[currentNodeIndex];
     }
 
@@ -109,17 +98,17 @@ std::vector<Vector2> BuildPathFromParents(const std::vector<Vector2>& pathNodes,
     return path;
 }
 
-std::vector<Vector2> SimplifyPath(const ILogisticsMap& logisticsMap,
-                                  const std::vector<Vector2>& path) {
+std::vector<int> SimplifyPath(const std::vector<std::vector<bool>>& validRoadSegments,
+                              const std::vector<int>& path) {
     if (path.size() < 3) {
         return path;
     }
 
-    std::vector<Vector2> simplifiedPath;
+    std::vector<int> simplifiedPath;
     simplifiedPath.push_back(path.front());
 
     for (std::size_t i = 1; i + 1 < path.size(); i++) {
-        if (IsRoadSegment(logisticsMap, simplifiedPath.back(), path[i + 1])) {
+        if (validRoadSegments[simplifiedPath.back()][path[i + 1]]) {
             continue;
         }
 
@@ -130,22 +119,61 @@ std::vector<Vector2> SimplifyPath(const ILogisticsMap& logisticsMap,
     return simplifiedPath;
 }
 
-std::vector<std::vector<int>> BuildAdjacencyList(const std::vector<NavigationEdge>& edges,
-                                                 std::size_t nodeCount) {
+std::vector<Vector2> BuildPathPositions(const std::vector<Vector2>& pathNodes,
+                                        const std::vector<int>& pathNodeIndices) {
+    std::vector<Vector2> path;
+    path.reserve(pathNodeIndices.size());
 
-    std::vector<std::vector<int>> adj(nodeCount);
+    for (int pathNodeIndex : pathNodeIndices) {
+        path.push_back(pathNodes[pathNodeIndex]);
+    }
+
+    return path;
+}
+
+} // namespace
+
+std::vector<std::vector<bool>>
+NavigationGraph::buildRoadSegmentValidity(const ILogisticsMap& logisticsMap) {
+    const std::vector<Vector2>& pathNodes = logisticsMap.getNavigationNodes();
+    std::vector<std::vector<bool>> validRoadSegments(pathNodes.size(),
+                                                     std::vector<bool>(pathNodes.size(), false));
+
+    for (std::size_t fromIndex = 0; fromIndex < pathNodes.size(); fromIndex++) {
+        for (std::size_t toIndex = fromIndex; toIndex < pathNodes.size(); toIndex++) {
+            const bool validSegment =
+                fromIndex == toIndex ||
+                IsRoadSegment(logisticsMap, pathNodes[fromIndex], pathNodes[toIndex]);
+            validRoadSegments[fromIndex][toIndex] = validSegment;
+            validRoadSegments[toIndex][fromIndex] = validSegment;
+        }
+    }
+
+    return validRoadSegments;
+}
+
+std::vector<std::vector<NavigationGraph::AdjacencyEntry>>
+NavigationGraph::buildAdjacencyList(const ILogisticsMap& logisticsMap,
+                                    const std::vector<std::vector<bool>>& validRoadSegments) {
+    const std::vector<Vector2>& pathNodes = logisticsMap.getNavigationNodes();
+    const std::vector<NavigationEdge>& edges = logisticsMap.getNavigationEdges();
+
+    std::vector<std::vector<NavigationGraph::AdjacencyEntry>> adj(pathNodes.size());
     for (const NavigationEdge& edge : edges) {
-        adj[edge.from].push_back(static_cast<int>(edge.to));
-        adj[edge.to].push_back(static_cast<int>(edge.from));
+        if (!validRoadSegments[edge.from][edge.to]) {
+            continue;
+        }
+
+        const float weight = math::distance(pathNodes[edge.from], pathNodes[edge.to]);
+        adj[edge.from].push_back({static_cast<int>(edge.to), weight});
+        adj[edge.to].push_back({static_cast<int>(edge.from), weight});
     }
     return adj;
 }
-} // namespace
 
 NavigationGraph::NavigationGraph(const ILogisticsMap& logisticsMap)
-    : logisticsMap_(logisticsMap),
-      adjacency_(BuildAdjacencyList(logisticsMap.getNavigationEdges(),
-                                    logisticsMap.getNavigationNodes().size())) {}
+    : logisticsMap_(logisticsMap), validRoadSegments_(buildRoadSegmentValidity(logisticsMap)),
+      adjacency_(buildAdjacencyList(logisticsMap, validRoadSegments_)) {}
 
 std::vector<Vector2>
 NavigationGraph::findPath(Vector2 start,
@@ -173,7 +201,7 @@ NavigationGraph::findPath(Vector2 start,
     openNodes.push({
         endpoints.startNodeIndex,
         0.0f,
-        Distance(pathNodes[endpoints.startNodeIndex], pathNodes[endpoints.goalNodeIndex]),
+        math::distance(pathNodes[endpoints.startNodeIndex], pathNodes[endpoints.goalNodeIndex]),
     });
 
     while (!openNodes.empty()) {
@@ -187,19 +215,14 @@ NavigationGraph::findPath(Vector2 start,
         }
 
         if (currentNodeIndex == endpoints.goalNodeIndex) {
-            return SimplifyPath(logisticsMap_,
-                                BuildPathFromParents(pathNodes, cameFrom, endpoints));
+            return BuildPathPositions(
+                pathNodes,
+                SimplifyPath(validRoadSegments_, BuildPathFromParents(cameFrom, endpoints)));
         }
 
-        for (int neighborNodeIndex : adjacency_[currentNodeIndex]) {
-            if (!IsRoadSegment(logisticsMap_, pathNodes[currentNodeIndex],
-                               pathNodes[neighborNodeIndex])) {
-                continue;
-            }
-
-            const float newCost =
-                costFromStart[currentNodeIndex] +
-                Distance(pathNodes[currentNodeIndex], pathNodes[neighborNodeIndex]);
+        for (const AdjacencyEntry& neighbor : adjacency_[currentNodeIndex]) {
+            const int neighborNodeIndex = neighbor.targetNodeIndex;
+            const float newCost = costFromStart[currentNodeIndex] + neighbor.weight;
 
             if (newCost >= costFromStart[neighborNodeIndex]) {
                 continue;
@@ -211,8 +234,8 @@ NavigationGraph::findPath(Vector2 start,
             openNodes.push({
                 neighborNodeIndex,
                 newCost,
-                newCost +
-                    Distance(pathNodes[neighborNodeIndex], pathNodes[endpoints.goalNodeIndex]),
+                newCost + math::distance(pathNodes[neighborNodeIndex],
+                                         pathNodes[endpoints.goalNodeIndex]),
             });
         }
     }

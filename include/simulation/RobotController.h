@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
 
 class LogisticsMap;
 class BlockingRobotManager;
@@ -27,10 +28,11 @@ class RobotController {
     void update(float deltaTime, const InputState& inputState);
     void draw() const;
     void unload();
-    std::optional<RobotStatusSnapshot> statusSnapshot() const;
+    [[nodiscard]] std::optional<RobotStatusSnapshot> statusSnapshot() const;
 
   private:
     void startPickupTrip();
+    void startPickupTrip(const std::vector<Vector2>& pickupPath);
     void startDropoffTrip();
     void startChargingTrip();
     void startCharging();
@@ -41,8 +43,15 @@ class RobotController {
     void updateCharging(float deltaTime);
     void updateWaypointTravel();
 
+    struct NextDeliveryRouteEstimate {
+        std::vector<Vector2> pickupPath;
+        std::optional<float> distance;
+    };
+
+    [[nodiscard]] NextDeliveryRouteEstimate buildNextDeliveryRouteEstimate() const;
+
     const LogisticsMap& logisticsMap_;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
     RobotRoutePlanner routePlanner_;
     RouteFollower routeFollower_;
     ChargingManager chargingManager_;

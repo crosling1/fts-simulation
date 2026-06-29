@@ -9,26 +9,23 @@
 namespace {
 constexpr double memoryRefreshInterval = 0.5;
 
-double lastMemoryRefreshTime = -memoryRefreshInterval;
-float cachedMemoryMegabytes = 0.0f;
-
-const char* RobotStateText(Robot::State state) {
+const char* RobotStateText(RobotState state) {
     switch (state) {
-    case Robot::State::Idle:
+    case RobotState::Idle:
         return "Idle";
-    case Robot::State::Moving:
+    case RobotState::Moving:
         return "Moving";
-    case Robot::State::PickingUp:
+    case RobotState::PickingUp:
         return "Picking up";
-    case Robot::State::CarryingItem:
+    case RobotState::CarryingItem:
         return "Carrying item";
-    case Robot::State::DroppingOff:
+    case RobotState::DroppingOff:
         return "Dropping off";
-    case Robot::State::Arrived:
+    case RobotState::Arrived:
         return "Arrived";
-    case Robot::State::BatteryDepleted:
+    case RobotState::BatteryDepleted:
         return "Battery depleted";
-    case Robot::State::Charging:
+    case RobotState::Charging:
         return "Charging";
     }
 
@@ -54,14 +51,25 @@ float ReadCurrentMemoryMegabytes() {
     return 0.0f;
 }
 
-float GetCurrentMemoryMegabytes() {
-    const double now = GetTime();
-    if (now - lastMemoryRefreshTime >= memoryRefreshInterval) {
-        cachedMemoryMegabytes = ReadCurrentMemoryMegabytes();
-        lastMemoryRefreshTime = now;
+class MemoryUsageCache {
+  public:
+    [[nodiscard]] float currentMegabytes(double now) {
+        if (now - lastRefreshTime_ >= memoryRefreshInterval) {
+            cachedMegabytes_ = ReadCurrentMemoryMegabytes();
+            lastRefreshTime_ = now;
+        }
+
+        return cachedMegabytes_;
     }
 
-    return cachedMemoryMegabytes;
+  private:
+    double lastRefreshTime_ = -memoryRefreshInterval;
+    float cachedMegabytes_ = 0.0f;
+};
+
+float GetCurrentMemoryMegabytes() {
+    static MemoryUsageCache memoryUsageCache;
+    return memoryUsageCache.currentMegabytes(GetTime());
 }
 
 void DrawControlHint() {
@@ -85,8 +93,9 @@ void DrawControlHint() {
     const int textY = hintY + 8;
 
     DrawRectangle(hintX, hintY, hintWidth, hintHeight, Fade(RAYWHITE, 0.9f));
-    DrawRectangleLinesEx({(float)hintX, (float)hintY, (float)hintWidth, (float)hintHeight}, 2.0f,
-                         DARKGRAY);
+    DrawRectangleLinesEx({static_cast<float>(hintX), static_cast<float>(hintY),
+                          static_cast<float>(hintWidth), static_cast<float>(hintHeight)},
+                         2.0f, DARKGRAY);
 
     DrawText(emergencyKey, textX, textY, fontSize, MAROON);
     textX += MeasureText(emergencyKey, fontSize);
@@ -109,7 +118,8 @@ void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus,
     constexpr int panelY = 20;
 
     DrawRectangle(panelX, panelY, panelWidth, panelHeight, Fade(RAYWHITE, 0.92f));
-    DrawRectangleLinesEx({(float)panelX, (float)panelY, (float)panelWidth, (float)panelHeight},
+    DrawRectangleLinesEx({static_cast<float>(panelX), static_cast<float>(panelY),
+                          static_cast<float>(panelWidth), static_cast<float>(panelHeight)},
                          2.0f, DARKGRAY);
 
     DrawText("Robot Status", panelX + panelPadding, panelY + 10, 20, DARKGRAY);

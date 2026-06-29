@@ -1,23 +1,15 @@
 #include "robots/Robot.h"
 
+#include "simulation/MathUtils.h"
+
 #include <cmath>
-#include <string_view>
 
 namespace {
-constexpr float pi = 3.14159265358979323846f;
-constexpr float radToDeg = 57.29577951308232f;
 constexpr float fullTurn = 360.0f;
 constexpr float halfTurn = 180.0f;
 
 float DegreesToRadians(float degree) {
-    return degree * pi / halfTurn;
-}
-
-float Distance(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return std::sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    return degree * math::kPi / halfTurn;
 }
 
 float NormalizeAngle(float angle) noexcept {
@@ -29,7 +21,7 @@ float NormalizeAngle(float angle) noexcept {
 }
 
 float TargetRotation(Vector2 from, Vector2 to) {
-    return std::atan2(to.y - from.y, to.x - from.x) * radToDeg;
+    return std::atan2(to.y - from.y, to.x - from.x) * math::kRadToDeg;
 }
 
 bool ShouldMove(Robot::State state) {
@@ -68,7 +60,8 @@ void Robot::updateMovement(float deltaTime) {
     moveTowardsTarget(deltaTime);
 
     const Vector2 currentPosition = {x_, y_};
-    battery_.drain(Distance(previousPosition, currentPosition) * simConfig_.batteryDrainPerPixel);
+    battery_.drain(math::distance(previousPosition, currentPosition) *
+                   simConfig_.batteryDrainPerPixel);
     if (battery_.isEmpty()) {
         state_ = State::BatteryDepleted;
     }
@@ -96,10 +89,22 @@ void Robot::setState(State newState) {
 }
 
 void Robot::setTargetPosition(const Vector2& target) {
+    beginMovingTo(target);
+}
+
+void Robot::enterIdle() {
+    state_ = State::Idle;
+}
+
+void Robot::arriveAtWaypoint() {
+    state_ = State::Arrived;
+}
+
+void Robot::beginMovingTo(Vector2 target) {
     targetPosition_ = target;
     speedController_.reset();
     if (hasReachedTarget()) {
-        state_ = State::Arrived;
+        arriveAtWaypoint();
         return;
     }
 
@@ -113,6 +118,18 @@ void Robot::setTargetPosition(const Vector2& target) {
     }
 }
 
+void Robot::beginCarrying() {
+    state_ = State::CarryingItem;
+}
+
+void Robot::beginPickingUp() {
+    state_ = State::PickingUp;
+}
+
+void Robot::beginDroppingOff() {
+    state_ = State::DroppingOff;
+}
+
 void Robot::chargeBy(float amount) {
     battery_.charge(amount);
 }
@@ -123,26 +140,16 @@ void Robot::enterChargingState() {
 
 void Robot::moveTowardsTarget(float deltaTime) {
     const Vector2 position = {x_, y_};
-    const float distance = Distance(position, targetPosition_);
+    const float distance = math::distance(position, targetPosition_);
     if (distance <= simConfig_.reachedDistance) {
-        x_ = targetPosition_.x;
-        y_ = targetPosition_.y;
-        speedController_.reset();
-        if (state_ != State::CarryingItem) {
-            state_ = State::Arrived;
-        }
+        snapToTarget();
         return;
     }
 
     const float controlledSpeed = speedController_.update({distance, deltaTime, speed_});
     const float step = controlledSpeed * deltaTime;
     if (step >= distance) {
-        x_ = targetPosition_.x;
-        y_ = targetPosition_.y;
-        speedController_.reset();
-        if (state_ != State::CarryingItem) {
-            state_ = State::Arrived;
-        }
+        snapToTarget();
         return;
     }
 
@@ -151,6 +158,15 @@ void Robot::moveTowardsTarget(float deltaTime) {
 
     x_ += directionX * step;
     y_ += directionY * step;
+}
+
+void Robot::snapToTarget() {
+    x_ = targetPosition_.x;
+    y_ = targetPosition_.y;
+    speedController_.reset();
+    if (state_ != State::CarryingItem) {
+        arriveAtWaypoint();
+    }
 }
 
 void Robot::rotateTowardsTarget(float deltaTime) {
@@ -187,7 +203,7 @@ bool Robot::hasBatteryFull() const {
 bool Robot::hasReachedTarget() const {
     const Vector2 position = {x_, y_};
 
-    return Distance(position, targetPosition_) <= simConfig_.reachedDistance;
+    return math::distance(position, targetPosition_) <= simConfig_.reachedDistance;
 }
 
 float Robot::getProximityDetectionRadius() const {

@@ -1,5 +1,4 @@
-#ifndef TEST_HELPERS_H
-#define TEST_HELPERS_H
+#pragma once
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -32,5 +31,3 @@ inline bool PathContainsPoint(const std::vector<Vector2>& path, Vector2 expected
     return false;
 }
 } // namespace test
-
-#endif // TEST_HELPERS_H

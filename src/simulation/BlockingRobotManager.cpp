@@ -1,21 +1,28 @@
 #include "simulation/BlockingRobotManager.h"
 
+#include "simulation/MathUtils.h"
 #include "simulation/map.h"
-
-#include <cmath>
-
-namespace {
-float Distance(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return std::sqrt((deltaX * deltaX) + (deltaY * deltaY));
-}
-
-} // namespace
 
 BlockingRobotManager::BlockingRobotManager(const SimConfig& simConfig)
     : simConfig_(simConfig), randomEngine_(std::random_device{}()) {}
+
+BlockingRobot BlockingRobot::AtPosition(Vector2 position, BlockingRobotRadius radius) {
+    BlockingRobot blockingRobot;
+    blockingRobot.position = position;
+    blockingRobot.radius = radius.value;
+    return blockingRobot;
+}
+
+BlockingRobot BlockingRobot::WithPath(const std::vector<Vector2>& path, BlockingRobotRadius radius,
+                                      BlockingRobotSpeed speed) {
+    BlockingRobot blockingRobot = AtPosition(path[0], radius);
+    blockingRobot.speed = speed.value;
+    blockingRobot.path = path;
+    blockingRobot.currentNodeIndex = 0;
+    blockingRobot.targetNodeIndex = 1;
+    blockingRobot.previousNodeIndex = 0;
+    return blockingRobot;
+}
 
 void BlockingRobotManager::clear() {
     blockingRobots_.clear();
@@ -46,8 +53,10 @@ void BlockingRobotManager::draw() const {
         const float radius = blockingRobot.radius;
 
         DrawCircleV(position, radius, PURPLE);
-        DrawCircleLines((int)position.x, (int)position.y, radius, DARKPURPLE);
-        DrawText("B", (int)position.x - 5, (int)position.y - 10, 20, WHITE);
+        DrawCircleLines(static_cast<int>(position.x), static_cast<int>(position.y), radius,
+                        DARKPURPLE);
+        DrawText("B", static_cast<int>(position.x) - 5, static_cast<int>(position.y) - 10, 20,
+                 WHITE);
     }
 }
 
@@ -72,15 +81,8 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
         return;
     }
 
-    addBlockingRobot({
-        path[0],
-        simConfig_.blockingRobotRadius,
-        speed,
-        path,
-        0,
-        1,
-        0,
-    });
+    addBlockingRobot(BlockingRobot::WithPath(
+        path, BlockingRobotRadius{simConfig_.blockingRobotRadius}, BlockingRobotSpeed{speed}));
 }
 
 void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime) {
@@ -89,12 +91,12 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
     }
 
     const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
-    const float distance = Distance(blockingRobot.position, target);
+    const float distance = math::distance(blockingRobot.position, target);
     if (distance <= simConfig_.reachedDistance) {
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
         blockingRobot.currentNodeIndex = blockingRobot.targetNodeIndex;
-        chooseNextTarget(blockingRobot, false);
+        chooseNextTarget(blockingRobot, BacktrackPolicy::Prevent);
         return;
     }
 
@@ -108,7 +110,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
     blockingRobot.position.y += ((target.y - blockingRobot.position.y) / distance) * step;
 }
 
-void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, bool allowBacktracking) {
+void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, BacktrackPolicy policy) {
     if (blockingRobot.path.size() < 2) {
         blockingRobot.targetNodeIndex = blockingRobot.currentNodeIndex;
         return;
@@ -123,7 +125,7 @@ void BlockingRobotManager::chooseNextTarget(BlockingRobot& blockingRobot, bool a
         candidates.push_back(blockingRobot.currentNodeIndex + 1);
     }
 
-    if (!allowBacktracking && candidates.size() > 1) {
+    if (policy == BacktrackPolicy::Prevent && candidates.size() > 1) {
         std::vector<std::size_t> forwardCandidates;
         for (std::size_t candidate : candidates) {
             if (candidate != blockingRobot.previousNodeIndex) {

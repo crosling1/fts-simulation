@@ -40,6 +40,6 @@ class RobotTaskFlow {
     void enterPhase(RobotTaskPhase newPhase);
 
     RobotTaskPhase phase_ = RobotTaskPhase::ToPickup;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
     float stateTimer_ = 0.0f;
 };

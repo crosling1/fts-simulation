@@ -1,6 +1,10 @@
 Checks: >
   clang-analyzer-*,
   bugprone-*,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  modernize-use-nodiscard,
+  modernize-use-nullptr,
+  modernize-use-override,
   performance-*,
   portability-*,
   readability-braces-around-statements,

@@ -9,10 +9,6 @@ bool ProximitySensor::hasBlockingRobotNearby(
     return blockingRobotManager.hasActiveBlockingRobotNear(origin, detectionRadius_);
 }
 
-void ProximitySensor::drawScanArea(Vector2 origin) const {
-    DrawCircleLines((int)origin.x, (int)origin.y, detectionRadius_, Fade(BLUE, 0.55f));
-}
-
 float ProximitySensor::getDetectionRadius() const {
     return detectionRadius_;
 }

@@ -1,9 +1,15 @@
 #include "simulation/RouteFollower.h"
 
 #include "robots/Robot.h"
-#include "simulation/map.h"
+#include "simulation/ILogisticsMap.h"
 
-RouteFollower::RouteFollower(const LogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
+RouteFollower::RouteFollower(const ILogisticsMap& logisticsMap) : logisticsMap_(logisticsMap) {}
+
+void RouteFollower::reset() {
+    activePath_.clear();
+    activePathStart_ = {0.0f, 0.0f};
+    currentWaypointIndex_ = 0;
+}
 
 void RouteFollower::setActivePath(const std::vector<Vector2>& path, Vector2 pathStart,
                                   Robot& robot) {

@@ -3,13 +3,18 @@
 #include <cctype>
 #include <cstdint>
 #include <fstream>
-#include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 namespace {
+struct JsonValue;
+
+using JsonObject = std::unordered_map<std::string, JsonValue>;
+
 struct JsonValue {
     enum class Type : std::uint8_t {
         Number,
@@ -22,7 +27,36 @@ struct JsonValue {
     double number = 0.0;
     std::string text;
     std::vector<JsonValue> array;
-    std::map<std::string, JsonValue> object;
+    std::shared_ptr<JsonObject> object = std::make_shared<JsonObject>();
+
+    JsonValue() = default;
+
+    JsonValue(Type typeValue, double numberValue = 0.0, std::string textValue = {},
+              std::vector<JsonValue> arrayValue = {}, JsonObject objectValue = {})
+        : type(typeValue), number(numberValue), text(std::move(textValue)),
+          array(std::move(arrayValue)),
+          object(std::make_shared<JsonObject>(std::move(objectValue))) {}
+
+    JsonValue(const JsonValue& other)
+        : type(other.type), number(other.number), text(other.text), array(other.array),
+          object(other.object == nullptr ? std::make_shared<JsonObject>()
+                                         : std::make_shared<JsonObject>(*other.object)) {}
+
+    JsonValue(JsonValue&& other) noexcept = default;
+
+    JsonValue& operator=(const JsonValue& other) {
+        if (this != &other) {
+            type = other.type;
+            number = other.number;
+            text = other.text;
+            array = other.array;
+            object = other.object == nullptr ? std::make_shared<JsonObject>()
+                                             : std::make_shared<JsonObject>(*other.object);
+        }
+        return *this;
+    }
+
+    JsonValue& operator=(JsonValue&& other) noexcept = default;
 };
 
 class JsonParser {
@@ -78,7 +112,7 @@ class JsonParser {
             const std::string key = ParseString();
             SkipWhitespace();
             Expect(':');
-            value.object[key] = ParseValue();
+            (*value.object)[key] = ParseValue();
             SkipWhitespace();
             if (Consume('}')) {
                 return value;
@@ -151,6 +185,22 @@ class JsonParser {
                 position_++;
             }
         }
+        if (position_ < source_.size() &&
+            (source_[position_] == 'e' || source_[position_] == 'E')) {
+            position_++;
+            if (position_ < source_.size() &&
+                (source_[position_] == '-' || source_[position_] == '+')) {
+                position_++;
+            }
+            if (position_ >= source_.size() ||
+                !std::isdigit(static_cast<unsigned char>(source_[position_]))) {
+                Fail("expected JSON number exponent digit");
+            }
+            while (position_ < source_.size() &&
+                   std::isdigit(static_cast<unsigned char>(source_[position_]))) {
+                position_++;
+            }
+        }
 
         return std::stod(source_.substr(start, position_ - start));
     }
@@ -187,8 +237,8 @@ const JsonValue& RequireField(const JsonValue& object, const std::string& key) {
         throw std::runtime_error("Expected JSON object while reading field: " + key);
     }
 
-    const auto iterator = object.object.find(key);
-    if (iterator == object.object.end()) {
+    const auto iterator = object.object->find(key);
+    if (iterator == object.object->end()) {
         throw std::runtime_error("Missing JSON field: " + key);
     }
 
@@ -234,7 +284,7 @@ Rectangle ReadRectangle(const JsonValue& value) {
 }
 
 Vector2 ReadNavigationNode(const JsonValue& value, const MapData& data) {
-    if (value.object.find("ref") != value.object.end()) {
+    if (value.object->find("ref") != value.object->end()) {
         const JsonValue& ref = RequireField(value, "ref");
         if (ref.type == JsonValue::Type::String && ref.text == "robot_start") {
             return data.robotStart;
@@ -245,7 +295,7 @@ Vector2 ReadNavigationNode(const JsonValue& value, const MapData& data) {
         throw std::runtime_error("Unsupported navigation node ref");
     }
 
-    if (value.object.find("dock") != value.object.end()) {
+    if (value.object->find("dock") != value.object->end()) {
         const std::size_t dockIndex =
             static_cast<std::size_t>(Number(RequireField(value, "dock"), "dock"));
         if (dockIndex >= data.dockPoints.size()) {

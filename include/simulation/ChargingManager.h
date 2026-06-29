@@ -2,26 +2,23 @@
 
 #include "simulation/SimConfig.h"
 
-#include "raylib.h"
+#include <optional>
 
-class LogisticsMap;
 class Robot;
-class RobotRoutePlanner;
 
 class ChargingManager {
   public:
-    explicit ChargingManager(const LogisticsMap& logisticsMap,
-                             const SimConfig& simConfig = SimConfig::Default());
+    explicit ChargingManager(const SimConfig& simConfig = SimConfig::Default());
 
-    [[nodiscard]] bool shouldStartChargingAfterDropoff(const Robot& robot,
-                                                       const RobotRoutePlanner& routePlanner,
-                                                       Vector2 robotPosition) const;
+    [[nodiscard]] bool
+    shouldStartChargingAfterDropoff(const Robot& robot,
+                                    std::optional<float> nextDeliveryDistance) const;
 
   private:
     [[nodiscard]] bool shouldChargeAtOrBelow(const Robot& robot, float thresholdPercentage) const;
-    [[nodiscard]] bool canCompleteNextDeliveryBeforeMinimumBattery(
-        const Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const;
+    [[nodiscard]] bool
+    canCompleteNextDeliveryBeforeMinimumBattery(const Robot& robot,
+                                                std::optional<float> nextDeliveryDistance) const;
 
-    const LogisticsMap& logisticsMap_;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
 };

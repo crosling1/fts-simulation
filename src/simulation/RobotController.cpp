@@ -5,16 +5,19 @@
 #include "simulation/map.h"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 RobotController::RobotController(const LogisticsMap& logisticsMap,
                                  const BlockingRobotManager& blockingRobotManager,
                                  const SimConfig& simConfig)
     : logisticsMap_(logisticsMap), simConfig_(simConfig), routePlanner_(logisticsMap),
-      routeFollower_(logisticsMap), chargingManager_(logisticsMap, simConfig),
+      routeFollower_(logisticsMap), chargingManager_(simConfig),
       emergencyStopController_(blockingRobotManager), taskFlow_(simConfig) {}
 
 void RobotController::initialize() {
+    routeFollower_.reset();
+
     const Robot::Config robotConfig = {
         {simConfig_.robotSpeed, simConfig_.robotRotationSpeed, simConfig_.robotSize},
         {simConfig_.robotProportionalGain, simConfig_.robotIntegralGain,
@@ -88,7 +91,7 @@ void RobotController::startChargingTrip() {
     const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToCharging();
-    robot_->setState(Robot::State::Arrived);
+    robot_->arriveAtWaypoint();
     const std::vector<Vector2> chargingPath =
         routePlanner_.buildPathToChargingStation(startPosition);
     routeFollower_.setActivePath(chargingPath, startPosition, *robot_);
@@ -100,18 +103,22 @@ void RobotController::startChargingTrip() {
 
 void RobotController::startPickupTrip() {
     const Vector2 startPosition = robot_->getPosition();
+    startPickupTrip(routePlanner_.buildPathToPickup(startPosition));
+}
+
+void RobotController::startPickupTrip(const std::vector<Vector2>& pickupPath) {
+    const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToPickup();
-    robot_->setState(Robot::State::Arrived);
-    routeFollower_.setActivePath(routePlanner_.buildPathToPickup(startPosition), startPosition,
-                                 *robot_);
+    robot_->arriveAtWaypoint();
+    routeFollower_.setActivePath(pickupPath, startPosition, *robot_);
 }
 
 void RobotController::startDropoffTrip() {
     const Vector2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToDropoff();
-    robot_->setState(Robot::State::CarryingItem);
+    robot_->beginCarrying();
     routeFollower_.setActivePath(routePlanner_.buildPathToDropoff(startPosition), startPosition,
                                  *robot_);
 }
@@ -153,13 +160,14 @@ void RobotController::updateDropoff(float deltaTime) {
         return;
     }
 
-    if (chargingManager_.shouldStartChargingAfterDropoff(*robot_, routePlanner_,
-                                                         robot_->getPosition())) {
+    const NextDeliveryRouteEstimate nextDeliveryEstimate = buildNextDeliveryRouteEstimate();
+
+    if (chargingManager_.shouldStartChargingAfterDropoff(*robot_, nextDeliveryEstimate.distance)) {
         startChargingTrip();
         return;
     }
 
-    startPickupTrip();
+    startPickupTrip(nextDeliveryEstimate.pickupPath);
 }
 
 void RobotController::updateCharging(float deltaTime) {
@@ -179,17 +187,32 @@ void RobotController::updateWaypointTravel() {
 
     if (taskFlow_.isRoutingToPickup()) {
         taskFlow_.startPickingUp();
-        robot_->setState(Robot::State::PickingUp);
+        robot_->beginPickingUp();
         return;
     }
 
     if (taskFlow_.isRoutingToDropoff()) {
         taskFlow_.startDroppingOff();
-        robot_->setState(Robot::State::DroppingOff);
+        robot_->beginDroppingOff();
         return;
     }
 
     if (taskFlow_.isRoutingToCharging()) {
         startCharging();
     }
+}
+
+RobotController::NextDeliveryRouteEstimate RobotController::buildNextDeliveryRouteEstimate() const {
+    const auto pickupDock = logisticsMap_.getPickupDockPosition();
+    if (!pickupDock) {
+        return {};
+    }
+
+    const Vector2 robotPosition = robot_->getPosition();
+    std::vector<Vector2> pickupPath = routePlanner_.buildPathToPickup(robotPosition);
+    const std::vector<Vector2> dropoffPath = routePlanner_.buildPathToDropoff(*pickupDock);
+    const float estimatedDistance = routePlanner_.calculatePathDistance(robotPosition, pickupPath) +
+                                    routePlanner_.calculatePathDistance(*pickupDock, dropoffPath);
+
+    return {std::move(pickupPath), estimatedDistance};
 }
