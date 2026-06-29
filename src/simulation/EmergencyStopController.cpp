@@ -2,6 +2,16 @@
 
 #include "simulation/BlockingRobotManager.h"
 
+namespace {
+Robot::State RestoredStateAfterEmergencyStop(Robot::State stateBeforeEmergencyStop) {
+    if (stateBeforeEmergencyStop == Robot::State::BatteryDepleted) {
+        return Robot::State::Idle;
+    }
+
+    return stateBeforeEmergencyStop;
+}
+} // namespace
+
 EmergencyStopController::EmergencyStopController(const BlockingRobotManager& blockingRobotManager)
     : blockingRobotManager_(blockingRobotManager) {}
 
@@ -19,7 +29,7 @@ void EmergencyStopController::updateEmergencyStop(const InputState& inputState, 
 
     if (inputState.resetEmergencyStopPressed && emergencyStopActive_) {
         emergencyStopActive_ = false;
-        robot.setState(stateBeforeEmergencyStop_);
+        robot.setState(RestoredStateAfterEmergencyStop(stateBeforeEmergencyStop_));
     }
 }
 
