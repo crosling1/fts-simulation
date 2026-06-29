@@ -67,56 +67,51 @@ software architecture.
 ## Architecture
 
 The simulation follows a responsibility-based architecture. `RobotController`
-coordinates the runtime workflow, while focused components handle navigation,
-route following, task progression, charging decisions, obstacle checks,
-rendering and status display.
+coordinates the core robot workflow, while focused components handle navigation,
+route following, task progression, charging decisions and safety control.
+Environment simulation, rendering and UI overlays stay outside the core control
+logic.
 
 ```text
-Simulation Loop
+main.cpp / Simulation Loop
       |
-      v
-Application Objects
++-- Environment / Dynamic Obstacle Simulation
+|     |
+|     +-- LogisticsMap
+|     |     +-- ILogisticsMap
+|     |     +-- MapData
+|     |
+|     +-- BlockingRobotManager
+|           +-- BlockingRobot
+|
++-- Core Simulation Logic
+|     |
+|     +-- RobotController
+|           |
+|           +-- Navigation
+|           |     +-- RobotRoutePlanner
+|           |     +-- NavigationGraph
+|           |     +-- RouteFollower
+|           |
+|           +-- Task Flow
+|           |     +-- RobotTaskFlow
+|           |
+|           +-- Energy Management
+|           |     +-- ChargingManager
+|           |
+|           +-- Safety / Control
+|           |     +-- EmergencyStopController
+|           |
+|           +-- Robot Model
+|                 +-- WorkerRobot
+|                 +-- Robot
+|                 +-- Battery
+|                 +-- ProximitySensor
+|
++-- Rendering And UI
       |
-      +-- LogisticsMap
-      +-- BlockingRobotManager
-      |
-      v
-RobotController
-      |
-      +-- Navigation Layer
-      |      |
-      |      +-- RobotRoutePlanner
-      |      +-- NavigationGraph
-      |      +-- RouteFollower
-      |
-      +-- Task Layer
-      |      |
-      |      +-- RobotTaskFlow
-      |
-      +-- Energy Layer
-      |      |
-      |      +-- ChargingManager
-      |
-      +-- Safety Layer
-      |      |
-      |      +-- EmergencyStopController
-      |      +-- BlockingRobotManager
-      |
-      v
-Robot
-      |
-      +-- WorkerRobot
-      +-- Battery
-      +-- ProximitySensor
-
-Environment
-      |
-      +-- ILogisticsMap
-      +-- MapData
-      +-- BlockingRobot
-
-Rendering And UI
-      |
+      +-- LogisticsMap::draw
+      +-- BlockingRobotManager::draw
       +-- RobotRenderer
       +-- MapOverlay
       +-- StatusOverlay
@@ -128,7 +123,7 @@ Rendering And UI
 | ---------------------------- | --------------------------------------------------------------------- |
 | `Robot` / `WorkerRobot`      | Robot motion, state transitions, target handling and robot identity.  |
 | `Battery`                    | Battery charge state, drain, charging and threshold checks.           |
-| `RobotController`            | Coordinates task flow, routing, movement, charging, safety and drawing. |
+| `RobotController`            | Coordinates task flow, routing, movement, charging and safety control. |
 | `RouteFollower`              | Applies active waypoint paths and keeps robot movement road-constrained. |
 | `RobotRoutePlanner`          | Builds pickup, dropoff and charging routes from map navigation data.  |
 | `NavigationGraph`            | Cached road-segment validity, weighted adjacency and A* pathfinding.  |
@@ -136,7 +131,7 @@ Rendering And UI
 | `EmergencyStopController`    | Emergency-stop toggling and obstacle-pause decisions.                 |
 | `ProximitySensor`            | Radius-based proximity checks against active blocking robots.         |
 | `BlockingRobot`              | Individual blocking robot position, path following and proximity data. |
-| `BlockingRobotManager`       | Blocking robot collection, initialization, updates and queries.       |
+| `BlockingRobotManager`       | Dynamic obstacle collection, initialization, movement updates and queries. |
 | `RobotTaskFlow`              | Pickup, dropoff and charging phase progression.                       |
 | `RobotRenderer`              | raylib rendering for robot visuals, scan radius and carried items.    |
 | `MapOverlay` / `StatusOverlay` | UI overlays for map labels and runtime robot status.                |
@@ -145,7 +140,10 @@ Rendering And UI
 
 ## Runtime Configuration
 
-`SimConfig` centralizes simulation tuning values. The current fields are:
+`SimConfig` centralizes simulation tuning defaults. Its settings are grouped by
+domain so robot motion, battery behavior, task timing, controller tuning and
+blocking robot parameters stay separated while sharing one configuration entry
+point. The current fields are:
 
 | Field | Purpose |
 | ----- | ------- |
