@@ -1,8 +1,8 @@
 #pragma once
 
-#include "robots/RobotRenderData.h"
+#include "robots/IRobotRenderer.h"
 
-class RobotRenderer {
+class RobotRenderer : public IRobotRenderer {
   public:
-    void draw(const RobotRenderData& data) const;
+    void draw(const RobotRenderData& data) const override;
 };

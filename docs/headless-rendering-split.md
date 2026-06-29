@@ -1,18 +1,20 @@
 # Headless Core And Rendering Split Notes
 
-This document records the current source layout for a future split between a
-headless simulation core and a raylib-backed rendering layer. The current
-`fts_core` target is intentionally unchanged: it still includes all existing
-simulation, UI and rendering files, and raylib remains a public dependency
-because public headers still expose raylib types such as `Vector2` and
-`Rectangle`.
+This document records the current source layout for the split between the core
+simulation library and a raylib-backed rendering layer. The current `fts_core`
+target still exposes raylib types such as `Vector2` and `Rectangle` in public
+headers, so raylib remains a public dependency of the core for now.
 
 ## Current CMake Boundary
 
 - `fts_core` is the reusable library linked by `robot_sim` and `unit_tests`.
+- `fts_rendering` contains rendering-only files from `src/rendering` and
+  raylib-dependent UI overlay files from `src/ui`.
+- `fts_rendering` depends on `fts_core` and raylib.
 - `robot_sim` owns the raylib window loop in `src/main.cpp`.
-- `unit_tests` link against `fts_core`, so moving files out of `fts_core` would
-  need a compatibility step before tests can remain unchanged.
+- `robot_sim` links both `fts_core` and `fts_rendering`.
+- `unit_tests` link against `fts_core`, so test-facing simulation APIs should
+  stay available from the core target.
 - `src/main.cpp` should remain an application shell, even after a rendering
   target exists. It currently owns `InitWindow`, `BeginDrawing`, `EndDrawing`
   and `CloseWindow`.
@@ -61,10 +63,10 @@ Related public headers:
 - `include/simulation/SimConfig.h`
 - `include/simulation/navigation.h`
 
-## Future Rendering Target Candidates
+## Rendering Target
 
-These files are clear candidates for a future `fts_rendering` target because
-they directly own raylib drawing calls.
+These files are built by `fts_rendering` because they directly own raylib
+drawing calls.
 
 - `src/rendering/RobotRenderer.cpp`
 - `src/ui/MapOverlay.cpp`
@@ -114,5 +116,5 @@ Related public headers:
    adapters.
 4. Move `ReadInputState` behind an input adapter owned by the app or rendering
    layer.
-5. Create `fts_rendering` after public headers no longer force `fts_core` to
-   expose raylib as a public dependency.
+5. After public headers no longer force `fts_core` to expose raylib as a public
+   dependency, make raylib private to the rendering and app-side targets.

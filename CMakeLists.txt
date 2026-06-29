@@ -38,7 +38,7 @@ foreach(catch2_target IN ITEMS Catch2 Catch2WithMain)
     endif()
 endforeach()
 
-set(FTS_HEADLESS_CORE_CANDIDATE_SOURCES
+set(FTS_CORE_SOURCES
     src/simulation/MapData.cpp
     src/simulation/NavigationGraph.cpp
     src/simulation/navigation.cpp
@@ -61,16 +61,8 @@ set(FTS_RAYLIB_BOUNDARY_CANDIDATE_SOURCES
     src/simulation/BlockingRobotManager.cpp
 )
 
-set(FTS_RENDERING_CANDIDATE_SOURCES
-    src/rendering/RobotRenderer.cpp
-    src/ui/MapOverlay.cpp
-    src/ui/StatusOverlay.cpp
-)
-
-set(FTS_CORE_SOURCES
-    ${FTS_HEADLESS_CORE_CANDIDATE_SOURCES}
+list(APPEND FTS_CORE_SOURCES
     ${FTS_RAYLIB_BOUNDARY_CANDIDATE_SOURCES}
-    ${FTS_RENDERING_CANDIDATE_SOURCES}
 )
 
 set(FTS_TEST_SOURCES
@@ -87,8 +79,9 @@ set(FTS_TEST_SOURCES
     tests/simulation/robot_task_flow_tests.cpp
 )
 
-set(FTS_HEADLESS_CORE_CANDIDATE_HEADERS
+set(FTS_CORE_HEADERS
     include/robots/Robot.h
+    include/robots/IRobotRenderer.h
     include/robots/RobotRenderData.h
     include/robots/RobotState.h
     include/robots/Battery.h
@@ -117,33 +110,37 @@ set(FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS
     include/simulation/BlockingRobotManager.h
 )
 
-set(FTS_RENDERING_CANDIDATE_HEADERS
+list(APPEND FTS_CORE_HEADERS
+    ${FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS}
+)
+
+set(FTS_RENDERING_SOURCES
+    src/rendering/RobotRenderer.cpp
+    src/ui/MapOverlay.cpp
+    src/ui/StatusOverlay.cpp
+)
+
+set(FTS_RENDERING_HEADERS
     include/rendering/RobotRenderer.h
     include/ui/MapOverlay.h
     include/ui/StatusOverlay.h
 )
 
-# fts_core intentionally still contains the whole simulation and raylib-backed
-# rendering surface. These grouped lists document the future split while keeping
-# behavior, public headers and test linkage unchanged.
-set(FTS_CORE_HEADERS
-    ${FTS_HEADLESS_CORE_CANDIDATE_HEADERS}
-    ${FTS_RAYLIB_BOUNDARY_CANDIDATE_HEADERS}
-    ${FTS_RENDERING_CANDIDATE_HEADERS}
-)
-
 add_library(fts_core ${FTS_CORE_SOURCES} ${FTS_CORE_HEADERS})
 target_include_directories(fts_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+add_library(fts_rendering ${FTS_RENDERING_SOURCES} ${FTS_RENDERING_HEADERS})
+target_link_libraries(fts_rendering PUBLIC fts_core)
+
 add_executable(robot_sim src/main.cpp)
-target_link_libraries(robot_sim PRIVATE fts_core)
+target_link_libraries(robot_sim PRIVATE fts_core fts_rendering)
 
 add_executable(unit_tests ${FTS_TEST_SOURCES})
 target_link_libraries(unit_tests PRIVATE fts_core Catch2::Catch2WithMain)
 target_include_directories(unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 if(FTS_PROJECT_CLANG_TIDY)
-    set_target_properties(fts_core robot_sim unit_tests PROPERTIES
+    set_target_properties(fts_core fts_rendering robot_sim unit_tests PROPERTIES
         CXX_CLANG_TIDY "${FTS_PROJECT_CLANG_TIDY}"
     )
 endif()
@@ -162,14 +159,19 @@ find_package(raylib QUIET)
 # changing this dependency boundary to PRIVATE.
 if(raylib_FOUND)
     target_link_libraries(fts_core PUBLIC raylib)
+    target_link_libraries(fts_rendering PRIVATE raylib)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(RAYLIB REQUIRED raylib)
 
     target_include_directories(fts_core PUBLIC ${RAYLIB_INCLUDE_DIRS})
+    target_include_directories(fts_rendering PRIVATE ${RAYLIB_INCLUDE_DIRS})
     target_link_directories(fts_core PUBLIC ${RAYLIB_LIBRARY_DIRS})
+    target_link_directories(fts_rendering PRIVATE ${RAYLIB_LIBRARY_DIRS})
     target_compile_options(fts_core PUBLIC ${RAYLIB_CFLAGS_OTHER})
+    target_compile_options(fts_rendering PRIVATE ${RAYLIB_CFLAGS_OTHER})
     target_link_libraries(fts_core PUBLIC ${RAYLIB_LIBRARIES})
+    target_link_libraries(fts_rendering PRIVATE ${RAYLIB_LIBRARIES})
 endif()
 
 if(UNIX AND NOT APPLE)
