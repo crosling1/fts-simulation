@@ -70,6 +70,8 @@ class Robot {
     void rotate(float degree);
 
   private:
+    void snapToTarget();
+
     float x_;
     float y_;
     float angle_;

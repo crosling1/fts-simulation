@@ -119,24 +119,14 @@ void Robot::moveTowardsTarget(float deltaTime) {
     const Vector2 position = {x_, y_};
     const float distance = math::distance(position, targetPosition_);
     if (distance <= simConfig_.reachedDistance) {
-        x_ = targetPosition_.x;
-        y_ = targetPosition_.y;
-        speedController_.reset();
-        if (state_ != State::CarryingItem) {
-            state_ = State::Arrived;
-        }
+        snapToTarget();
         return;
     }
 
     const float controlledSpeed = speedController_.update({distance, deltaTime, speed_});
     const float step = controlledSpeed * deltaTime;
     if (step >= distance) {
-        x_ = targetPosition_.x;
-        y_ = targetPosition_.y;
-        speedController_.reset();
-        if (state_ != State::CarryingItem) {
-            state_ = State::Arrived;
-        }
+        snapToTarget();
         return;
     }
 
@@ -145,6 +135,15 @@ void Robot::moveTowardsTarget(float deltaTime) {
 
     x_ += directionX * step;
     y_ += directionY * step;
+}
+
+void Robot::snapToTarget() {
+    x_ = targetPosition_.x;
+    y_ = targetPosition_.y;
+    speedController_.reset();
+    if (state_ != State::CarryingItem) {
+        state_ = State::Arrived;
+    }
 }
 
 void Robot::rotateTowardsTarget(float deltaTime) {
