@@ -9,9 +9,6 @@
 namespace {
 constexpr double memoryRefreshInterval = 0.5;
 
-double lastMemoryRefreshTime = -memoryRefreshInterval;
-float cachedMemoryMegabytes = 0.0f;
-
 const char* RobotStateText(RobotState state) {
     switch (state) {
     case RobotState::Idle:
@@ -54,14 +51,25 @@ float ReadCurrentMemoryMegabytes() {
     return 0.0f;
 }
 
-float GetCurrentMemoryMegabytes() {
-    const double now = GetTime();
-    if (now - lastMemoryRefreshTime >= memoryRefreshInterval) {
-        cachedMemoryMegabytes = ReadCurrentMemoryMegabytes();
-        lastMemoryRefreshTime = now;
+class MemoryUsageCache {
+  public:
+    [[nodiscard]] float currentMegabytes(double now) {
+        if (now - lastRefreshTime_ >= memoryRefreshInterval) {
+            cachedMegabytes_ = ReadCurrentMemoryMegabytes();
+            lastRefreshTime_ = now;
+        }
+
+        return cachedMegabytes_;
     }
 
-    return cachedMemoryMegabytes;
+  private:
+    double lastRefreshTime_ = -memoryRefreshInterval;
+    float cachedMegabytes_ = 0.0f;
+};
+
+float GetCurrentMemoryMegabytes() {
+    static MemoryUsageCache memoryUsageCache;
+    return memoryUsageCache.currentMegabytes(GetTime());
 }
 
 void DrawControlHint() {
