@@ -128,6 +128,10 @@ catch_discover_tests(unit_tests)
 
 find_package(raylib QUIET)
 
+# raylib is currently a public dependency because fts_core public headers expose
+# raylib geometry types such as Vector2 and Rectangle. A future headless split
+# should first replace those API types with project-owned geometry types before
+# changing this dependency boundary to PRIVATE.
 if(raylib_FOUND)
     target_link_libraries(fts_core PUBLIC raylib)
 else()
