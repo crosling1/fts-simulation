@@ -3,7 +3,7 @@
 #include "robots/Robot.h"
 #include "simulation/InputState.h"
 
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 class BlockingRobotManager;
 
@@ -14,7 +14,7 @@ class EmergencyStopController {
     void reset();
     void updateEmergencyStop(const InputState& inputState, Robot& robot);
     [[nodiscard]] bool isEmergencyStopActive() const;
-    [[nodiscard]] bool shouldPauseForObstacle(Vector2 robotPosition,
+    [[nodiscard]] bool shouldPauseForObstacle(Vec2 robotPosition,
                                               float proximityDetectionRadius) const;
 
   private:

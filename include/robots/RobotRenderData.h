@@ -1,12 +1,12 @@
 #pragma once
 
 #include "robots/RobotState.h"
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <string_view>
 
 struct RobotRenderData {
-    Vector2 position;
+    Vec2 position;
     float angleDegrees;
     float radius;
     float proximityDetectionRadius;

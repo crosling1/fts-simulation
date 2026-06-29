@@ -48,9 +48,9 @@ TEST_CASE("Map road queries", "[Navigation]") {
     LogisticsMap logisticsMap;
     logisticsMap.init();
 
-    const Vector2 start = logisticsMap.getRobotStartPosition();
-    const Vector2 offRoad = {20.0f, 20.0f};
-    const Vector2 clamped = logisticsMap.clampPositionToRoad(offRoad);
+    const Vec2 start = logisticsMap.getRobotStartPosition();
+    const Vec2 offRoad = {20.0f, 20.0f};
+    const Vec2 clamped = logisticsMap.clampPositionToRoad(offRoad);
 
     CHECK(logisticsMap.isRoadPosition(start));
     CHECK(logisticsMap.isRoadPosition(logisticsMap.getChargingStationDockPosition()));

@@ -1,3 +1,4 @@
+#include "rendering/RobotRenderer.h"
 #include "simulation/BlockingRobotManager.h"
 #include "simulation/InputState.h"
 #include "simulation/RobotController.h"
@@ -28,6 +29,7 @@ int main() try {
 
     RobotController robotController(logisticsMap, blockingRobotManager, simConfig);
     robotController.initialize();
+    const RobotRenderer robotRenderer;
 
     while (!WindowShouldClose()) {
         const float deltaTime = GetFrameTime();
@@ -41,7 +43,7 @@ int main() try {
         logisticsMap.draw();
         DrawMapOverlay();
         blockingRobotManager.draw();
-        robotController.draw();
+        robotController.draw(robotRenderer);
         DrawStatusOverlay(robotController.statusSnapshot(), simConfig);
 
         EndDrawing();

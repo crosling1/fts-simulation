@@ -267,14 +267,14 @@ float FloatField(const JsonValue& object, const std::string& key) {
     return static_cast<float>(Number(RequireField(object, key), key));
 }
 
-Vector2 ReadVector(const JsonValue& value) {
+Vec2 ReadVector(const JsonValue& value) {
     return {
         FloatField(value, "x"),
         FloatField(value, "y"),
     };
 }
 
-Rectangle ReadRectangle(const JsonValue& value) {
+Rect ReadRectangle(const JsonValue& value) {
     return {
         FloatField(value, "x"),
         FloatField(value, "y"),
@@ -283,7 +283,7 @@ Rectangle ReadRectangle(const JsonValue& value) {
     };
 }
 
-Vector2 ReadNavigationNode(const JsonValue& value, const MapData& data) {
+Vec2 ReadNavigationNode(const JsonValue& value, const MapData& data) {
     if (value.object->find("ref") != value.object->end()) {
         const JsonValue& ref = RequireField(value, "ref");
         if (ref.type == JsonValue::Type::String && ref.text == "robot_start") {

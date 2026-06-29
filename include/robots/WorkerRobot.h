@@ -6,7 +6,7 @@
 class WorkerRobot : public Robot {
   public:
     WorkerRobot(Pose startPose, Config config, const SimConfig& simConfig = SimConfig::Default());
-    WorkerRobot(const Vector2& startPosition, Config config,
+    WorkerRobot(const Vec2& startPosition, Config config,
                 const SimConfig& simConfig = SimConfig::Default());
 
     [[nodiscard]] std::string_view typeName() const noexcept override;

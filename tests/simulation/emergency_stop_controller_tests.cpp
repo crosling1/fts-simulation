@@ -17,7 +17,7 @@ Robot::Config RobotConfig() {
 TEST_CASE("Emergency stop restores the saved robot state on reset", "[EmergencyStopController]") {
     const BlockingRobotManager blockingRobotManager;
     EmergencyStopController controller(blockingRobotManager);
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig());
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig());
 
     robot.setState(Robot::State::Moving);
 
@@ -35,7 +35,7 @@ TEST_CASE("Emergency stop restores the saved robot state on reset", "[EmergencyS
 TEST_CASE("Emergency stop resets battery depleted state to idle", "[EmergencyStopController]") {
     const BlockingRobotManager blockingRobotManager;
     EmergencyStopController controller(blockingRobotManager);
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig());
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig());
 
     robot.setState(Robot::State::BatteryDepleted);
 

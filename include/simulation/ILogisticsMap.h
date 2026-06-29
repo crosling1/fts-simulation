@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulation/MapData.h"
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -18,12 +18,12 @@ class ILogisticsMap {
   public:
     virtual ~ILogisticsMap() = default;
 
-    [[nodiscard]] virtual std::optional<Vector2> getLagerDockPosition(LagerId lagerId) const = 0;
-    [[nodiscard]] virtual std::optional<Vector2> getPickupDockPosition() const = 0;
-    [[nodiscard]] virtual std::optional<Vector2> getDeliveryDockPosition() const = 0;
-    [[nodiscard]] virtual Vector2 getChargingStationDockPosition() const = 0;
-    [[nodiscard]] virtual bool isRoadPosition(Vector2 position) const = 0;
-    [[nodiscard]] virtual Vector2 clampPositionToRoad(Vector2 position) const = 0;
-    [[nodiscard]] virtual const std::vector<Vector2>& getNavigationNodes() const = 0;
+    [[nodiscard]] virtual std::optional<Vec2> getLagerDockPosition(LagerId lagerId) const = 0;
+    [[nodiscard]] virtual std::optional<Vec2> getPickupDockPosition() const = 0;
+    [[nodiscard]] virtual std::optional<Vec2> getDeliveryDockPosition() const = 0;
+    [[nodiscard]] virtual Vec2 getChargingStationDockPosition() const = 0;
+    [[nodiscard]] virtual bool isRoadPosition(Vec2 position) const = 0;
+    [[nodiscard]] virtual Vec2 clampPositionToRoad(Vec2 position) const = 0;
+    [[nodiscard]] virtual const std::vector<Vec2>& getNavigationNodes() const = 0;
     [[nodiscard]] virtual const std::vector<NavigationEdge>& getNavigationEdges() const = 0;
 };

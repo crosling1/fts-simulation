@@ -7,7 +7,7 @@
 #include "sensors/ProximitySensor.h"
 #include "sensors/Sensor.h"
 #include "simulation/SimConfig.h"
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <memory>
 #include <string_view>
@@ -31,12 +31,12 @@ class Robot {
     };
 
     struct Pose {
-        Vector2 position;
+        Vec2 position;
         float angleDegrees = 0.0f;
     };
 
     Robot(Pose startPose, Config config, const SimConfig& simConfig = SimConfig::Default());
-    Robot(const Vector2& startPosition, Config config,
+    Robot(const Vec2& startPosition, Config config,
           const SimConfig& simConfig = SimConfig::Default());
     virtual ~Robot() = default;
 
@@ -44,12 +44,12 @@ class Robot {
 
     void updateMovement(float deltaTime);
     [[nodiscard]] RobotRenderData renderData() const noexcept;
-    void setPosition(const Vector2& newPosition);
+    void setPosition(const Vec2& newPosition);
     void setState(State newState);
-    void setTargetPosition(const Vector2& target);
+    void setTargetPosition(const Vec2& target);
     void enterIdle();
     void arriveAtWaypoint();
-    void beginMovingTo(Vector2 target);
+    void beginMovingTo(Vec2 target);
     void beginCarrying();
     void beginPickingUp();
     void beginDroppingOff();
@@ -57,7 +57,7 @@ class Robot {
     void enterChargingState();
     void moveTowardsTarget(float deltaTime);
     void rotateTowardsTarget(float deltaTime);
-    [[nodiscard]] Vector2 getPosition() const;
+    [[nodiscard]] Vec2 getPosition() const;
     [[nodiscard]] State getState() const;
     [[nodiscard]] bool hasBatteryFull() const;
     [[nodiscard]] bool hasReachedTarget() const;
@@ -82,7 +82,7 @@ class Robot {
     float y_;
     float angle_;
     float speed_;
-    Vector2 targetPosition_;
+    Vec2 targetPosition_;
     float rotationSpeed_;
     float size_;
     PIController speedController_;

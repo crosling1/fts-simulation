@@ -37,7 +37,7 @@ bool EmergencyStopController::isEmergencyStopActive() const {
     return emergencyStopActive_;
 }
 
-bool EmergencyStopController::shouldPauseForObstacle(Vector2 robotPosition,
+bool EmergencyStopController::shouldPauseForObstacle(Vec2 robotPosition,
                                                      float proximityDetectionRadius) const {
     return blockingRobotManager_.hasActiveBlockingRobotNear(robotPosition,
                                                             proximityDetectionRadius);

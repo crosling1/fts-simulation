@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <vector>
 
@@ -10,8 +10,8 @@ class NavigationGraph {
   public:
     explicit NavigationGraph(const ILogisticsMap& logisticsMap);
 
-    [[nodiscard]] std::vector<Vector2>
-    findPath(Vector2 start, Vector2 goal) const; // NOLINT(bugprone-easily-swappable-parameters)
+    [[nodiscard]] std::vector<Vec2>
+    findPath(Vec2 start, Vec2 goal) const; // NOLINT(bugprone-easily-swappable-parameters)
 
   private:
     struct AdjacencyEntry {

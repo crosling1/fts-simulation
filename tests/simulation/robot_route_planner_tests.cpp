@@ -12,7 +12,7 @@ TEST_CASE("Robot route planner uses logistics map interface", "[RobotRoutePlanne
     MockLogisticsMap map;
     const RobotRoutePlanner routePlanner(map);
 
-    const std::vector<Vector2> path = routePlanner.buildPathToPickup({0.0f, 0.0f});
+    const std::vector<Vec2> path = routePlanner.buildPathToPickup({0.0f, 0.0f});
 
     REQUIRE_FALSE(path.empty());
     test::CheckVectorNear(path.back(), {10.0f, 0.0f});

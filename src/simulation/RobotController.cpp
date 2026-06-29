@@ -48,7 +48,7 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
         return;
     }
 
-    const Vector2 robotPosition = robot_->getPosition();
+    const Vec2 robotPosition = robot_->getPosition();
 
     // Obstacle proximity is checked only during movement phases.
     if (emergencyStopController_.shouldPauseForObstacle(robotPosition,
@@ -59,16 +59,6 @@ void RobotController::update(float deltaTime, const InputState& inputState) {
     robot_->updateMovement(deltaTime);
     routeFollower_.keepOnRoad(*robot_);
     updateWaypointTravel();
-}
-
-void RobotController::draw() const {
-    if (robot_ == nullptr) {
-        return;
-    }
-
-    routeFollower_.draw();
-
-    robotRenderer_.draw(robot_->renderData());
 }
 
 void RobotController::unload() {
@@ -88,12 +78,11 @@ std::optional<RobotStatusSnapshot> RobotController::statusSnapshot() const {
 }
 
 void RobotController::startChargingTrip() {
-    const Vector2 startPosition = robot_->getPosition();
+    const Vec2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToCharging();
     robot_->arriveAtWaypoint();
-    const std::vector<Vector2> chargingPath =
-        routePlanner_.buildPathToChargingStation(startPosition);
+    const std::vector<Vec2> chargingPath = routePlanner_.buildPathToChargingStation(startPosition);
     routeFollower_.setActivePath(chargingPath, startPosition, *robot_);
 
     if (chargingPath.empty()) {
@@ -102,12 +91,12 @@ void RobotController::startChargingTrip() {
 }
 
 void RobotController::startPickupTrip() {
-    const Vector2 startPosition = robot_->getPosition();
+    const Vec2 startPosition = robot_->getPosition();
     startPickupTrip(routePlanner_.buildPathToPickup(startPosition));
 }
 
-void RobotController::startPickupTrip(const std::vector<Vector2>& pickupPath) {
-    const Vector2 startPosition = robot_->getPosition();
+void RobotController::startPickupTrip(const std::vector<Vec2>& pickupPath) {
+    const Vec2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToPickup();
     robot_->arriveAtWaypoint();
@@ -115,7 +104,7 @@ void RobotController::startPickupTrip(const std::vector<Vector2>& pickupPath) {
 }
 
 void RobotController::startDropoffTrip() {
-    const Vector2 startPosition = robot_->getPosition();
+    const Vec2 startPosition = robot_->getPosition();
 
     taskFlow_.startTripToDropoff();
     robot_->beginCarrying();
@@ -208,9 +197,9 @@ RobotController::NextDeliveryRouteEstimate RobotController::buildNextDeliveryRou
         return {};
     }
 
-    const Vector2 robotPosition = robot_->getPosition();
-    std::vector<Vector2> pickupPath = routePlanner_.buildPathToPickup(robotPosition);
-    const std::vector<Vector2> dropoffPath = routePlanner_.buildPathToDropoff(*pickupDock);
+    const Vec2 robotPosition = robot_->getPosition();
+    std::vector<Vec2> pickupPath = routePlanner_.buildPathToPickup(robotPosition);
+    const std::vector<Vec2> dropoffPath = routePlanner_.buildPathToDropoff(*pickupDock);
     const float estimatedDistance = routePlanner_.calculatePathDistance(robotPosition, pickupPath) +
                                     routePlanner_.calculatePathDistance(*pickupDock, dropoffPath);
 
