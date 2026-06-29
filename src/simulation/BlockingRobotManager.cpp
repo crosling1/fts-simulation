@@ -1,19 +1,20 @@
 #include "simulation/BlockingRobotManager.h"
 
+#include "rendering/RaylibGeometry.h"
 #include "simulation/MathUtils.h"
 #include "simulation/map.h"
 
 BlockingRobotManager::BlockingRobotManager(const SimConfig& simConfig)
     : simConfig_(simConfig), randomEngine_(std::random_device{}()) {}
 
-BlockingRobot BlockingRobot::AtPosition(Vector2 position, BlockingRobotRadius radius) {
+BlockingRobot BlockingRobot::AtPosition(Vec2 position, BlockingRobotRadius radius) {
     BlockingRobot blockingRobot;
     blockingRobot.position = position;
     blockingRobot.radius = radius.value;
     return blockingRobot;
 }
 
-BlockingRobot BlockingRobot::WithPath(const std::vector<Vector2>& path, BlockingRobotRadius radius,
+BlockingRobot BlockingRobot::WithPath(const std::vector<Vec2>& path, BlockingRobotRadius radius,
                                       BlockingRobotSpeed speed) {
     BlockingRobot blockingRobot = AtPosition(path[0], radius);
     blockingRobot.speed = speed.value;
@@ -49,10 +50,10 @@ void BlockingRobotManager::update(float deltaTime) {
 
 void BlockingRobotManager::draw() const {
     for (const BlockingRobot& blockingRobot : blockingRobots_) {
-        const Vector2 position = blockingRobot.position;
+        const Vec2 position = blockingRobot.position;
         const float radius = blockingRobot.radius;
 
-        DrawCircleV(position, radius, PURPLE);
+        DrawCircleV(ToRaylib(position), radius, PURPLE);
         DrawCircleLines(static_cast<int>(position.x), static_cast<int>(position.y), radius,
                         DARKPURPLE);
         DrawText("B", static_cast<int>(position.x) - 5, static_cast<int>(position.y) - 10, 20,
@@ -60,11 +61,10 @@ void BlockingRobotManager::draw() const {
     }
 }
 
-bool BlockingRobotManager::hasActiveBlockingRobotNear(Vector2 position,
-                                                      float detectionRadius) const {
+bool BlockingRobotManager::hasActiveBlockingRobotNear(Vec2 position, float detectionRadius) const {
     for (const BlockingRobot& blockingRobot : blockingRobots_) {
-        if (CheckCollisionCircles(position, detectionRadius, blockingRobot.position,
-                                  blockingRobot.radius)) {
+        const float combinedRadius = detectionRadius + blockingRobot.radius;
+        if (math::distanceSq(position, blockingRobot.position) <= combinedRadius * combinedRadius) {
             return true;
         }
     }
@@ -76,7 +76,7 @@ const std::vector<BlockingRobot>& BlockingRobotManager::getBlockingRobots() cons
     return blockingRobots_;
 }
 
-void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path, float speed) {
+void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vec2>& path, float speed) {
     if (path.size() < 2) {
         return;
     }
@@ -90,7 +90,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
         return;
     }
 
-    const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
+    const Vec2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
     const float distance = math::distance(blockingRobot.position, target);
     if (distance <= simConfig_.reachedDistance) {
         blockingRobot.position = target;

@@ -1,13 +1,16 @@
 # Headless Core And Rendering Split Notes
 
 This document records the current source layout for the split between the core
-simulation library and a raylib-backed rendering layer. The current `fts_core`
-target still exposes raylib types such as `Vector2` and `Rectangle` in public
-headers, so raylib remains a public dependency of the core for now.
+simulation library and a raylib-backed rendering layer. Core public headers use
+project-owned geometry types from `include/simulation/Geometry.h`; raylib
+geometry remains behind rendering and adapter boundaries.
 
 ## Current CMake Boundary
 
 - `fts_core` is the reusable library linked by `robot_sim` and `unit_tests`.
+- `fts_core` uses `Vec2` and `Rect` in simulation-facing public APIs.
+- raylib is a private implementation dependency of `fts_core` while legacy
+  drawing/input boundary methods still live in simulation files.
 - `fts_rendering` contains rendering-only files from `src/rendering` and
   raylib-dependent UI overlay files from `src/ui`.
 - `fts_rendering` depends on `fts_core` and raylib.
@@ -22,9 +25,7 @@ headers, so raylib remains a public dependency of the core for now.
 ## Headless Core Candidates
 
 These files contain simulation, navigation, robot, control, sensor or data
-loading behavior without direct raylib drawing or input calls. Many still use
-raylib data types in their public APIs; those types should remain in place until
-the project introduces project-owned geometry types.
+loading behavior without direct raylib drawing or input calls.
 
 - `src/control/PIController.cpp`
 - `src/robots/Battery.cpp`
@@ -52,6 +53,7 @@ Related public headers:
 - `include/sensors/Sensor.h`
 - `include/simulation/ChargingManager.h`
 - `include/simulation/EmergencyStopController.h`
+- `include/simulation/Geometry.h`
 - `include/simulation/ILogisticsMap.h`
 - `include/simulation/MapData.h`
 - `include/simulation/MathUtils.h`
@@ -74,6 +76,7 @@ drawing calls.
 
 Related public headers:
 
+- `include/rendering/RaylibGeometry.h`
 - `include/rendering/RobotRenderer.h`
 - `include/ui/MapOverlay.h`
 - `include/ui/StatusOverlay.h`
@@ -88,10 +91,10 @@ first extraction points before `fts_core` can become truly headless.
   - Core behavior: map-data ownership, dock/station queries, road clamping and
     navigation-node access.
   - raylib behavior: `ClearBackground`, map grid/road/warehouse/station drawing
-    and collision helper usage.
+    and core-to-raylib geometry conversion for drawing.
 - `src/simulation/BlockingRobotManager.cpp`
   - Core behavior: blocking robot path state, movement and proximity queries.
-  - raylib behavior: blocking robot drawing and circle collision helper usage.
+  - raylib behavior: blocking robot drawing.
 - `src/simulation/RouteFollower.cpp`
   - Core behavior: active waypoint management and road-constrained movement.
   - raylib behavior: active path drawing.
@@ -108,13 +111,10 @@ Related public headers:
 
 ## Suggested Future Steps
 
-1. Introduce project-owned geometry types for positions and rectangles.
-2. Keep compatibility adapters for raylib `Vector2` and `Rectangle` while
-   migrating public headers.
-3. Move drawing methods such as `LogisticsMap::draw`,
+1. Move drawing methods such as `LogisticsMap::draw`,
    `BlockingRobotManager::draw` and `RouteFollower::draw` into rendering-side
    adapters.
-4. Move `ReadInputState` behind an input adapter owned by the app or rendering
+2. Move `ReadInputState` behind an input adapter owned by the app or rendering
    layer.
-5. After public headers no longer force `fts_core` to expose raylib as a public
-   dependency, make raylib private to the rendering and app-side targets.
+3. Remove the remaining private raylib dependency from `fts_core` once those
+   boundary methods are extracted.

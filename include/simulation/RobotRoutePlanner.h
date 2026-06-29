@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulation/NavigationGraph.h"
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <vector>
 
@@ -11,11 +11,11 @@ class RobotRoutePlanner {
   public:
     explicit RobotRoutePlanner(const ILogisticsMap& logisticsMap);
 
-    [[nodiscard]] std::vector<Vector2> buildPathToPickup(Vector2 startPosition) const;
-    [[nodiscard]] std::vector<Vector2> buildPathToDropoff(Vector2 startPosition) const;
-    [[nodiscard]] std::vector<Vector2> buildPathToChargingStation(Vector2 startPosition) const;
-    [[nodiscard]] float calculatePathDistance(Vector2 startPosition,
-                                              const std::vector<Vector2>& path) const;
+    [[nodiscard]] std::vector<Vec2> buildPathToPickup(Vec2 startPosition) const;
+    [[nodiscard]] std::vector<Vec2> buildPathToDropoff(Vec2 startPosition) const;
+    [[nodiscard]] std::vector<Vec2> buildPathToChargingStation(Vec2 startPosition) const;
+    [[nodiscard]] float calculatePathDistance(Vec2 startPosition,
+                                              const std::vector<Vec2>& path) const;
 
   private:
     const ILogisticsMap& logisticsMap_;

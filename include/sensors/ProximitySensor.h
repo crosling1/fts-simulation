@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 class BlockingRobotManager;
 
@@ -9,7 +9,7 @@ class ProximitySensor {
     explicit ProximitySensor(float detectionRadius);
 
     [[nodiscard]] bool
-    hasBlockingRobotNearby(Vector2 origin, const BlockingRobotManager& blockingRobotManager) const;
+    hasBlockingRobotNearby(Vec2 origin, const BlockingRobotManager& blockingRobotManager) const;
     [[nodiscard]] float getDetectionRadius() const;
 
   private:

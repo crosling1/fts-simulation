@@ -1,5 +1,6 @@
 #include "rendering/RobotRenderer.h"
 
+#include "rendering/RaylibGeometry.h"
 #include "simulation/MathUtils.h"
 
 #include <cmath>
@@ -30,6 +31,8 @@ Color GetRobotColor(RobotState state) {
 } // namespace
 
 void RobotRenderer::draw(const RobotRenderData& data) const {
+    const Vector2 position = ToRaylib(data.position);
+
     DrawCircleLines(static_cast<int>(data.position.x), static_cast<int>(data.position.y),
                     data.proximityDetectionRadius, Fade(BLUE, 0.55f));
 
@@ -40,20 +43,20 @@ void RobotRenderer::draw(const RobotRenderData& data) const {
         data.position.y + std::sin(headingRadians) * headingLength,
     };
 
-    DrawCircleV(data.position, data.radius, GetRobotColor(data.state));
+    DrawCircleV(position, data.radius, GetRobotColor(data.state));
     DrawCircleLines(static_cast<int>(data.position.x), static_cast<int>(data.position.y),
                     data.radius, BLACK);
     DrawCircleLines(static_cast<int>(data.position.x), static_cast<int>(data.position.y),
                     data.radius + 2.0f, WHITE);
-    DrawLineEx(data.position, headingEnd, 3.0f, BLACK);
-    DrawCircleV(data.position, data.radius * 0.2f, BLACK);
+    DrawLineEx(position, headingEnd, 3.0f, BLACK);
+    DrawCircleV(position, data.radius * 0.2f, BLACK);
     DrawText("R", static_cast<int>(data.position.x) - 5, static_cast<int>(data.position.y) - 10, 20,
              WHITE);
 
     if (data.carryingItem) {
-        const Rectangle item = {data.position.x - 7.0f, data.position.y - 25.0f, 14.0f, 12.0f};
+        const Rect item = {data.position.x - 7.0f, data.position.y - 25.0f, 14.0f, 12.0f};
 
-        DrawRectangleRec(item, GOLD);
-        DrawRectangleLinesEx(item, 2.0f, BROWN);
+        DrawRectangleRec(ToRaylib(item), GOLD);
+        DrawRectangleLinesEx(ToRaylib(item), 2.0f, BROWN);
     }
 }

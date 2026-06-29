@@ -33,7 +33,7 @@ struct ComparePathQueueEntry {
     }
 };
 
-bool IsRoadSample(const ILogisticsMap& logisticsMap, Vector2 position) {
+bool IsRoadSample(const ILogisticsMap& logisticsMap, Vec2 position) {
     if (logisticsMap.isRoadPosition(position)) {
         return true;
     }
@@ -42,8 +42,8 @@ bool IsRoadSample(const ILogisticsMap& logisticsMap, Vector2 position) {
            (roadSampleTolerance * roadSampleTolerance);
 }
 
-bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vector2 from,
-                   Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
+bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vec2 from,
+                   Vec2 to) { // NOLINT(bugprone-easily-swappable-parameters)
     const float segmentLength = math::distance(from, to);
     if (segmentLength <= roadSampleTolerance) {
         return IsRoadSample(logisticsMap, from) && IsRoadSample(logisticsMap, to);
@@ -52,7 +52,7 @@ bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vector2 from,
     const int sampleCount = static_cast<int>(std::ceil(segmentLength / roadSampleSpacing));
     for (int i = 0; i <= sampleCount; i++) {
         const float t = static_cast<float>(i) / static_cast<float>(sampleCount);
-        const Vector2 sample = {
+        const Vec2 sample = {
             from.x + ((to.x - from.x) * t),
             from.y + ((to.y - from.y) * t),
         };
@@ -65,7 +65,7 @@ bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vector2 from,
     return true;
 }
 
-int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position) {
+int FindNearestPathNode(const std::vector<Vec2>& pathNodes, Vec2 position) {
     int nearestNodeIndex = invalidPathNode;
     float nearestDistanceSquared = unreachableDistance;
 
@@ -119,9 +119,9 @@ std::vector<int> SimplifyPath(const std::vector<std::vector<bool>>& validRoadSeg
     return simplifiedPath;
 }
 
-std::vector<Vector2> BuildPathPositions(const std::vector<Vector2>& pathNodes,
-                                        const std::vector<int>& pathNodeIndices) {
-    std::vector<Vector2> path;
+std::vector<Vec2> BuildPathPositions(const std::vector<Vec2>& pathNodes,
+                                     const std::vector<int>& pathNodeIndices) {
+    std::vector<Vec2> path;
     path.reserve(pathNodeIndices.size());
 
     for (int pathNodeIndex : pathNodeIndices) {
@@ -135,7 +135,7 @@ std::vector<Vector2> BuildPathPositions(const std::vector<Vector2>& pathNodes,
 
 std::vector<std::vector<bool>>
 NavigationGraph::buildRoadSegmentValidity(const ILogisticsMap& logisticsMap) {
-    const std::vector<Vector2>& pathNodes = logisticsMap.getNavigationNodes();
+    const std::vector<Vec2>& pathNodes = logisticsMap.getNavigationNodes();
     std::vector<std::vector<bool>> validRoadSegments(pathNodes.size(),
                                                      std::vector<bool>(pathNodes.size(), false));
 
@@ -155,7 +155,7 @@ NavigationGraph::buildRoadSegmentValidity(const ILogisticsMap& logisticsMap) {
 std::vector<std::vector<NavigationGraph::AdjacencyEntry>>
 NavigationGraph::buildAdjacencyList(const ILogisticsMap& logisticsMap,
                                     const std::vector<std::vector<bool>>& validRoadSegments) {
-    const std::vector<Vector2>& pathNodes = logisticsMap.getNavigationNodes();
+    const std::vector<Vec2>& pathNodes = logisticsMap.getNavigationNodes();
     const std::vector<NavigationEdge>& edges = logisticsMap.getNavigationEdges();
 
     std::vector<std::vector<NavigationGraph::AdjacencyEntry>> adj(pathNodes.size());
@@ -175,10 +175,10 @@ NavigationGraph::NavigationGraph(const ILogisticsMap& logisticsMap)
     : logisticsMap_(logisticsMap), validRoadSegments_(buildRoadSegmentValidity(logisticsMap)),
       adjacency_(buildAdjacencyList(logisticsMap, validRoadSegments_)) {}
 
-std::vector<Vector2>
-NavigationGraph::findPath(Vector2 start,
-                          Vector2 goal) const { // NOLINT(bugprone-easily-swappable-parameters)
-    const std::vector<Vector2>& pathNodes = logisticsMap_.getNavigationNodes();
+std::vector<Vec2>
+NavigationGraph::findPath(Vec2 start,
+                          Vec2 goal) const { // NOLINT(bugprone-easily-swappable-parameters)
+    const std::vector<Vec2>& pathNodes = logisticsMap_.getNavigationNodes();
     const PathEndpointIndices endpoints = {
         FindNearestPathNode(pathNodes, start),
         FindNearestPathNode(pathNodes, goal),

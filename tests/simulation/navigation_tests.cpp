@@ -21,13 +21,13 @@ template <typename T>
     throw std::runtime_error(std::string(message));
 }
 
-bool SamePosition(Vector2 left, Vector2 right) {
+bool SamePosition(Vec2 left, Vec2 right) {
     return test::AlmostEqual(left.x, right.x) && test::AlmostEqual(left.y, right.y);
 }
 
-std::optional<Vector2> FindConnectedNavigationNode(const LogisticsMap& logisticsMap,
-                                                   Vector2 navigationNode) {
-    const std::vector<Vector2>& navigationNodes = logisticsMap.getNavigationNodes();
+std::optional<Vec2> FindConnectedNavigationNode(const LogisticsMap& logisticsMap,
+                                                Vec2 navigationNode) {
+    const std::vector<Vec2>& navigationNodes = logisticsMap.getNavigationNodes();
 
     for (NavigationEdge edge : logisticsMap.getNavigationEdges()) {
         if (SamePosition(navigationNodes[edge.from], navigationNode)) {
@@ -47,28 +47,28 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     LogisticsMap logisticsMap;
     logisticsMap.init();
 
-    const Vector2 pickupDockPosition =
+    const Vec2 pickupDockPosition =
         RequireOptionalValue(logisticsMap.getLagerDockPosition(logisticsMap.getPickupLagerId()),
                              "Expected pickup dock position to exist");
-    const Vector2 deliveryDockPosition =
+    const Vec2 deliveryDockPosition =
         RequireOptionalValue(logisticsMap.getLagerDockPosition(logisticsMap.getDeliveryLagerId()),
                              "Expected delivery dock position to exist");
-    const Vector2 l6DockPosition = RequireOptionalValue(
-        logisticsMap.getLagerDockPosition(LagerId::L6), "Expected L6 dock position to exist");
-    const Vector2 l6EntryWaypoint =
+    const Vec2 l6DockPosition = RequireOptionalValue(logisticsMap.getLagerDockPosition(LagerId::L6),
+                                                     "Expected L6 dock position to exist");
+    const Vec2 l6EntryWaypoint =
         RequireOptionalValue(FindConnectedNavigationNode(logisticsMap, l6DockPosition),
                              "Expected L6 dock position to have a connected navigation node");
 
-    const std::vector<Vector2> pickupPath =
+    const std::vector<Vec2> pickupPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), pickupDockPosition);
-    const std::vector<Vector2> dropoffPath =
+    const std::vector<Vec2> dropoffPath =
         FindNavigationPath(logisticsMap, pickupDockPosition, deliveryDockPosition);
-    const std::vector<Vector2> chargingPath =
+    const std::vector<Vec2> chargingPath =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(),
                            logisticsMap.getChargingStationDockPosition());
-    const std::vector<Vector2> dropoffToChargingPath = FindNavigationPath(
+    const std::vector<Vec2> dropoffToChargingPath = FindNavigationPath(
         logisticsMap, deliveryDockPosition, logisticsMap.getChargingStationDockPosition());
-    const std::vector<Vector2> l6Path =
+    const std::vector<Vec2> l6Path =
         FindNavigationPath(logisticsMap, logisticsMap.getRobotStartPosition(), l6DockPosition);
 
     REQUIRE(!pickupPath.empty());
@@ -86,22 +86,22 @@ TEST_CASE("Navigation finds warehouse routes", "[Navigation]") {
     CHECK(!test::PathContainsPoint(pickupPath, l6EntryWaypoint));
     CHECK(test::PathContainsPoint(l6Path, l6EntryWaypoint));
 
-    for (Vector2 waypoint : pickupPath) {
+    for (Vec2 waypoint : pickupPath) {
         CAPTURE(waypoint.x, waypoint.y);
         CHECK(logisticsMap.isRoadPosition(waypoint));
     }
 
-    for (Vector2 waypoint : dropoffPath) {
+    for (Vec2 waypoint : dropoffPath) {
         CAPTURE(waypoint.x, waypoint.y);
         CHECK(logisticsMap.isRoadPosition(waypoint));
     }
 
-    for (Vector2 waypoint : chargingPath) {
+    for (Vec2 waypoint : chargingPath) {
         CAPTURE(waypoint.x, waypoint.y);
         CHECK(logisticsMap.isRoadPosition(waypoint));
     }
 
-    for (Vector2 waypoint : dropoffToChargingPath) {
+    for (Vec2 waypoint : dropoffToChargingPath) {
         CAPTURE(waypoint.x, waypoint.y);
         CHECK(logisticsMap.isRoadPosition(waypoint));
     }

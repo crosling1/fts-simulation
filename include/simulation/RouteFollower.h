@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <cstddef>
 #include <vector>
@@ -13,7 +13,7 @@ class RouteFollower {
     explicit RouteFollower(const ILogisticsMap& logisticsMap);
 
     void reset();
-    void setActivePath(const std::vector<Vector2>& path, Vector2 pathStart, Robot& robot);
+    void setActivePath(const std::vector<Vec2>& path, Vec2 pathStart, Robot& robot);
     void keepOnRoad(Robot& robot) const;
     bool updateWaypointTravel(Robot& robot);
     void draw() const;
@@ -22,7 +22,7 @@ class RouteFollower {
     bool setNextWaypoint(Robot& robot);
 
     const ILogisticsMap& logisticsMap_;
-    std::vector<Vector2> activePath_;
-    Vector2 activePathStart_ = {0.0f, 0.0f};
+    std::vector<Vec2> activePath_;
+    Vec2 activePathStart_ = {0.0f, 0.0f};
     std::size_t currentWaypointIndex_ = 0;
 };

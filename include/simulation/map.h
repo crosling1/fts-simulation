@@ -2,7 +2,7 @@
 
 #include "simulation/ILogisticsMap.h"
 #include "simulation/MapData.h"
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <cstddef>
 #include <vector>
@@ -15,24 +15,24 @@ class LogisticsMap : public ILogisticsMap {
 
     [[nodiscard]] LagerId getPickupLagerId() const;
     [[nodiscard]] LagerId getDeliveryLagerId() const;
-    [[nodiscard]] Vector2 getRobotStartPosition() const;
-    [[nodiscard]] Vector2 getChargingStationPosition() const;
-    [[nodiscard]] Vector2 getChargingStationDockPosition() const override;
-    [[nodiscard]] std::optional<Vector2> getLagerDockPosition(LagerId lagerId) const override;
-    [[nodiscard]] std::optional<Vector2> getPickupDockPosition() const override;
-    [[nodiscard]] std::optional<Vector2> getDeliveryDockPosition() const override;
-    [[nodiscard]] bool isRoadPosition(Vector2 position) const override;
-    [[nodiscard]] Vector2 clampPositionToRoad(Vector2 position) const override;
-    [[nodiscard]] const std::vector<Vector2>& getNavigationNodes() const override;
+    [[nodiscard]] Vec2 getRobotStartPosition() const;
+    [[nodiscard]] Vec2 getChargingStationPosition() const;
+    [[nodiscard]] Vec2 getChargingStationDockPosition() const override;
+    [[nodiscard]] std::optional<Vec2> getLagerDockPosition(LagerId lagerId) const override;
+    [[nodiscard]] std::optional<Vec2> getPickupDockPosition() const override;
+    [[nodiscard]] std::optional<Vec2> getDeliveryDockPosition() const override;
+    [[nodiscard]] bool isRoadPosition(Vec2 position) const override;
+    [[nodiscard]] Vec2 clampPositionToRoad(Vec2 position) const override;
+    [[nodiscard]] const std::vector<Vec2>& getNavigationNodes() const override;
     [[nodiscard]] const std::vector<NavigationEdge>& getNavigationEdges() const override;
     [[nodiscard]] const std::vector<BlockingRobotPath>& getBlockingRobotPaths() const;
 
   private:
     MapData data_;
 
-    [[nodiscard]] Vector2 getWarehouseCenter(std::size_t index) const;
+    [[nodiscard]] Vec2 getWarehouseCenter(std::size_t index) const;
     void drawGrid() const;
     void drawRoads() const;
-    void drawWarehouse(Rectangle body, int index) const;
+    void drawWarehouse(Rect body, int index) const;
     void drawChargingStation() const;
 };

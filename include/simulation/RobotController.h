@@ -32,7 +32,7 @@ class RobotController {
 
   private:
     void startPickupTrip();
-    void startPickupTrip(const std::vector<Vector2>& pickupPath);
+    void startPickupTrip(const std::vector<Vec2>& pickupPath);
     void startDropoffTrip();
     void startChargingTrip();
     void startCharging();
@@ -44,7 +44,7 @@ class RobotController {
     void updateWaypointTravel();
 
     struct NextDeliveryRouteEstimate {
-        std::vector<Vector2> pickupPath;
+        std::vector<Vec2> pickupPath;
         std::optional<float> distance;
     };
 

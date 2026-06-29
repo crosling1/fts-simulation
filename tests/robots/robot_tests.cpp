@@ -18,7 +18,7 @@ Robot::Config RobotConfig(float speed, float rotationSpeed, float size,
 }
 
 void DrainRobotBatteryBy(WorkerRobot& robot, float percentage) {
-    const Vector2 originalPosition = robot.getPosition();
+    const Vec2 originalPosition = robot.getPosition();
     const float distance = percentage / SimConfig::Default().batteryDrainPerPixel;
 
     robot.setTargetPosition({originalPosition.x + distance, originalPosition.y});
@@ -28,48 +28,48 @@ void DrainRobotBatteryBy(WorkerRobot& robot, float percentage) {
 } // namespace
 
 TEST_CASE("Robot moves to target", "[Robot]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({10.0f, 0.0f});
     REQUIRE(robot.getState() == Robot::State::Moving);
 
     robot.updateMovement(0.5f);
 
-    const Vector2 position = robot.getPosition();
+    const Vec2 position = robot.getPosition();
     test::CheckVectorNear(position, {5.0f, 0.0f});
     CHECK(robot.getState() == Robot::State::Moving);
 
     robot.updateMovement(0.5f);
-    const Vector2 finalPosition = robot.getPosition();
+    const Vec2 finalPosition = robot.getPosition();
     test::CheckVectorNear(finalPosition, {10.0f, 0.0f});
     CHECK(robot.getState() == Robot::State::Arrived);
 }
 
 TEST_CASE("Robot PI controller limits speed near target", "[Robot]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f, 0.5f, 0.1f, 100.0f));
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f, 0.5f, 0.1f, 100.0f));
 
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
 
-    const Vector2 position = robot.getPosition();
+    const Vec2 position = robot.getPosition();
     test::CheckVectorNear(position, {6.0f, 0.0f});
     CHECK(robot.getState() == Robot::State::Moving);
 }
 
 TEST_CASE("Robot keeps carrying state when arriving", "[Robot]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setState(Robot::State::CarryingItem);
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
 
-    const Vector2 position = robot.getPosition();
+    const Vec2 position = robot.getPosition();
     test::CheckVectorNear(position, {10.0f, 0.0f});
     CHECK(robot.getState() == Robot::State::CarryingItem);
 }
 
 TEST_CASE("Robot rotates toward target", "[Robot]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig(10.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({0.0f, -10.0f});
     robot.updateMovement(0.5f);
@@ -98,7 +98,7 @@ TEST_CASE("Battery clamps charge and reports state", "[Battery]") {
 }
 
 TEST_CASE("Robot drains battery by distance moved", "[Robot][Battery]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
 
     robot.setTargetPosition({100.0f, 0.0f});
     robot.updateMovement(1.0f);
@@ -111,7 +111,7 @@ TEST_CASE("Robot drains battery by distance moved", "[Robot][Battery]") {
 }
 
 TEST_CASE("Robot stops when battery is empty", "[Robot][Battery]") {
-    WorkerRobot robot(Vector2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
+    WorkerRobot robot(Vec2{0.0f, 0.0f}, RobotConfig(100.0f, 90.0f, 8.0f));
 
     DrainRobotBatteryBy(robot, 100.0f);
     robot.setTargetPosition({10.0f, 0.0f});
@@ -120,12 +120,12 @@ TEST_CASE("Robot stops when battery is empty", "[Robot][Battery]") {
 
     robot.updateMovement(1.0f);
 
-    const Vector2 position = robot.getPosition();
+    const Vec2 position = robot.getPosition();
     test::CheckVectorNear(position, {0.0f, 0.0f});
 
     robot.chargeBy(50.0f);
     robot.setTargetPosition({10.0f, 0.0f});
     robot.updateMovement(1.0f);
-    const Vector2 chargedPosition = robot.getPosition();
+    const Vec2 chargedPosition = robot.getPosition();
     test::CheckVectorNear(chargedPosition, {10.0f, 0.0f});
 }

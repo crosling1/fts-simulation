@@ -1,5 +1,6 @@
 #include "simulation/RouteFollower.h"
 
+#include "rendering/RaylibGeometry.h"
 #include "robots/Robot.h"
 #include "simulation/ILogisticsMap.h"
 
@@ -11,8 +12,7 @@ void RouteFollower::reset() {
     currentWaypointIndex_ = 0;
 }
 
-void RouteFollower::setActivePath(const std::vector<Vector2>& path, Vector2 pathStart,
-                                  Robot& robot) {
+void RouteFollower::setActivePath(const std::vector<Vec2>& path, Vec2 pathStart, Robot& robot) {
     activePath_ = path;
     activePathStart_ = pathStart;
     currentWaypointIndex_ = 0;
@@ -20,7 +20,7 @@ void RouteFollower::setActivePath(const std::vector<Vector2>& path, Vector2 path
 }
 
 void RouteFollower::keepOnRoad(Robot& robot) const {
-    const Vector2 robotPosition = robot.getPosition();
+    const Vec2 robotPosition = robot.getPosition();
     if (!logisticsMap_.isRoadPosition(robotPosition)) {
         robot.setPosition(logisticsMap_.clampPositionToRoad(robotPosition));
     }
@@ -35,10 +35,10 @@ bool RouteFollower::updateWaypointTravel(Robot& robot) {
 }
 
 void RouteFollower::draw() const {
-    Vector2 previousPoint = activePathStart_;
-    for (Vector2 waypoint : activePath_) {
-        DrawLineEx(previousPoint, waypoint, 3.0f, MAGENTA);
-        DrawCircleV(waypoint, 5.0f, MAGENTA);
+    Vec2 previousPoint = activePathStart_;
+    for (Vec2 waypoint : activePath_) {
+        DrawLineEx(ToRaylib(previousPoint), ToRaylib(waypoint), 3.0f, MAGENTA);
+        DrawCircleV(ToRaylib(waypoint), 5.0f, MAGENTA);
         previousPoint = waypoint;
     }
 }

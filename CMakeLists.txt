@@ -91,6 +91,7 @@ set(FTS_CORE_HEADERS
     include/sensors/ProximitySensor.h
     include/simulation/ILogisticsMap.h
     include/simulation/MapData.h
+    include/simulation/Geometry.h
     include/simulation/SimConfig.h
     include/simulation/NavigationGraph.h
     include/simulation/navigation.h
@@ -121,6 +122,7 @@ set(FTS_RENDERING_SOURCES
 )
 
 set(FTS_RENDERING_HEADERS
+    include/rendering/RaylibGeometry.h
     include/rendering/RobotRenderer.h
     include/ui/MapOverlay.h
     include/ui/StatusOverlay.h
@@ -153,27 +155,25 @@ catch_discover_tests(unit_tests)
 
 find_package(raylib QUIET)
 
-# raylib is currently a public dependency because fts_core public headers expose
-# raylib geometry types such as Vector2 and Rectangle. A future headless split
-# should first replace those API types with project-owned geometry types before
-# changing this dependency boundary to PRIVATE.
+# fts_core still has a few raylib-backed drawing/input boundary implementations,
+# but its public headers use project-owned geometry types.
 if(raylib_FOUND)
-    target_link_libraries(fts_core PUBLIC raylib)
-    target_link_libraries(fts_rendering PRIVATE raylib)
+    target_link_libraries(fts_core PRIVATE raylib)
+    target_link_libraries(fts_rendering PUBLIC raylib)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(RAYLIB REQUIRED raylib)
 
-    target_include_directories(fts_core PUBLIC ${RAYLIB_INCLUDE_DIRS})
-    target_include_directories(fts_rendering PRIVATE ${RAYLIB_INCLUDE_DIRS})
-    target_link_directories(fts_core PUBLIC ${RAYLIB_LIBRARY_DIRS})
-    target_link_directories(fts_rendering PRIVATE ${RAYLIB_LIBRARY_DIRS})
-    target_compile_options(fts_core PUBLIC ${RAYLIB_CFLAGS_OTHER})
-    target_compile_options(fts_rendering PRIVATE ${RAYLIB_CFLAGS_OTHER})
-    target_link_libraries(fts_core PUBLIC ${RAYLIB_LIBRARIES})
-    target_link_libraries(fts_rendering PRIVATE ${RAYLIB_LIBRARIES})
+    target_include_directories(fts_core PRIVATE ${RAYLIB_INCLUDE_DIRS})
+    target_include_directories(fts_rendering PUBLIC ${RAYLIB_INCLUDE_DIRS})
+    target_link_directories(fts_core PRIVATE ${RAYLIB_LIBRARY_DIRS})
+    target_link_directories(fts_rendering PUBLIC ${RAYLIB_LIBRARY_DIRS})
+    target_compile_options(fts_core PRIVATE ${RAYLIB_CFLAGS_OTHER})
+    target_compile_options(fts_rendering PUBLIC ${RAYLIB_CFLAGS_OTHER})
+    target_link_libraries(fts_core PRIVATE ${RAYLIB_LIBRARIES})
+    target_link_libraries(fts_rendering PUBLIC ${RAYLIB_LIBRARIES})
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(fts_core PUBLIC m dl pthread GL rt X11)
+    target_link_libraries(fts_core PRIVATE m dl pthread GL rt X11)
 endif()

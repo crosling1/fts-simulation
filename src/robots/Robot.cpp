@@ -20,7 +20,7 @@ float NormalizeAngle(float angle) noexcept {
     return angle - halfTurn;
 }
 
-float TargetRotation(Vector2 from, Vector2 to) {
+float TargetRotation(Vec2 from, Vec2 to) {
     return std::atan2(to.y - from.y, to.x - from.x) * math::kRadToDeg;
 }
 
@@ -41,7 +41,7 @@ Robot::Robot(Pose startPose, Config config, const SimConfig& simConfig)
       speedController_(config.controller), simConfig_(simConfig), state_(State::Idle),
       proximitySensor_(config.motion.size * simConfig.sensorRangeMultiplier) {}
 
-Robot::Robot(const Vector2& startPosition, Config config, const SimConfig& simConfig)
+Robot::Robot(const Vec2& startPosition, Config config, const SimConfig& simConfig)
     : Robot(Pose{startPosition}, config, simConfig) {}
 
 void Robot::updateMovement(float deltaTime) {
@@ -54,12 +54,12 @@ void Robot::updateMovement(float deltaTime) {
         return;
     }
 
-    const Vector2 previousPosition = {x_, y_};
+    const Vec2 previousPosition = {x_, y_};
 
     rotateTowardsTarget(deltaTime);
     moveTowardsTarget(deltaTime);
 
-    const Vector2 currentPosition = {x_, y_};
+    const Vec2 currentPosition = {x_, y_};
     battery_.drain(math::distance(previousPosition, currentPosition) *
                    simConfig_.batteryDrainPerPixel);
     if (battery_.isEmpty()) {
@@ -78,7 +78,7 @@ RobotRenderData Robot::renderData() const noexcept {
     };
 }
 
-void Robot::setPosition(const Vector2& newPosition) {
+void Robot::setPosition(const Vec2& newPosition) {
     x_ = newPosition.x;
     y_ = newPosition.y;
     speedController_.reset();
@@ -88,7 +88,7 @@ void Robot::setState(State newState) {
     state_ = newState;
 }
 
-void Robot::setTargetPosition(const Vector2& target) {
+void Robot::setTargetPosition(const Vec2& target) {
     beginMovingTo(target);
 }
 
@@ -100,7 +100,7 @@ void Robot::arriveAtWaypoint() {
     state_ = State::Arrived;
 }
 
-void Robot::beginMovingTo(Vector2 target) {
+void Robot::beginMovingTo(Vec2 target) {
     targetPosition_ = target;
     speedController_.reset();
     if (hasReachedTarget()) {
@@ -139,7 +139,7 @@ void Robot::enterChargingState() {
 }
 
 void Robot::moveTowardsTarget(float deltaTime) {
-    const Vector2 position = {x_, y_};
+    const Vec2 position = {x_, y_};
     const float distance = math::distance(position, targetPosition_);
     if (distance <= simConfig_.reachedDistance) {
         snapToTarget();
@@ -174,7 +174,7 @@ void Robot::rotateTowardsTarget(float deltaTime) {
         return;
     }
 
-    const Vector2 position = {x_, y_};
+    const Vec2 position = {x_, y_};
     const float desiredRotation = TargetRotation(position, targetPosition_);
     const float angleDifference = NormalizeAngle(desiredRotation - angle_);
     const float maxStep = rotationSpeed_ * deltaTime;
@@ -188,7 +188,7 @@ void Robot::rotateTowardsTarget(float deltaTime) {
     angle_ = NormalizeAngle(angle_);
 }
 
-Vector2 Robot::getPosition() const {
+Vec2 Robot::getPosition() const {
     return {x_, y_};
 }
 
@@ -201,7 +201,7 @@ bool Robot::hasBatteryFull() const {
 }
 
 bool Robot::hasReachedTarget() const {
-    const Vector2 position = {x_, y_};
+    const Vec2 position = {x_, y_};
 
     return math::distance(position, targetPosition_) <= simConfig_.reachedDistance;
 }

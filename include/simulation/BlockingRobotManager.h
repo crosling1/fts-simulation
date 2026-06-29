@@ -2,7 +2,7 @@
 
 #include "simulation/SimConfig.h"
 
-#include "raylib.h"
+#include "simulation/Geometry.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -20,15 +20,14 @@ struct BlockingRobotSpeed {
 };
 
 struct BlockingRobot {
-    [[nodiscard]] static BlockingRobot AtPosition(Vector2 position, BlockingRobotRadius radius);
-    [[nodiscard]] static BlockingRobot WithPath(const std::vector<Vector2>& path,
-                                                BlockingRobotRadius radius,
-                                                BlockingRobotSpeed speed);
+    [[nodiscard]] static BlockingRobot AtPosition(Vec2 position, BlockingRobotRadius radius);
+    [[nodiscard]] static BlockingRobot
+    WithPath(const std::vector<Vec2>& path, BlockingRobotRadius radius, BlockingRobotSpeed speed);
 
-    Vector2 position{};
+    Vec2 position{};
     float radius{};
     float speed{};
-    std::vector<Vector2> path;
+    std::vector<Vec2> path;
     std::size_t currentNodeIndex{};
     std::size_t targetNodeIndex{};
     std::size_t previousNodeIndex{};
@@ -43,7 +42,7 @@ class BlockingRobotManager {
     void initBlockingRobots(const LogisticsMap& logisticsMap);
     void update(float deltaTime);
     void draw() const;
-    [[nodiscard]] bool hasActiveBlockingRobotNear(Vector2 position, float detectionRadius) const;
+    [[nodiscard]] bool hasActiveBlockingRobotNear(Vec2 position, float detectionRadius) const;
     [[nodiscard]] const std::vector<BlockingRobot>& getBlockingRobots() const;
 
   private:
@@ -53,7 +52,7 @@ class BlockingRobotManager {
     SimConfig simConfig_;
     std::mt19937 randomEngine_;
 
-    void addBlockingRobotPath(const std::vector<Vector2>& path, float speed);
+    void addBlockingRobotPath(const std::vector<Vec2>& path, float speed);
     void moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime);
     void chooseNextTarget(BlockingRobot& blockingRobot, BacktrackPolicy policy);
 };

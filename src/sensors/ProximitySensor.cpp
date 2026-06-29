@@ -5,7 +5,7 @@
 ProximitySensor::ProximitySensor(float detectionRadius) : detectionRadius_(detectionRadius) {}
 
 bool ProximitySensor::hasBlockingRobotNearby(
-    Vector2 origin, const BlockingRobotManager& blockingRobotManager) const {
+    Vec2 origin, const BlockingRobotManager& blockingRobotManager) const {
     return blockingRobotManager.hasActiveBlockingRobotNear(origin, detectionRadius_);
 }
 
