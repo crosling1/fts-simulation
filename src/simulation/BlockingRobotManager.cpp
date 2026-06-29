@@ -6,6 +6,24 @@
 BlockingRobotManager::BlockingRobotManager(const SimConfig& simConfig)
     : simConfig_(simConfig), randomEngine_(std::random_device{}()) {}
 
+BlockingRobot BlockingRobot::AtPosition(Vector2 position, BlockingRobotRadius radius) {
+    BlockingRobot blockingRobot;
+    blockingRobot.position = position;
+    blockingRobot.radius = radius.value;
+    return blockingRobot;
+}
+
+BlockingRobot BlockingRobot::WithPath(const std::vector<Vector2>& path, BlockingRobotRadius radius,
+                                      BlockingRobotSpeed speed) {
+    BlockingRobot blockingRobot = AtPosition(path[0], radius);
+    blockingRobot.speed = speed.value;
+    blockingRobot.path = path;
+    blockingRobot.currentNodeIndex = 0;
+    blockingRobot.targetNodeIndex = 1;
+    blockingRobot.previousNodeIndex = 0;
+    return blockingRobot;
+}
+
 void BlockingRobotManager::clear() {
     blockingRobots_.clear();
 }
@@ -63,15 +81,8 @@ void BlockingRobotManager::addBlockingRobotPath(const std::vector<Vector2>& path
         return;
     }
 
-    addBlockingRobot({
-        path[0],
-        simConfig_.blockingRobotRadius,
-        speed,
-        path,
-        0,
-        1,
-        0,
-    });
+    addBlockingRobot(BlockingRobot::WithPath(
+        path, BlockingRobotRadius{simConfig_.blockingRobotRadius}, BlockingRobotSpeed{speed}));
 }
 
 void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float deltaTime) {

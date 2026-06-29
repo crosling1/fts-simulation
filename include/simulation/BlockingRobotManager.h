@@ -11,7 +11,20 @@
 
 class LogisticsMap;
 
+struct BlockingRobotRadius {
+    float value;
+};
+
+struct BlockingRobotSpeed {
+    float value;
+};
+
 struct BlockingRobot {
+    [[nodiscard]] static BlockingRobot AtPosition(Vector2 position, BlockingRobotRadius radius);
+    [[nodiscard]] static BlockingRobot WithPath(const std::vector<Vector2>& path,
+                                                BlockingRobotRadius radius,
+                                                BlockingRobotSpeed speed);
+
     Vector2 position{};
     float radius{};
     float speed{};
