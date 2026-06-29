@@ -85,8 +85,9 @@ void DrawControlHint() {
     const int textY = hintY + 8;
 
     DrawRectangle(hintX, hintY, hintWidth, hintHeight, Fade(RAYWHITE, 0.9f));
-    DrawRectangleLinesEx({(float)hintX, (float)hintY, (float)hintWidth, (float)hintHeight}, 2.0f,
-                         DARKGRAY);
+    DrawRectangleLinesEx({static_cast<float>(hintX), static_cast<float>(hintY),
+                          static_cast<float>(hintWidth), static_cast<float>(hintHeight)},
+                         2.0f, DARKGRAY);
 
     DrawText(emergencyKey, textX, textY, fontSize, MAROON);
     textX += MeasureText(emergencyKey, fontSize);
@@ -109,7 +110,8 @@ void DrawStatusOverlay(const std::optional<RobotStatusSnapshot>& robotStatus,
     constexpr int panelY = 20;
 
     DrawRectangle(panelX, panelY, panelWidth, panelHeight, Fade(RAYWHITE, 0.92f));
-    DrawRectangleLinesEx({(float)panelX, (float)panelY, (float)panelWidth, (float)panelHeight},
+    DrawRectangleLinesEx({static_cast<float>(panelX), static_cast<float>(panelY),
+                          static_cast<float>(panelWidth), static_cast<float>(panelHeight)},
                          2.0f, DARKGRAY);
 
     DrawText("Robot Status", panelX + panelPadding, panelY + 10, 20, DARKGRAY);

@@ -44,9 +44,10 @@ void LogisticsMap::draw() const {
     drawChargingStation();
 
     DrawCircleV(data_.robotStart, 20, ORANGE);
-    DrawCircleLines((int)data_.robotStart.x, (int)data_.robotStart.y, 24.0f, BROWN);
-    DrawText("Robot Start", (int)data_.robotStart.x - 47, (int)data_.robotStart.y + 34, 18,
-             DARKGRAY);
+    DrawCircleLines(static_cast<int>(data_.robotStart.x), static_cast<int>(data_.robotStart.y),
+                    24.0f, BROWN);
+    DrawText("Robot Start", static_cast<int>(data_.robotStart.x) - 47,
+             static_cast<int>(data_.robotStart.y) + 34, 18, DARKGRAY);
 }
 
 void LogisticsMap::unload() {
@@ -178,15 +179,17 @@ void LogisticsMap::drawWarehouse(Rectangle body, int index) const {
 
     DrawRectangleRec(body, fillColor);
     DrawRectangleLinesEx(body, 3.0f, lineColor);
-    DrawRectangle((int)body.x + 10, (int)body.y + 43, 70, 12, Fade(lineColor, 0.35f));
-    DrawText(TextFormat("L%d", index + 1), (int)body.x + 28, (int)body.y + 16, 24, DARKBLUE);
+    DrawRectangle(static_cast<int>(body.x) + 10, static_cast<int>(body.y) + 43, 70, 12,
+                  Fade(lineColor, 0.35f));
+    DrawText(TextFormat("L%d", index + 1), static_cast<int>(body.x) + 28,
+             static_cast<int>(body.y) + 16, 24, DARKBLUE);
 
     if (isPickupLager || isDeliveryLager) {
         const char* label = isPickupLager ? "A" : "B";
         Color badgeColor = isPickupLager ? DARKGREEN : MAROON;
 
-        DrawCircle((int)body.x + 78, (int)body.y + 14, 15.0f, badgeColor);
-        DrawText(label, (int)body.x + 70, (int)body.y + 3, 22, WHITE);
+        DrawCircle(static_cast<int>(body.x) + 78, static_cast<int>(body.y) + 14, 15.0f, badgeColor);
+        DrawText(label, static_cast<int>(body.x) + 70, static_cast<int>(body.y) + 3, 22, WHITE);
     }
 }
 
@@ -200,13 +203,15 @@ void LogisticsMap::drawChargingStation() const {
 
     DrawRectangleRec(body, Fade(PURPLE, 0.25f));
     DrawRectangleLinesEx(body, 3.0f, DARKPURPLE);
-    DrawText("C", (int)body.x + 12, (int)body.y + 10, 28, DARKPURPLE);
-    DrawText("CHARGE", (int)body.x + 14, (int)body.y + 52, 14, DARKPURPLE);
+    DrawText("C", static_cast<int>(body.x) + 12, static_cast<int>(body.y) + 10, 28, DARKPURPLE);
+    DrawText("CHARGE", static_cast<int>(body.x) + 14, static_cast<int>(body.y) + 52, 14,
+             DARKPURPLE);
 
     const Rectangle batteryBody = {body.x + 38.0f, body.y + 18.0f, 30.0f, 18.0f};
     const Rectangle batteryTip = {body.x + 68.0f, body.y + 23.0f, 5.0f, 8.0f};
     DrawRectangleRec(batteryBody, RAYWHITE);
     DrawRectangleLinesEx(batteryBody, 2.0f, DARKPURPLE);
     DrawRectangleRec(batteryTip, DARKPURPLE);
-    DrawRectangle((int)batteryBody.x + 4, (int)batteryBody.y + 4, 18, 10, GREEN);
+    DrawRectangle(static_cast<int>(batteryBody.x) + 4, static_cast<int>(batteryBody.y) + 4, 18, 10,
+                  GREEN);
 }

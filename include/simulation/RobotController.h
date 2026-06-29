@@ -27,7 +27,7 @@ class RobotController {
     void update(float deltaTime, const InputState& inputState);
     void draw() const;
     void unload();
-    std::optional<RobotStatusSnapshot> statusSnapshot() const;
+    [[nodiscard]] std::optional<RobotStatusSnapshot> statusSnapshot() const;
 
   private:
     void startPickupTrip();

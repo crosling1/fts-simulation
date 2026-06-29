@@ -13,8 +13,9 @@ class EmergencyStopController {
 
     void reset();
     void updateEmergencyStop(const InputState& inputState, Robot& robot);
-    bool isEmergencyStopActive() const;
-    bool shouldPauseForObstacle(Vector2 robotPosition, float proximityDetectionRadius) const;
+    [[nodiscard]] bool isEmergencyStopActive() const;
+    [[nodiscard]] bool shouldPauseForObstacle(Vector2 robotPosition,
+                                              float proximityDetectionRadius) const;
 
   private:
     const BlockingRobotManager& blockingRobotManager_;

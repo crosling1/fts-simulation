@@ -35,8 +35,10 @@ void BlockingRobotManager::draw() const {
         const float radius = blockingRobot.radius;
 
         DrawCircleV(position, radius, PURPLE);
-        DrawCircleLines((int)position.x, (int)position.y, radius, DARKPURPLE);
-        DrawText("B", (int)position.x - 5, (int)position.y - 10, 20, WHITE);
+        DrawCircleLines(static_cast<int>(position.x), static_cast<int>(position.y), radius,
+                        DARKPURPLE);
+        DrawText("B", static_cast<int>(position.x) - 5, static_cast<int>(position.y) - 10, 20,
+                 WHITE);
     }
 }
 
