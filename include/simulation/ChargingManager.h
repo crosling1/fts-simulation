@@ -4,13 +4,13 @@
 
 #include "raylib.h"
 
-class LogisticsMap;
+class ILogisticsMap;
 class Robot;
 class RobotRoutePlanner;
 
 class ChargingManager {
   public:
-    explicit ChargingManager(const LogisticsMap& logisticsMap,
+    explicit ChargingManager(const ILogisticsMap& logisticsMap,
                              const SimConfig& simConfig = SimConfig::Default());
 
     [[nodiscard]] bool shouldStartChargingAfterDropoff(const Robot& robot,
@@ -22,6 +22,6 @@ class ChargingManager {
     [[nodiscard]] bool canCompleteNextDeliveryBeforeMinimumBattery(
         const Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const;
 
-    const LogisticsMap& logisticsMap_;
+    const ILogisticsMap& logisticsMap_;
     const SimConfig& simConfig_;
 };

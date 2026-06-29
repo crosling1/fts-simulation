@@ -1,12 +1,12 @@
 #include "simulation/ChargingManager.h"
 
 #include "robots/Robot.h"
+#include "simulation/ILogisticsMap.h"
 #include "simulation/RobotRoutePlanner.h"
-#include "simulation/map.h"
 
 #include <vector>
 
-ChargingManager::ChargingManager(const LogisticsMap& logisticsMap, const SimConfig& simConfig)
+ChargingManager::ChargingManager(const ILogisticsMap& logisticsMap, const SimConfig& simConfig)
     : logisticsMap_(logisticsMap), simConfig_(simConfig) {}
 
 bool ChargingManager::shouldStartChargingAfterDropoff(const Robot& robot,
@@ -22,7 +22,7 @@ bool ChargingManager::shouldChargeAtOrBelow(const Robot& robot, float thresholdP
 
 bool ChargingManager::canCompleteNextDeliveryBeforeMinimumBattery(
     const Robot& robot, const RobotRoutePlanner& routePlanner, Vector2 robotPosition) const {
-    const auto pickupDock = logisticsMap_.getLagerDockPosition(logisticsMap_.getPickupLagerId());
+    const auto pickupDock = logisticsMap_.getPickupDockPosition();
     if (!pickupDock) {
         return false;
     }
