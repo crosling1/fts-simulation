@@ -2,6 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "robots/Battery.h"
 #include "robots/WorkerRobot.h"
 #include "simulation/ChargingManager.h"
 #include "simulation/RobotRoutePlanner.h"
@@ -21,21 +22,7 @@ Robot::Config RobotConfig() {
 }
 
 void SetRobotBatteryPercentage(WorkerRobot& robot, float percentage) {
-    const SimConfig simConfig = SimConfig::Default();
-    const float currentCharge = robot.getBattery().getChargePercentage();
-
-    if (percentage >= currentCharge) {
-        robot.chargeBy(percentage - currentCharge);
-        return;
-    }
-
-    const Vector2 originalPosition = robot.getPosition();
-    const float distance = (currentCharge - percentage) / simConfig.batteryDrainPerPixel;
-    const float speed = RobotConfig().motion.speed;
-
-    robot.setTargetPosition({originalPosition.x + distance, originalPosition.y});
-    robot.updateMovement(distance / speed);
-    robot.setPosition(originalPosition);
+    const_cast<Battery&>(robot.getBattery()).setChargePercentage(percentage);
 }
 
 float EstimatedNextDeliveryDistance(const LogisticsMap& logisticsMap,
