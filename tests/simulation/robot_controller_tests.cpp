@@ -10,6 +10,31 @@
 #include "simulation/map.h"
 
 namespace {
+constexpr float kControllerUpdateTimestep = 0.1f;
+
+const char* RobotStateName(RobotState state) {
+    switch (state) {
+    case RobotState::Idle:
+        return "Idle";
+    case RobotState::Moving:
+        return "Moving";
+    case RobotState::PickingUp:
+        return "PickingUp";
+    case RobotState::CarryingItem:
+        return "CarryingItem";
+    case RobotState::DroppingOff:
+        return "DroppingOff";
+    case RobotState::Arrived:
+        return "Arrived";
+    case RobotState::BatteryDepleted:
+        return "BatteryDepleted";
+    case RobotState::Charging:
+        return "Charging";
+    }
+
+    return "Unknown";
+}
+
 RobotStatusSnapshot RequireSnapshot(const RobotController& controller) {
     const std::optional<RobotStatusSnapshot> snapshot = controller.statusSnapshot();
     REQUIRE(snapshot.has_value());
@@ -20,13 +45,21 @@ bool AdvanceUntilState(RobotController& controller, RobotState expectedState,
                        float maxSeconds = 30.0f) {
     InputState inputState;
     float elapsedSeconds = 0.0f;
+    RobotStatusSnapshot lastSnapshot = RequireSnapshot(controller);
+
     while (elapsedSeconds <= maxSeconds) {
-        controller.update(0.1f, inputState);
-        if (RequireSnapshot(controller).state == expectedState) {
+        controller.update(kControllerUpdateTimestep, inputState);
+        lastSnapshot = RequireSnapshot(controller);
+        if (lastSnapshot.state == expectedState) {
             return true;
         }
-        elapsedSeconds += 0.1f;
+        elapsedSeconds += kControllerUpdateTimestep;
     }
+
+    INFO("Expected state: " << RobotStateName(expectedState));
+    INFO("Last observed state: " << RobotStateName(lastSnapshot.state));
+    INFO("Battery percentage: " << lastSnapshot.batteryPercentage);
+    INFO("Elapsed simulated time: " << elapsedSeconds);
 
     return false;
 }
