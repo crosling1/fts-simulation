@@ -50,9 +50,7 @@ void LogisticsMap::draw() const {
              static_cast<int>(data_.robotStart.y) + 34, 18, DARKGRAY);
 }
 
-void LogisticsMap::unload() {
-    // No resources allocated yet.
-}
+void LogisticsMap::unload() {}
 
 LagerId LogisticsMap::getPickupLagerId() const {
     return static_cast<LagerId>(data_.pickupLagerIndex);

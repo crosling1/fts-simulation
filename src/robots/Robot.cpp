@@ -3,7 +3,6 @@
 #include "simulation/MathUtils.h"
 
 #include <cmath>
-#include <string_view>
 
 namespace {
 constexpr float fullTurn = 360.0f;

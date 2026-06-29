@@ -4,7 +4,6 @@
 
 class BlockingRobotManager;
 
-// Helper for radius-based proximity checks.
 class ProximitySensor {
   public:
     explicit ProximitySensor(float detectionRadius);
