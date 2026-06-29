@@ -20,5 +20,5 @@ class ChargingManager {
     canCompleteNextDeliveryBeforeMinimumBattery(const Robot& robot,
                                                 std::optional<float> nextDeliveryDistance) const;
 
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
 };

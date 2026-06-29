@@ -87,7 +87,7 @@ class Robot {
     float rotationSpeed_;
     float size_;
     PIController speedController_;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
     State state_;
     Battery battery_;
     ProximitySensor proximitySensor_;

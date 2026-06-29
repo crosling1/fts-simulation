@@ -37,7 +37,7 @@ class BlockingRobotManager {
     enum class BacktrackPolicy : std::uint8_t { Allow, Prevent };
 
     std::vector<BlockingRobot> blockingRobots_;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
     std::mt19937 randomEngine_;
 
     void addBlockingRobotPath(const std::vector<Vector2>& path, float speed);

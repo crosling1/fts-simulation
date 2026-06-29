@@ -51,7 +51,7 @@ class RobotController {
     [[nodiscard]] NextDeliveryRouteEstimate buildNextDeliveryRouteEstimate() const;
 
     const LogisticsMap& logisticsMap_;
-    const SimConfig& simConfig_;
+    SimConfig simConfig_;
     RobotRoutePlanner routePlanner_;
     RouteFollower routeFollower_;
     ChargingManager chargingManager_;
