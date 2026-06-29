@@ -1,6 +1,7 @@
 #include "simulation/NavigationGraph.h"
 
 #include "simulation/ILogisticsMap.h"
+#include "simulation/MathUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -32,29 +33,18 @@ struct ComparePathQueueEntry {
     }
 };
 
-float DistanceSquared(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return (deltaX * deltaX) + (deltaY * deltaY);
-}
-
-float Distance(Vector2 from, Vector2 to) {
-    return std::sqrt(DistanceSquared(from, to));
-}
-
 bool IsRoadSample(const ILogisticsMap& logisticsMap, Vector2 position) {
     if (logisticsMap.isRoadPosition(position)) {
         return true;
     }
 
-    return DistanceSquared(position, logisticsMap.clampPositionToRoad(position)) <=
+    return math::distanceSq(position, logisticsMap.clampPositionToRoad(position)) <=
            (roadSampleTolerance * roadSampleTolerance);
 }
 
 bool IsRoadSegment(const ILogisticsMap& logisticsMap, Vector2 from,
                    Vector2 to) { // NOLINT(bugprone-easily-swappable-parameters)
-    const float segmentLength = Distance(from, to);
+    const float segmentLength = math::distance(from, to);
     if (segmentLength <= roadSampleTolerance) {
         return IsRoadSample(logisticsMap, from) && IsRoadSample(logisticsMap, to);
     }
@@ -80,7 +70,7 @@ int FindNearestPathNode(const std::vector<Vector2>& pathNodes, Vector2 position)
     float nearestDistanceSquared = unreachableDistance;
 
     for (std::size_t i = 0; i < pathNodes.size(); i++) {
-        const float candidateDistanceSquared = DistanceSquared(position, pathNodes[i]);
+        const float candidateDistanceSquared = math::distanceSq(position, pathNodes[i]);
         if (candidateDistanceSquared < nearestDistanceSquared) {
             nearestDistanceSquared = candidateDistanceSquared;
             nearestNodeIndex = static_cast<int>(i);
@@ -173,7 +163,7 @@ NavigationGraph::findPath(Vector2 start,
     openNodes.push({
         endpoints.startNodeIndex,
         0.0f,
-        Distance(pathNodes[endpoints.startNodeIndex], pathNodes[endpoints.goalNodeIndex]),
+        math::distance(pathNodes[endpoints.startNodeIndex], pathNodes[endpoints.goalNodeIndex]),
     });
 
     while (!openNodes.empty()) {
@@ -199,7 +189,7 @@ NavigationGraph::findPath(Vector2 start,
 
             const float newCost =
                 costFromStart[currentNodeIndex] +
-                Distance(pathNodes[currentNodeIndex], pathNodes[neighborNodeIndex]);
+                math::distance(pathNodes[currentNodeIndex], pathNodes[neighborNodeIndex]);
 
             if (newCost >= costFromStart[neighborNodeIndex]) {
                 continue;
@@ -211,8 +201,8 @@ NavigationGraph::findPath(Vector2 start,
             openNodes.push({
                 neighborNodeIndex,
                 newCost,
-                newCost +
-                    Distance(pathNodes[neighborNodeIndex], pathNodes[endpoints.goalNodeIndex]),
+                newCost + math::distance(pathNodes[neighborNodeIndex],
+                                         pathNodes[endpoints.goalNodeIndex]),
             });
         }
     }

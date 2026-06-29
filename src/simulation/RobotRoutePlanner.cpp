@@ -1,17 +1,7 @@
 #include "simulation/RobotRoutePlanner.h"
 
 #include "simulation/ILogisticsMap.h"
-
-#include <cmath>
-
-namespace {
-float Distance(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return std::sqrt((deltaX * deltaX) + (deltaY * deltaY));
-}
-} // namespace
+#include "simulation/MathUtils.h"
 
 RobotRoutePlanner::RobotRoutePlanner(const ILogisticsMap& logisticsMap)
     : logisticsMap_(logisticsMap), navigationGraph_(logisticsMap) {}
@@ -44,7 +34,7 @@ float RobotRoutePlanner::calculatePathDistance(Vector2 startPosition,
     Vector2 previousPoint = startPosition;
 
     for (Vector2 waypoint : path) {
-        distance += Distance(previousPoint, waypoint);
+        distance += math::distance(previousPoint, waypoint);
         previousPoint = waypoint;
     }
 

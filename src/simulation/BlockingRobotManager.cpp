@@ -1,18 +1,7 @@
 #include "simulation/BlockingRobotManager.h"
 
+#include "simulation/MathUtils.h"
 #include "simulation/map.h"
-
-#include <cmath>
-
-namespace {
-float Distance(Vector2 from, Vector2 to) {
-    const float deltaX = to.x - from.x;
-    const float deltaY = to.y - from.y;
-
-    return std::sqrt((deltaX * deltaX) + (deltaY * deltaY));
-}
-
-} // namespace
 
 BlockingRobotManager::BlockingRobotManager(const SimConfig& simConfig)
     : simConfig_(simConfig), randomEngine_(std::random_device{}()) {}
@@ -89,7 +78,7 @@ void BlockingRobotManager::moveBlockingRobot(BlockingRobot& blockingRobot, float
     }
 
     const Vector2 target = blockingRobot.path[blockingRobot.targetNodeIndex];
-    const float distance = Distance(blockingRobot.position, target);
+    const float distance = math::distance(blockingRobot.position, target);
     if (distance <= simConfig_.reachedDistance) {
         blockingRobot.position = target;
         blockingRobot.previousNodeIndex = blockingRobot.currentNodeIndex;
